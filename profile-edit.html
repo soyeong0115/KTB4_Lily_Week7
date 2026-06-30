@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원정보수정</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="header-title">아무 말 대잔치</h1>
+
+      <details class="profile-menu-wrap">
+        <summary class="profile-icon">🐧</summary>
+
+        <nav class="profile-dropdown">
+          <a href="./profile-edit.html">회원정보수정</a>
+          <a href="./password-edit.html">비밀번호수정</a>
+          <a href="./index.html">로그아웃</a>
+        </nav>
+      </details>
+    </header>
+
+    <main class="profile-edit-main">
+      <h2 class="profile-edit-title">회원정보수정</h2>
+
+      <form class="profile-edit-form">
+        <section class="profile-edit-image-area">
+          <label class="profile-edit-label">프로필 사진*</label>
+
+          <input 
+            id="profileImageInput" 
+            class="profile-image-input" 
+            type="file" 
+            accept="image/*" 
+          />
+
+          <label class="profile-edit-image" for="profileImageInput">
+            <span>변경</span>
+          </label>
+        </section>
+
+        <div class="profile-edit-field">
+          <label>이메일</label>
+          <p>startupcode@gmail.com</p>
+        </div>
+
+        <div class="profile-edit-field">
+          <label for="nickname">닉네임</label>
+          <input id="nickname" type="text" value="스타트업코드" />
+          <p class="helper-text">* helper text</p>
+        </div>
+
+        <button class="profile-submit-button" type="button">수정하기</button>
+
+        <button class="profile-withdraw-button" type="button">
+          회원 탈퇴
+        </button>
+
+        <div class="profile-complete-toast">
+          수정완료
+        </div>
+      </form>
+    </main>
+  </div>
+</body>
+</html>
