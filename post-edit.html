@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>게시글 수정</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <a class="back-button" href="./post-detail.html">‹</a>
+      <h1 class="header-title">아무 말 대잔치</h1>
+
+      <details class="profile-menu-wrap">
+        <summary class="profile-icon">🐧</summary>
+
+        <nav class="profile-dropdown">
+            <a href="./profile-edit.html">회원정보수정</a>
+            <a href="./password-edit.html">비밀번호수정</a>
+            <a href="./index.html">로그아웃</a>
+        </nav>
+      </details>
+    </header>
+
+    <main class="post-create-main">
+      <h2 class="post-create-title">게시글 수정</h2>
+
+      <form class="post-create-form">
+        <div class="post-form-group">
+          <label for="title">제목*</label>
+          <input 
+            id="title" 
+            type="text" 
+            maxlength="26"
+            required
+            value="제목 1"
+          />
+        </div>
+
+        <div class="post-form-group">
+          <label for="content">내용*</label>
+          <textarea 
+            id="content" 
+            required
+          >무엇을 얘기할까요? 아무말이라면, 삶은 항상 놀라운 모험이라고 생각합니다. 우리는 매일 새로운 경험을 하고 배우며 성장합니다. 때로는 어려움과 도전이 있지만, 그것들이 우리를 더 강하고 지혜롭게 만듭니다.</textarea>
+          <p class="helper-text">* 내용을 입력해주세요.</p>
+        </div>
+
+        <div class="post-form-group image-group">
+          <label>이미지</label>
+
+          <div class="file-row">
+            <button class="file-button" type="button">파일 선택</button>
+            <span>기존 파일 명</span>
+          </div>
+        </div>
+
+        <button class="post-submit-button" type="button">수정하기</button>
+      </form>
+    </main>
+  </div>
+</body>
+</html>
