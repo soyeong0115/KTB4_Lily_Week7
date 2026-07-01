@@ -703,7 +703,7 @@ textarea {
   border: none;
   border-radius: 4px;
 
-  background-color: #aca0eb;
+  background-color: #7f6aee;
 
   color: white;
   font-size: 14px;
@@ -712,11 +712,7 @@ textarea {
   cursor: pointer;
 }
 
-.post-submit-button:hover {
-  background-color: #7f6aee;
-}
-
-.post-submit-button:active {
+.post-submit-button:disabled {
   background-color: #aca0eb;
 }
 
