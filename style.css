@@ -226,12 +226,20 @@ textarea {
   cursor: pointer;
 }
 
-.primary-button:hover {
+/* 활성화된 버튼 hover */
+.primary-button:not(:disabled):hover {
   background-color: #7f6aee;
 }
 
-.primary-button:active {
+/* 활성화된 버튼 클릭 */
+.primary-button:not(:disabled):active {
   background-color: #aca0eb;
+}
+
+/* 비활성화 상태 */
+.primary-button:disabled {
+  background-color: #aca0eb;
+  cursor: not-allowed;
 }
 
 .text-link {
