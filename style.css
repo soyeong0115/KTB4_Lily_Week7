@@ -218,22 +218,12 @@ textarea {
 
   border: 0;
   border-radius: 4px;
-  background-color: #aca0eb;
+  background-color: #7f6aee;
 
   color: white;
   font-weight: 700;
 
   cursor: pointer;
-}
-
-/* 활성화된 버튼 hover */
-.primary-button:not(:disabled):hover {
-  background-color: #7f6aee;
-}
-
-/* 활성화된 버튼 클릭 */
-.primary-button:not(:disabled):active {
-  background-color: #aca0eb;
 }
 
 /* 비활성화 상태 */
@@ -415,13 +405,14 @@ textarea {
   margin-top: 8px;
 
   border-radius: 4px;
-  background-color: #aca0eb;
+  background-color: #7f6aee;
 
   font-size: 14px;
 }
 
-.signup-main .primary-button:hover {
-  background-color: #7f6aee;
+.signup-main .primary-button:disabled {
+  background-color: #aca0eb;
+  cursor: not-allowed;
 }
 
 .login-link-button {
