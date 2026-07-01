@@ -59,8 +59,6 @@ emailInput.addEventListener('blur', () => {
         return;
     }
 
-    // 중복된 이메일인 경우
-
     validationState.email = true;
     updateSignupButtonState();
 });
@@ -153,4 +151,44 @@ nicknameInput.addEventListener('blur', () => {
 
     validationState.nickname = true;
     updateSignupButtonState();
+});
+
+signupButton.addEventListener('click', async() => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    const nickname = nicknameInput.value;
+
+    try {
+        const response = await fetch('http://localhost:8080/auth/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                nickname: nickname
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // 중복된 이메일인 경우
+            if (data.message === 'email_duplicated') {
+                showHelperText(emailInput, '* 중복된 이메일 입니다.');
+                return;
+            }
+
+            // 중복된 닉네임인 경우
+            if (data.message === 'nickname_duplicated') {
+                showHelperText(nicknameInput, '* 중복된 닉네임 입니다.');
+                return;
+            }
+        }
+
+        window.location.href = './index.html';
+    } catch (error) {
+        console.error(error);
+    }
 });
