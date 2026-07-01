@@ -77,7 +77,32 @@ passwordInput.addEventListener('blur', () => {
     updateLoginButtonState();
 });
 
-loginButton.addEventListener('click', () => {
+loginButton.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
     // 로그인 요청
-    // 로그인 실패 시
+    try {
+        const response = await fetch('http://localhost:8080/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+            }),
+        });
+
+        // 로그인 실패 시
+        if (!response.ok) {
+            passwordHelperText.textContent = '* 이메일 또는 비밀번호를 확인해주세요.';
+            passwordHelperGroup.classList.add('is-error');
+            return;
+        }
+
+        window.location.href = './posts.html';
+    } catch (error) {
+        console.error(error);
+    }
 });
