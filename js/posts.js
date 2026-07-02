@@ -38,7 +38,7 @@ function renderPosts(posts) {
         return `
             <a class="post-card">
                 <div class="post-card-content">
-                    <h3>${post.title}</h3>
+                    <h3>${post.titlePreview}</h3>
 
                     <div class="post-info-row">
                         <p class="post-stats-text">
@@ -52,7 +52,7 @@ function renderPosts(posts) {
 
                 <div class="post-author">
                     <div class="author-image"></div>
-                    <strong>${post.nickname}</strong>
+                    <strong>${post.writer.nickname}</strong>
                 </div>
             </a>
         `;
