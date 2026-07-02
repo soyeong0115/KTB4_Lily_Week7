@@ -876,6 +876,16 @@ textarea {
   font-weight: 700;
 }
 
+#post-like-button {
+  background-color: #d9d9d9;
+  cursor: pointer;
+}
+
+/* 좋아요 누른 상태 */
+#post-like-button.is-liked {
+  background-color: #aca0eb;
+}
+
 /* 댓글 작성 영역 */
 .comment-form {
   width: 100%;
