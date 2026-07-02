@@ -94,12 +94,18 @@ loginButton.addEventListener('click', async () => {
             }),
         });
 
+        const data = await response.json();
+        console.log('로그인 응답:', data);
+
         // 로그인 실패 시
         if (!response.ok) {
             passwordHelperText.textContent = '* 이메일 또는 비밀번호를 확인해주세요.';
             passwordHelperGroup.classList.add('is-error');
             return;
         }
+
+        // 르그인 성공 시 사용자 정보 저장
+        localStorage.setItem('userId', data.data.userId);
 
         window.location.href = './posts.html';
     } catch (error) {

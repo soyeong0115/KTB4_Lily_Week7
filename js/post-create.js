@@ -43,18 +43,28 @@ postSubmitButton.addEventListener('click', async() => {
         helperGroup.classList.add('is-error');
         return;
     }
+
+    // 사용자 ID 꺼내기
+    const userId = localStorage.getItem('userId');
     
     try {
         const response = await fetch('http://localhost:8080/posts', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-USER-ID': userId,
             },
             body: JSON.stringify({
                 title: postTitle,
                 content: postContent,
             }),
         });
+
+        if (!response.ok) {
+            postCreateHelperText.textContent = '* 게시글 작성에 실패했습니다.';
+            helperGroup.classList.add('is-error');
+            return;
+        }
 
         window.location.href = './posts.html';
     } catch (error) {
