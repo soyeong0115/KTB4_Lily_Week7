@@ -36,7 +36,7 @@ function renderPosts(posts) {
 
     postList.innerHTML = posts.map((post) => {
         return `
-            <a class="post-card">
+            <a class="post-card" href="./post-detail.html?postId=${post.postId}">
                 <div class="post-card-content">
                     <h3>${post.titlePreview}</h3>
 
