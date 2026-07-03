@@ -1,6 +1,14 @@
 const commentList = document.querySelector('.comment-list');
 const commentTextarea = document.querySelector('.comment-form textarea');
 const commentSubmitButton = document.querySelector('.comment-submit');
+const commentEditButton = document.querySelector('.comment-edit-button');
+const commentDeleteButton = document.querySelector('.comment-delete-button');
+
+const commentPostId = new URLSearchParams(window.location.search).get('postId');
+const commentUserId = localStorage.getItem('userId');
+
+console.log('현재 주소:', window.location.href);
+console.log('commentPostId:', commentPostId);
 
 commentSubmitButton.disabled = true;
 
@@ -13,15 +21,24 @@ commentTextarea.addEventListener('input', () => {
     updateCommentSubmitButtonState();
 });
 
+let editingCommentId = null;
+
 commentSubmitButton.addEventListener('click', async () => {
     const commentContent = commentTextarea.value.trim();
+    const isEditing = editingCommentId !== null;
+
+    const url = isEditing
+        ? `http://localhost:8080/posts/${commentPostId}/comments/${editingCommentId}`
+        : `http://localhost:8080/posts/${commentPostId}/comments`;
+
+    const method = isEditing ? 'PATCH' : 'POST';
 
     try {
-        const response = await fetch(`http://localhost:8080/posts/${postId}/comments`, {
-            method: 'POST',
+        const response = await fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'X-USER-ID': commentUserId,
             },
     
             body: JSON.stringify({
@@ -31,14 +48,10 @@ commentSubmitButton.addEventListener('click', async () => {
 
         const data = await response.json();
 
-        if (!response.ok) {
-            alert('댓글 작성에 실패했습니다.');
-            return;
-        }
-
-        console.log('댓글 작성 응답:', data);
-
         commentTextarea.value = '';
+        commentSubmitButton.textContent = '댓글 등록';
+        editingCommentId = null;
+
         updateCommentSubmitButtonState();
 
     } catch (error) {
@@ -49,9 +62,53 @@ commentSubmitButton.addEventListener('click', async () => {
     fetchPostDetail();
 })
 
-// 댓글 수정 클릭하면 textarea에 댓글 내용이 들어가고, 댓글 등록 버튼이 댓글 수정 버튼으로 바뀌도록 구현
-// 댓글 수정 버튼 클릭 시 댓글 수정 API 호출
-// 댓글 삭제 시 확인모달 띄우기 -> 확인 클릭 시 댓글 삭제 API 호출
+commentList.addEventListener('click', async (event) => {
+    const commentItem = event.target.closest('.comment-item');
+
+    if (!commentItem) {
+        return;
+    }
+
+    const commentId = commentItem.dataset.commentId;
+
+    if (event.target.classList.contains('comment-edit-button')) {
+        const commentContent = commentItem.querySelector('.comment-content').textContent;
+
+        commentTextarea.value = commentContent;
+        commentSubmitButton.textContent = '댓글 수정';
+        editingCommentId = commentId;
+
+        updateCommentSubmitButtonState();
+        commentTextarea.focus();
+
+        return;
+    }
+
+    if (event.target.classList.contains('comment-delete-button')) {
+        // 삭제 확인 모달 UI로 교체 예정
+        const confirmDelete = confirm('정말로 댓글을 삭제하시겠습니까?');
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/posts/${commentPostId}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-USER-ID': commentUserId,
+                },
+            });
+
+            fetchPostDetail();
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+});
+
 
 function renderComments(comments) {
     if (comments.length === 0) {
@@ -63,7 +120,7 @@ function renderComments(comments) {
         const isMyComment = Number(userId) === comment.writer.userId;
 
         return `
-            <article class="comment-item">
+            <article class="comment-item" data-comment-id="${comment.commentId}">
                 <div class="comment-item-top">
                     <div class="comment-info">
                         <strong>${comment.writer.nickname}</strong>
@@ -86,7 +143,7 @@ function renderComments(comments) {
                     }
                 </div>
 
-                <p>${comment.content}</p>
+                <p class="comment-content">${comment.content}</p>
             </article>
         `;
     }).join('');
