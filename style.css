@@ -1145,13 +1145,19 @@ textarea {
   font-size: 14px;
 }
 
-.profile-edit-field .helper-text {
-  margin-top: 6px;
+.profile-edit-field .profile-helper-text {
+  display: block;
+  min-height: 18px;
+  margin-top: 4px;
+  margin-bottom: 14px;
 
   color: #ff0000;
   font-size: 12px;
+  line-height: 18px;
+  text-align: left;
 
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
 }
 
 .profile-submit-button {
@@ -1161,21 +1167,13 @@ textarea {
 
   border: none;
   border-radius: 4px;
-  background-color: #aca0eb;
+  background-color: #7f6aee;
 
   color: white;
   font-size: 14px;
   font-weight: 700;
 
   cursor: pointer;
-}
-
-.profile-submit-button:hover {
-  background-color: #7f6aee;
-}
-
-.profile-submit-button:active {
-  background-color: #aca0eb;
 }
 
 .profile-withdraw-button {
@@ -1194,14 +1192,14 @@ textarea {
 }
 
 .profile-complete-toast {
-  display: flex;
+  display: none;
 
   width: 110px;
   height: 54px;
   margin: 44px auto 0;
 
   border-radius: 30px;
-  background-color: #aca0eb;
+  background-color: #7f6aee;
 
   color: white;
   font-size: 18px;
@@ -1209,6 +1207,10 @@ textarea {
 
   align-items: center;
   justify-content: center;
+}
+
+.profile-complete-toast.is-show {
+  display: flex;
 }
 
 /* 모달 */

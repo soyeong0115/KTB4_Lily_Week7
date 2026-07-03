@@ -43,13 +43,13 @@
 
         <div class="profile-edit-field">
           <label>이메일</label>
-          <p>startupcode@gmail.com</p>
+          <p id="email"></p>
         </div>
 
         <div class="profile-edit-field">
           <label for="nickname">닉네임</label>
-          <input id="nickname" type="text" value="스타트업코드" />
-          <p class="helper-text">* helper text</p>
+          <input id="nickname" type="text" />
+          <p class="profile-helper-text"></p>
         </div>
 
         <button class="profile-submit-button" type="button">수정하기</button>
@@ -64,5 +64,7 @@
       </form>
     </main>
   </div>
+
+  <script src="./js/profile-edit.js"></script>
 </body>
 </html>
