@@ -34,7 +34,7 @@
             type="text" 
             maxlength="26"
             required
-            value="제목 1"
+            placeholder="제목을 입력해주세요. (최대 26글자)"
           />
         </div>
 
@@ -43,8 +43,9 @@
           <textarea 
             id="content" 
             required
-          >무엇을 얘기할까요? 아무말이라면, 삶은 항상 놀라운 모험이라고 생각합니다. 우리는 매일 새로운 경험을 하고 배우며 성장합니다. 때로는 어려움과 도전이 있지만, 그것들이 우리를 더 강하고 지혜롭게 만듭니다.</textarea>
-          <p class="helper-text">* 내용을 입력해주세요.</p>
+            placeholder="내용을 입력해주세요."
+          ></textarea>
+          <p class="helper-text"></p>
         </div>
 
         <div class="post-form-group image-group">
@@ -60,5 +61,7 @@
       </form>
     </main>
   </div>
+
+  <script src="./js/post-edit.js"></script>
 </body>
 </html>
