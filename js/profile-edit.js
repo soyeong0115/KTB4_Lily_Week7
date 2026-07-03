@@ -102,3 +102,33 @@ profileSubmitButton.addEventListener('click', async () => {
         console.error(error);
     }
 });
+
+profileWithdrawButton.addEventListener('click', async () => {
+    // 회원 탈퇴 모달 UI 구현 후 교체 예정
+    const confirmDelete = confirm("회원탈퇴 하시겠습니까?");
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8080/user', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-USER-ID': userId,
+            },
+        });
+
+        if (!response.ok) {
+            alert('회원 탈퇴에 실패했습니다.');
+            return;
+        }
+
+        localStorage.removeItem('userId');
+        window.location.href = './index.html';
+        
+    } catch (error) {
+        console.error(error);
+    }
+});
