@@ -94,6 +94,8 @@ function renderPostDetail(post) {
     } else {
         postLikeButton.classList.remove('is-liked');
     }
+
+    renderComments(post.comments ?? []);
 }
 
 postLikeButton.addEventListener("click", async () => {
@@ -111,5 +113,3 @@ postLikeButton.addEventListener("click", async () => {
         console.error(error);
     }
 });
-
-// 댓글은 따로 파일 파자.. 너무 길어질 듯

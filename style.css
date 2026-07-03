@@ -1018,6 +1018,18 @@ textarea {
   color: #111;
 }
 
+.comment-submit {
+  background-color: #7f6aee;
+  color: white;
+  cursor: pointer;
+}
+
+/* 입력 없을 때 */
+.comment-submit:disabled {
+  background-color: #aca0eb;
+  cursor: not-allowed;
+}
+
 /* 회원정보 수정 */
 
 .profile-edit-main {
