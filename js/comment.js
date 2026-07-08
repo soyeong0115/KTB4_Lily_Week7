@@ -5,7 +5,28 @@ const commentEditButton = document.querySelector('.comment-edit-button');
 const commentDeleteButton = document.querySelector('.comment-delete-button');
 
 const commentPostId = new URLSearchParams(window.location.search).get('postId');
-const commentUserId = localStorage.getItem('userId');
+const accessToken = localStorage.getItem('accessToken');
+
+let currentUserId = null;
+let editingCommentId = null;
+
+async function fetchCurrentUser() {
+    if (!accessToken) {
+        return;
+    }
+
+    const response = await fetch('http://localhost:8080/user/profile', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+        },
+    });
+
+    const result = await response.json();
+
+    currentUserId = result.data.userId;
+}
 
 console.log('현재 주소:', window.location.href);
 console.log('commentPostId:', commentPostId);
@@ -38,7 +59,7 @@ commentSubmitButton.addEventListener('click', async () => {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': commentUserId,
+                'Authorization': `Bearer ${accessToken}`,
             },
     
             body: JSON.stringify({
@@ -97,7 +118,7 @@ commentList.addEventListener('click', async (event) => {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-USER-ID': commentUserId,
+                    'Authorization': `Bearer ${accessToken}`,
                 },
             });
 
@@ -117,7 +138,7 @@ function renderComments(comments) {
     }
 
     commentList.innerHTML = comments.map((comment) => {
-        const isMyComment = Number(userId) === comment.writer.userId;
+        const isMyComment = currentUserId === comment.writer.userId;
 
         return `
             <article class="comment-item" data-comment-id="${comment.commentId}">
