@@ -7,12 +7,12 @@ const profileSubmitButton = document.querySelector('.profile-submit-button');
 const profileWithdrawButton = document.querySelector('.profile-withdraw-button');
 const profileCompleteToast = document.querySelector('.profile-complete-toast');
 
-const userId = localStorage.getItem('userId');
+const accessToken = localStorage.getItem('accessToken');
 
 let originalNickname = ''; // 기존 닉네임 저장하고 시작
 
 async function fetchMyProfile() {
-    if (!userId) {
+    if (!accessToken) {
         alert('로그인이 필요합니다.');
         window.location.href = './index.html';
     } 
@@ -22,7 +22,7 @@ async function fetchMyProfile() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
         });
 
@@ -69,7 +69,7 @@ profileSubmitButton.addEventListener('click', async () => {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
                 nickname: nickname,
@@ -116,7 +116,7 @@ profileWithdrawButton.addEventListener('click', async () => {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
         });
 
@@ -125,9 +125,9 @@ profileWithdrawButton.addEventListener('click', async () => {
             return;
         }
 
-        localStorage.removeItem('userId');
+        localStorage.removeItem('accessToken');
         window.location.href = './index.html';
-        
+
     } catch (error) {
         console.error(error);
     }

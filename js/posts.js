@@ -1,14 +1,14 @@
 const postList = document.querySelector('.post-list');
 
 async function fetchPosts() {
-    const userId = localStorage.getItem('userId');
+    const accessToken = localStorage.getItem('accessToken');
 
     try {
         const response = await fetch('http://localhost:8080/posts', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
         });
 

@@ -1,5 +1,5 @@
 const postId = new URLSearchParams(window.location.search).get('postId');
-const userId = localStorage.getItem('userId');
+const accessToken = localStorage.getItem('accessToken');
 
 const postEditButton = document.getElementById('post-edit-button');
 const postDeleteButton = document.getElementById('post-delete-button');
@@ -36,7 +36,7 @@ postDeleteButton.addEventListener("click", async () => {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
         });
 
@@ -57,7 +57,7 @@ async function fetchPostDetail() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
         });
 
@@ -104,7 +104,7 @@ postLikeButton.addEventListener("click", async () => {
             method: isLiked ? 'DELETE' : 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
         });
 

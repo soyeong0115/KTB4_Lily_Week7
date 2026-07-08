@@ -8,7 +8,7 @@ const passwordCheckGroup = passwordCheckInput.closest('.form-group');
 const passwordHelperText = passwordGroup.querySelector('.helper-text');
 const passwordCheckHelperText = passwordCheckGroup.querySelector('.helper-text');
 
-const userId = localStorage.getItem('userId');
+const accessToken = localStorage.getItem('accessToken');
 
 passwordSubmitButton.disabled = true;
 
@@ -72,7 +72,7 @@ passwordSubmitButton.addEventListener('click', async () => {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
                 password: password,

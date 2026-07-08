@@ -45,14 +45,14 @@ postSubmitButton.addEventListener('click', async() => {
     }
 
     // 사용자 ID 꺼내기
-    const userId = localStorage.getItem('userId');
+    const accessToken = localStorage.getItem('accessToken');
     
     try {
         const response = await fetch('http://localhost:8080/posts', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
                 title: postTitle,

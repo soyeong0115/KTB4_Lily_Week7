@@ -1,5 +1,5 @@
 const postId = new URLSearchParams(window.location.search).get('postId');
-const userId = localStorage.getItem('userId');
+const accessToken = localStorage.getItem('accessToken');
 
 const backButton = document.querySelector('.back-button');
 
@@ -22,7 +22,7 @@ async function fetchPostEdit() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
         });
 
@@ -63,7 +63,7 @@ postEditButton.addEventListener('click', async () => {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-USER-ID': userId,
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: JSON.stringify({
                 title: title,

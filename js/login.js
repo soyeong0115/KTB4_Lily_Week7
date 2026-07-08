@@ -105,7 +105,7 @@ loginButton.addEventListener('click', async () => {
         }
 
         // 르그인 성공 시 사용자 정보 저장
-        localStorage.setItem('userId', data.data.userId);
+        localStorage.setItem('accessToken', data.data.accessToken);
 
         window.location.href = './posts.html';
     } catch (error) {
