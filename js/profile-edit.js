@@ -1,3 +1,5 @@
+import { request } from './api.js';
+
 const emailText = document.querySelector('#email');
 const nicknameInput = document.querySelector('#nickname');
 
@@ -18,24 +20,9 @@ async function fetchMyProfile() {
     } 
 
     try {
-        const response = await fetch('http://localhost:8080/user/profile', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
+        const profile = await request('/user/profile', { method: 'GET' });
 
-        const data = await response.json();
-
-        console.log('프로필 조회 응답:', data);
-
-        if (!response.ok) {
-            alert('회원정보를 불러오지 못했습니다.');
-            return;
-        }
-
-        const profile = data.data;
+        console.log('프로필 조회 응답:', profile);
 
         emailText.textContent = profile.email;
         nicknameInput.value = profile.nickname;
@@ -43,6 +30,7 @@ async function fetchMyProfile() {
         originalNickname = profile.nickname;
 
     } catch (error) {
+        alert('회원정보를 불러오지 못했습니다.');
         console.error(error);
     }
 }
@@ -65,40 +53,30 @@ profileSubmitButton.addEventListener('click', async () => {
     }
 
     try {
-        const response = await fetch(`http://localhost:8080/user/profile`, {
+        await request('/user/profile', {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
             body: JSON.stringify({
                 nickname: nickname,
             })
         });
 
-        const data = await response.json();
-            
-        // 닉네임 중복 시
-        if (!response.ok) {
-            if (data.message === 'nickname_duplicated') {
-                helperText.textContent = '* 중복된 닉네임입니다.';
-                return;
-            }
-        }
-        
         helperText.textContent = '';
         originalNickname = nickname;
 
-        console.log('프로필 수정 성공 여부', response.ok);
-
         // 수정 완료 토스트
         profileCompleteToast.classList.add('is-show');
-    
+
         setTimeout(() => {
             profileCompleteToast.classList.remove('is-show');
         }, 1500);
 
     } catch (error) {
+        // 닉네임 중복 시
+        if (error.body?.message === 'nickname_duplicated') {
+            helperText.textContent = '* 중복된 닉네임입니다.';
+            return;
+        }
+
         console.error(error);
     }
 });
@@ -112,23 +90,13 @@ profileWithdrawButton.addEventListener('click', async () => {
     }
 
     try {
-        const response = await fetch('http://localhost:8080/user', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
-
-        if (!response.ok) {
-            alert('회원 탈퇴에 실패했습니다.');
-            return;
-        }
+        await request('/user', { method: 'DELETE' });
 
         localStorage.removeItem('accessToken');
         window.location.href = './index.html';
 
     } catch (error) {
+        alert('회원 탈퇴에 실패했습니다.');
         console.error(error);
     }
 });

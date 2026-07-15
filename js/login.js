@@ -1,3 +1,5 @@
+import { request } from './api.js';
+
 const emailInput = document.querySelector('#email');
 const passwordInput = document.querySelector('#password');
 const loginButton = document.querySelector('#login-button');
@@ -83,32 +85,24 @@ loginButton.addEventListener('click', async () => {
 
     // 로그인 요청
     try {
-        const response = await fetch('http://localhost:8080/auth/login', {
+        const data = await request('/auth/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 email: email,
                 password: password,
             }),
         });
 
-        const data = await response.json();
         console.log('로그인 응답:', data);
 
-        // 로그인 실패 시
-        if (!response.ok) {
-            passwordHelperText.textContent = '* 이메일 또는 비밀번호를 확인해주세요.';
-            passwordHelperGroup.classList.add('is-error');
-            return;
-        }
-
         // 르그인 성공 시 사용자 정보 저장
-        localStorage.setItem('accessToken', data.data.accessToken);
+        localStorage.setItem('accessToken', data.accessToken);
 
         window.location.href = './posts.html';
     } catch (error) {
+        // 로그인 실패 시
+        passwordHelperText.textContent = '* 이메일 또는 비밀번호를 확인해주세요.';
+        passwordHelperGroup.classList.add('is-error');
         console.error(error);
     }
 });

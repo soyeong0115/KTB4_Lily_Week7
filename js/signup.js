@@ -1,3 +1,5 @@
+import { request } from './api.js';
+
 const emailInput = document.querySelector('#email');
 const passwordInput = document.querySelector('#password');
 const passwordCheckInput = document.querySelector('#password-check');
@@ -159,11 +161,8 @@ signupButton.addEventListener('click', async() => {
     const nickname = nicknameInput.value;
 
     try {
-        const response = await fetch('http://localhost:8080/auth/signup', {
+        await request('/auth/signup', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 email: email,
                 password: password,
@@ -171,24 +170,20 @@ signupButton.addEventListener('click', async() => {
             }),
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            // 중복된 이메일인 경우
-            if (data.message === 'email_duplicated') {
-                showHelperText(emailInput, '* 중복된 이메일 입니다.');
-                return;
-            }
-
-            // 중복된 닉네임인 경우
-            if (data.message === 'nickname_duplicated') {
-                showHelperText(nicknameInput, '* 중복된 닉네임 입니다.');
-                return;
-            }
-        }
-
         window.location.href = './index.html';
     } catch (error) {
+        // 중복된 이메일인 경우
+        if (error.body?.message === 'email_duplicated') {
+            showHelperText(emailInput, '* 중복된 이메일 입니다.');
+            return;
+        }
+
+        // 중복된 닉네임인 경우
+        if (error.body?.message === 'nickname_duplicated') {
+            showHelperText(nicknameInput, '* 중복된 닉네임 입니다.');
+            return;
+        }
+
         console.error(error);
     }
 });

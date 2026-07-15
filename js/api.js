@@ -22,7 +22,7 @@ export async function request(path, options = {}) {
         responseBody = null;
     }
 
-    if (!request.ok) {
+    if (!response.ok) {
         const error = new Error(responseBody?.message || 'request_failed');
         error.status = response.status;
         error.body = responseBody;

@@ -1,29 +1,16 @@
+import { request } from './api.js';
+
 const postList = document.querySelector('.post-list');
 
 async function fetchPosts() {
-    const accessToken = localStorage.getItem('accessToken');
-
     try {
-        const response = await fetch('http://localhost:8080/posts', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
+        const posts = await request('/posts', { method: 'GET' });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            postList.innerHTML = '<p>게시글을 불러오는데 실패했습니다.</p>';
-            return;
-        }
-
-        renderPosts(data.data);
-        console.log('게시글 목록 응답:', data);
-        console.log('게시글 목록 데이터:', data.data);
+        renderPosts(posts);
+        console.log('게시글 목록 데이터:', posts);
     }
     catch (error) {
+        postList.innerHTML = '<p>게시글을 불러오는데 실패했습니다.</p>';
         console.error(error);
     }
 }

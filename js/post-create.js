@@ -1,3 +1,5 @@
+import { request } from './api.js';
+
 const postTitleInput = document.querySelector('#title');
 const postContentInput = document.querySelector('#content');
 const fileButton = document.querySelector('.file-button');
@@ -44,30 +46,19 @@ postSubmitButton.addEventListener('click', async() => {
         return;
     }
 
-    // 사용자 ID 꺼내기
-    const accessToken = localStorage.getItem('accessToken');
-    
     try {
-        const response = await fetch('http://localhost:8080/posts', {
+        await request('/posts', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
             body: JSON.stringify({
                 title: postTitle,
                 content: postContent,
             }),
         });
 
-        if (!response.ok) {
-            postCreateHelperText.textContent = '* 게시글 작성에 실패했습니다.';
-            helperGroup.classList.add('is-error');
-            return;
-        }
-
         window.location.href = './posts.html';
     } catch (error) {
+        postCreateHelperText.textContent = '* 게시글 작성에 실패했습니다.';
+        helperGroup.classList.add('is-error');
         console.error(error);
     }
 });

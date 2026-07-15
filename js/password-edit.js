@@ -1,3 +1,5 @@
+import { request } from './api.js';
+
 const passwordInput = document.querySelector('#password');
 const passwordCheckInput = document.querySelector('#password-check');
 const passwordSubmitButton = document.querySelector('.primary-button');
@@ -7,8 +9,6 @@ const passwordGroup = passwordInput.closest('.form-group');
 const passwordCheckGroup = passwordCheckInput.closest('.form-group');
 const passwordHelperText = passwordGroup.querySelector('.helper-text');
 const passwordCheckHelperText = passwordCheckGroup.querySelector('.helper-text');
-
-const accessToken = localStorage.getItem('accessToken');
 
 passwordSubmitButton.disabled = true;
 
@@ -68,12 +68,8 @@ passwordSubmitButton.addEventListener('click', async () => {
     const newPassword = passwordCheckInput.value.trim();
 
     try {
-        const response = await fetch('http://localhost:8080/user/password', {
+        await request('/user/password', {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
             body: JSON.stringify({
                 password: password,
                 newPassword: newPassword,
@@ -83,8 +79,6 @@ passwordSubmitButton.addEventListener('click', async () => {
         passwordInput.value = '';
         passwordCheckInput.value = '';
         passwordSubmitButton.disabled = true;
-
-        console.log('프로필 수정 성공 여부', response.ok);
 
         // 수정 완료 토스트
         editPasswordCompleteToast.classList.add('is-show');

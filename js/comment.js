@@ -1,3 +1,6 @@
+import { request } from './api.js';
+import { fetchPostDetail } from './post-detail.js';
+
 const commentList = document.querySelector('.comment-list');
 const commentTextarea = document.querySelector('.comment-form textarea');
 const commentSubmitButton = document.querySelector('.comment-submit');
@@ -15,17 +18,9 @@ async function fetchCurrentUser() {
         return;
     }
 
-    const response = await fetch('http://localhost:8080/user/profile', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-        },
-    });
+    const profile = await request('/user/profile', { method: 'GET' });
 
-    const result = await response.json();
-
-    currentUserId = result.data.userId;
+    currentUserId = profile.userId;
 }
 
 console.log('현재 주소:', window.location.href);
@@ -42,32 +37,23 @@ commentTextarea.addEventListener('input', () => {
     updateCommentSubmitButtonState();
 });
 
-let editingCommentId = null;
-
 commentSubmitButton.addEventListener('click', async () => {
     const commentContent = commentTextarea.value.trim();
     const isEditing = editingCommentId !== null;
 
     const url = isEditing
-        ? `http://localhost:8080/posts/${commentPostId}/comments/${editingCommentId}`
-        : `http://localhost:8080/posts/${commentPostId}/comments`;
+        ? `/posts/${commentPostId}/comments/${editingCommentId}`
+        : `/posts/${commentPostId}/comments`;
 
     const method = isEditing ? 'PATCH' : 'POST';
 
     try {
-        const response = await fetch(url, {
+        await request(url, {
             method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-    
             body: JSON.stringify({
                 content: commentContent,
             }),
         });
-
-        const data = await response.json();
 
         commentTextarea.value = '';
         commentSubmitButton.textContent = '댓글 등록';
@@ -114,12 +100,8 @@ commentList.addEventListener('click', async (event) => {
         }
 
         try {
-            const response = await fetch(`http://localhost:8080/posts/${commentPostId}/comments/${commentId}`, {
+            await request(`/posts/${commentPostId}/comments/${commentId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
             });
 
             fetchPostDetail();
@@ -131,7 +113,7 @@ commentList.addEventListener('click', async (event) => {
 });
 
 
-function renderComments(comments) {
+export function renderComments(comments) {
     if (comments.length === 0) {
         commentList.innerHTML = '<p>댓글이 없습니다.</p>';
         return;

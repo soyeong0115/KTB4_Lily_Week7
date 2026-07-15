@@ -1,5 +1,6 @@
+import { request } from './api.js';
+
 const postId = new URLSearchParams(window.location.search).get('postId');
-const accessToken = localStorage.getItem('accessToken');
 
 const backButton = document.querySelector('.back-button');
 
@@ -18,16 +19,7 @@ fetchPostEdit();
 
 async function fetchPostEdit() {
     try {
-        const response = await fetch(`http://localhost:8080/posts/${postId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
-
-        const data = await response.json();
-        const post = data.data;
+        const post = await request(`/posts/${postId}`, { method: 'GET' });
 
         postTitleInput.value = post.title;
         postContentInput.value = post.content;
@@ -59,26 +51,18 @@ postEditButton.addEventListener('click', async () => {
     }
 
     try {
-        const response = await fetch(`http://localhost:8080/posts/${postId}`, {
+        await request(`/posts/${postId}`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
             body: JSON.stringify({
                 title: title,
                 content: content,
             }),
         });
 
-        if (!response.ok) {
-            alert('게시글 수정에 실패했습니다.');
-            return;
-        }
-
         window.location.href = `./post-detail.html?postId=${postId}`;
 
     } catch (error) {
+        alert('게시글 수정에 실패했습니다.');
         console.error(error);
     }
 });

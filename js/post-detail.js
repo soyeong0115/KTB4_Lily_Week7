@@ -1,5 +1,7 @@
+import { request } from './api.js';
+import { renderComments } from './comment.js';
+
 const postId = new URLSearchParams(window.location.search).get('postId');
-const accessToken = localStorage.getItem('accessToken');
 
 const postEditButton = document.getElementById('post-edit-button');
 const postDeleteButton = document.getElementById('post-delete-button');
@@ -32,47 +34,25 @@ postDeleteButton.addEventListener("click", async () => {
     }
 
     try {
-        const response = await fetch(`http://localhost:8080/posts/${postId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
-
-        if (!response.ok) {
-            alert('게시글 삭제에 실패했습니다.');
-            return;
-        }
+        await request(`/posts/${postId}`, { method: 'DELETE' });
 
         window.location.href = './posts.html';
     } catch (error) {
+        alert('게시글 삭제에 실패했습니다.');
         console.error(error);
     }
 });
 
-async function fetchPostDetail() {
+export async function fetchPostDetail() {
     try {
-        const response = await fetch(`http://localhost:8080/posts/${postId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
+        const post = await request(`/posts/${postId}`, { method: 'GET' });
 
-        const data = await response.json();
+        console.log('게시글 상세 조회 응답:', post);
 
-        if (!response.ok) {
-            alert('게시글 상세 조회에 실패했습니다.');
-            return;
-        }
+        renderPostDetail(post);
 
-        console.log('게시글 상세 조회 응답:', data);
-
-        renderPostDetail(data.data);
-        
     } catch (error) {
+        alert('게시글 상세 조회에 실패했습니다.');
         console.error(error);
     }
 }
@@ -100,12 +80,8 @@ function renderPostDetail(post) {
 
 postLikeButton.addEventListener("click", async () => {
     try {
-        const response = await fetch(`http://localhost:8080/posts/${postId}/likes`, {
+        await request(`/posts/${postId}/likes`, {
             method: isLiked ? 'DELETE' : 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
         });
 
         fetchPostDetail();
