@@ -46,6 +46,8 @@ postSubmitButton.addEventListener('click', async() => {
         return;
     }
 
+    postSubmitButton.disabled = true;
+
     try {
         await request('/posts', {
             method: 'POST',
@@ -60,5 +62,6 @@ postSubmitButton.addEventListener('click', async() => {
         postCreateHelperText.textContent = '* 게시글 작성에 실패했습니다.';
         helperGroup.classList.add('is-error');
         console.error(error);
+        updatePostSubmitButtonState();
     }
 });

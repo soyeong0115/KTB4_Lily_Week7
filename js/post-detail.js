@@ -79,6 +79,8 @@ function renderPostDetail(post) {
 }
 
 postLikeButton.addEventListener("click", async () => {
+    postLikeButton.disabled = true;
+
     try {
         await request(`/posts/${postId}/likes`, {
             method: isLiked ? 'DELETE' : 'POST',
@@ -88,5 +90,7 @@ postLikeButton.addEventListener("click", async () => {
     } catch (error) {
         alert('좋아요 처리에 실패했습니다.');
         console.error(error);
+    } finally {
+        postLikeButton.disabled = false;
     }
 });

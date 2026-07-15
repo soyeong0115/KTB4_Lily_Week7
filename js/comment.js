@@ -47,6 +47,8 @@ commentSubmitButton.addEventListener('click', async () => {
 
     const method = isEditing ? 'PATCH' : 'POST';
 
+    commentSubmitButton.disabled = true;
+
     try {
         await request(url, {
             method: method,
@@ -59,13 +61,13 @@ commentSubmitButton.addEventListener('click', async () => {
         commentSubmitButton.textContent = '댓글 등록';
         editingCommentId = null;
 
-        updateCommentSubmitButtonState();
-
         // 댓글 작성/수정 후에 댓글 목록 갱신
         fetchPostDetail();
     } catch (error) {
         alert('댓글 등록에 실패했습니다.');
         console.error(error);
+    } finally {
+        updateCommentSubmitButtonState();
     }
 })
 
