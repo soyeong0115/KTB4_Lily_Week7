@@ -88,6 +88,7 @@ passwordSubmitButton.addEventListener('click', async () => {
         }, 1500);
 
     } catch (error) {
+        alert('비밀번호 수정에 실패했습니다.');
         console.error(error);
     }
 });

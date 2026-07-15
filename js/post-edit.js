@@ -27,6 +27,7 @@ async function fetchPostEdit() {
         updatePostEditButtonState();
 
     } catch (error) {
+        alert('게시글 정보를 불러오지 못했습니다.');
         console.error(error);
     }
 }

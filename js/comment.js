@@ -61,12 +61,12 @@ commentSubmitButton.addEventListener('click', async () => {
 
         updateCommentSubmitButtonState();
 
+        // 댓글 작성/수정 후에 댓글 목록 갱신
+        fetchPostDetail();
     } catch (error) {
+        alert('댓글 등록에 실패했습니다.');
         console.error(error);
     }
-
-    // 댓글 작성 후에 댓글 목록 갱신
-    fetchPostDetail();
 })
 
 commentList.addEventListener('click', async (event) => {
@@ -107,6 +107,7 @@ commentList.addEventListener('click', async (event) => {
             fetchPostDetail();
 
         } catch (error) {
+            alert('댓글 삭제에 실패했습니다.');
             console.error(error);
         }
     }
