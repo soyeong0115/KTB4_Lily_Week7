@@ -1081,6 +1081,8 @@ textarea {
 }
 
 .profile-edit-image {
+  position: relative;
+
   width: 150px;
   height: 150px;
   margin: 0 auto;
@@ -1096,11 +1098,20 @@ textarea {
   overflow: hidden;
 }
 
+.profile-edit-image img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
 .profile-edit-image:hover span {
   background-color: rgba(0, 0, 0, 0.55);
 }
 
 .profile-edit-image span {
+  position: relative;
+  z-index: 1;
+
   min-width: 54px;
   height: 28px;
   padding: 0 12px;
