@@ -11,7 +11,7 @@ const passwordHelperGroup = passwordInput.closest('.form-group');
 const passwordHelperText = passwordHelperGroup.querySelector('.helper-text');
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,20}$/;
 
 const validationState = {
     email: false,

@@ -43,7 +43,7 @@ function clearHelperText(input) {
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,20}$/;
 
 const validationState = {
     email: false,
@@ -100,7 +100,7 @@ passwordInput.addEventListener('blur', () => {
 
     // 비밀번호 값이 유효하지 않은 경우
     if (!passwordRegex.test(password)) {
-        showHelperText(passwordInput, '* 비밀번호는 8자 이상이며, 영문자, 숫자, 특수문자를 모두 포함해야 합니다.');
+        showHelperText(passwordInput, '* 비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.');
         updateSignupButtonState();
         return;
     }
@@ -125,7 +125,7 @@ passwordCheckInput.addEventListener('blur', () => {
 
     // 비밀번호 확인 값이 유효하지 않은 경우
     if (!passwordRegex.test(passwordCheck)) {
-        showHelperText(passwordCheckInput, '* 비밀번호는 8자 이상이며, 영문자, 숫자, 특수문자를 모두 포함해야 합니다.');
+        showHelperText(passwordCheckInput, '* 비밀번호는 8자 이상, 20자 이하이며, 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.');
         updateSignupButtonState();
         return;
     }
