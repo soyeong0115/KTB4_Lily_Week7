@@ -355,6 +355,10 @@ textarea {
   text-align: left;
 }
 
+.signup-profile-area .profile-image-input {
+  display: none;
+}
+
 .signup-profile-area .profile-image {
   width: 150px;
   height: 150px;
@@ -370,6 +374,9 @@ textarea {
   font-size: 28px;
   font-weight: 300;
   color: #111;
+
+  cursor: pointer;
+  overflow: hidden;
 }
 
 .signup-main .form-group {

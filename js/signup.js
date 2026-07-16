@@ -5,6 +5,26 @@ const passwordInput = document.querySelector('#password');
 const passwordCheckInput = document.querySelector('#password-check');
 const nicknameInput = document.querySelector('#nickname');
 const signupButton = document.querySelector('.primary-button');
+const profileImageInput = document.querySelector('#profileImageInput');
+const profileImagePreview = document.querySelector('.profile-image');
+
+let profileImageUrl = null;
+
+// 프로필 이미지 미리보기
+function showProfileImagePreview(imageUrl) {
+    let previewImage = profileImagePreview.querySelector('img');
+
+    if (!previewImage) {
+        previewImage = document.createElement('img');
+        previewImage.style.width = '100%';
+        previewImage.style.height = '100%';
+        previewImage.style.objectFit = 'cover';
+        profileImagePreview.textContent = '';
+        profileImagePreview.appendChild(previewImage);
+    }
+
+    previewImage.src = `http://localhost:8080${imageUrl}`;
+}
 
 function showHelperText(input, message) {
     const helperGroup = input.closest('.form-group');
@@ -155,6 +175,31 @@ nicknameInput.addEventListener('blur', () => {
     updateSignupButtonState();
 });
 
+profileImageInput.addEventListener('change', async () => {
+    const file = profileImageInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await request('/images', {
+            method: 'POST',
+            body: formData,
+        });
+
+        profileImageUrl = response.imageUrl;
+        showProfileImagePreview(response.imageUrl);
+
+    } catch (error) {
+        alert('이미지 업로드에 실패했습니다.');
+        console.error(error);
+    }
+});
+
 signupButton.addEventListener('click', async() => {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -166,7 +211,8 @@ signupButton.addEventListener('click', async() => {
             body: JSON.stringify({
                 email: email,
                 password: password,
-                nickname: nickname
+                nickname: nickname,
+                profileImage: profileImageUrl
             }),
         });
 
