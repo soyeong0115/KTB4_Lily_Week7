@@ -2,6 +2,8 @@ import { request } from './api.js';
 
 const emailText = document.querySelector('#email');
 const nicknameInput = document.querySelector('#nickname');
+const profileImageInput = document.querySelector('#profileImageInput');
+const profileImagePreview = document.querySelector('.profile-edit-image');
 
 const helperText = document.querySelector('.profile-helper-text');
 
@@ -12,6 +14,24 @@ const profileCompleteToast = document.querySelector('.profile-complete-toast');
 const accessToken = localStorage.getItem('accessToken');
 
 let originalNickname = ''; // 기존 닉네임 저장하고 시작
+
+let profileImageUrl = null;
+
+// 프로필 이미지 미리보기
+function showProfileImagePreview(imageUrl) {
+    let previewImage = profileImagePreview.querySelector('img');
+
+    // 함수가 <img> 태그를 동적으로 생성해 넣는 방식
+    if (!previewImage) {
+        previewImage = document.createElement('img');
+        previewImage.style.width = '100%';
+        previewImage.style.height = '100%';
+        previewImage.style.objectFit = 'cover';
+        profileImagePreview.style.prepend(previewImage);
+    }
+
+    previewImage.src = `http://localhost:8080${imageUrl}`;
+}
 
 async function fetchMyProfile() {
     if (!accessToken) {
@@ -29,6 +49,11 @@ async function fetchMyProfile() {
 
         originalNickname = profile.nickname;
 
+        if (profile.profileImage) {
+            profileImageUrl = profile.profileImage;
+            showProfileImagePreview(profile.profileImage);
+        }
+
     } catch (error) {
         alert('회원정보를 불러오지 못했습니다.');
         console.error(error);
@@ -36,6 +61,32 @@ async function fetchMyProfile() {
 }
 
 fetchMyProfile();
+
+// 이미지 업로드
+profileImageInput.addEventListener('click', async () => {
+    const file = profileImageInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    try {
+        const formDate = new FormData();
+        formDate.append('image', file);
+
+        const response = await request('/images', {
+            method: 'POST',
+            body: formDate,
+        });
+
+        profileImageUrl = response.imageUrl;
+        showProfileImagePreview(response.imageUrl);
+
+    } catch(error) {
+        alert('이미지 업로드에 실패했습니다.')
+        console.error(error);
+    }
+});
 
 profileSubmitButton.addEventListener('click', async () => {
     const nickname = nicknameInput.value.trim();
@@ -57,6 +108,7 @@ profileSubmitButton.addEventListener('click', async () => {
             method: 'PATCH',
             body: JSON.stringify({
                 nickname: nickname,
+                profileImage: profileImageUrl,
             })
         });
 
