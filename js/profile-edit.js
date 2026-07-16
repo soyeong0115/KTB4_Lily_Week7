@@ -27,7 +27,7 @@ function showProfileImagePreview(imageUrl) {
         previewImage.style.width = '100%';
         previewImage.style.height = '100%';
         previewImage.style.objectFit = 'cover';
-        profileImagePreview.style.prepend(previewImage);
+        profileImagePreview.prepend(previewImage);
     }
 
     previewImage.src = `http://localhost:8080${imageUrl}`;
