@@ -8,6 +8,7 @@ const postDeleteButton = document.getElementById('post-delete-button');
 const postLikeButton = document.getElementById('post-like-button');
 
 const postTitle = document.querySelector('.detail-info h2');
+const postImageBox = document.querySelector('.post-image-box');
 const postContent = document.querySelector('.post-content');
 const postAuthor = document.querySelector(".detail-author");
 const postCreatedAt = document.querySelector(".detail-meta time");
@@ -62,6 +63,16 @@ function renderPostDetail(post) {
     postAuthor.textContent = post.writer.nickname;
     postCreatedAt.textContent = post.createdAt;
     postContent.textContent = post.content;
+
+    postImageBox.textContent = '';
+    if (post.postImage) {
+        const postImage = document.createElement('img');
+        postImage.src = `http://localhost:8080${post.postImage}`;
+        postImage.style.width = '100%';
+        postImage.style.height = '100%';
+        postImage.style.objectFit = 'cover';
+        postImageBox.appendChild(postImage);
+    }
     
     postLikeCount.textContent = post.likeCount;
     postViewCount.textContent = post.viewCount;
