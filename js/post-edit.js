@@ -7,10 +7,15 @@ const backButton = document.querySelector('.back-button');
 const postTitleInput = document.querySelector('#title');
 const postContentInput = document.querySelector('#content');
 const postEditButton = document.querySelector('.post-submit-button');
+const fileButton = document.querySelector('.file-button');
+const postImageInput = document.querySelector('#postImageInput');
+const fileNameText = document.querySelector('.file-row span');
 
 const helperText = document.querySelector('.helper-text');
 
 postEditButton.disabled = true;
+
+let postImageUrl = null;
 
 // 뒤로가기 버튼
 backButton.href = `./post-detail.html?postId=${postId}`;
@@ -24,6 +29,11 @@ async function fetchPostEdit() {
         postTitleInput.value = post.title;
         postContentInput.value = post.content;
 
+        if (post.postImage) {
+            postImageUrl = post.postImage;
+            fileNameText.textContent = post.postImage.split('/').pop();
+        }
+
         updatePostEditButtonState();
 
     } catch (error) {
@@ -31,6 +41,35 @@ async function fetchPostEdit() {
         console.error(error);
     }
 }
+
+fileButton.addEventListener('click', () => {
+    postImageInput.click();
+});
+
+postImageInput.addEventListener('change', async () => {
+    const file = postImageInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await request('/images', {
+            method: 'POST',
+            body: formData,
+        });
+
+        postImageUrl = response.imageUrl;
+        fileNameText.textContent = file.name;
+
+    } catch (error) {
+        alert('이미지 업로드에 실패했습니다.');
+        console.error(error);
+    }
+});
 
 function updatePostEditButtonState() {
     const title = postTitleInput.value.trim();
@@ -57,6 +96,7 @@ postEditButton.addEventListener('click', async () => {
             body: JSON.stringify({
                 title: title,
                 content: content,
+                postImage: postImageUrl,
             }),
         });
 

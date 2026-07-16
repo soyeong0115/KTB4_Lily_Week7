@@ -21,6 +21,7 @@ fileButton.addEventListener('click', () => {
     postImageInput.click();
 });
 
+// 파일 선택 버튼 클릭 이벤트 => 컴퓨터에서 이미지 파일 업로드
 postImageInput.addEventListener('change', async () => {
     const file = postImageInput.files[0];
 
@@ -64,8 +65,6 @@ postContentInput.addEventListener('blur', () => {
     validationState.postContent = postContentInput.value.trim() !== '';
     updatePostSubmitButtonState();
 });
-
-// 파일 선택 버튼 클릭 이벤트 => 컴퓨터에서 이미지 파일 업로드
 
 postSubmitButton.addEventListener('click', async() => {
     const postTitle = postTitleInput.value;
