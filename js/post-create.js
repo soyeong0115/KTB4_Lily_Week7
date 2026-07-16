@@ -3,6 +3,8 @@ import { request } from './api.js';
 const postTitleInput = document.querySelector('#title');
 const postContentInput = document.querySelector('#content');
 const fileButton = document.querySelector('.file-button');
+const postImageInput = document.querySelector('#postImageInput');
+const fileNameText = document.querySelector('.file-row span');
 const postSubmitButton = document.querySelector('.post-submit-button');
 
 const helperGroup = postContentInput.closest('.post-form-group');
@@ -12,6 +14,39 @@ const validationState = {
     postTitle: false,
     postContent: false,
 };
+
+let postImageUrl = null;
+
+fileButton.addEventListener('click', () => {
+    postImageInput.click();
+});
+
+postImageInput.addEventListener('change', async () => {
+    const file = postImageInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await request('/images', {
+            method: 'POST',
+            body: formData,
+        });
+
+        postImageUrl = response.imageUrl;
+        fileNameText.textContent = file.name;
+
+    } catch (error) {
+        fileNameText.textContent = '파일을 선택해주세요.';
+        postImageUrl = null;
+        alert('이미지 업로드에 실패했습니다.');
+        console.error(error);
+    }
+});
 
 function updatePostSubmitButtonState() {
     postSubmitButton.disabled = !(
@@ -54,6 +89,7 @@ postSubmitButton.addEventListener('click', async() => {
             body: JSON.stringify({
                 title: postTitle,
                 content: postContent,
+                postImage: postImageUrl,
             }),
         });
 
