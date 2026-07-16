@@ -1,12 +1,15 @@
 import { request } from './api.js';
 
+const currentPasswordInput = document.querySelector('#current-password');
 const passwordInput = document.querySelector('#password');
 const passwordCheckInput = document.querySelector('#password-check');
 const passwordSubmitButton = document.querySelector('.primary-button');
 const editPasswordCompleteToast = document.querySelector('.edit-password-complete-toast');
 
+const currentPasswordGroup = currentPasswordInput.closest('.form-group');
 const passwordGroup = passwordInput.closest('.form-group');
 const passwordCheckGroup = passwordCheckInput.closest('.form-group');
+const currentPasswordHelperText = currentPasswordGroup.querySelector('.helper-text');
 const passwordHelperText = passwordGroup.querySelector('.helper-text');
 const passwordCheckHelperText = passwordCheckGroup.querySelector('.helper-text');
 
@@ -18,32 +21,41 @@ function isValidPassword(password) {
 }
 
 function validatePasswordForm() {
-    const password = passwordInput.value.trim();
-    const newPassword = passwordCheckInput.value.trim();
+    const currentPassword = currentPasswordInput.value.trim();
+    const newPassword = passwordInput.value.trim();
+    const newPasswordCheck = passwordCheckInput.value.trim();
 
+    currentPasswordGroup.classList.remove('is-error');
     passwordGroup.classList.remove('is-error');
     passwordCheckGroup.classList.remove('is-error');
 
+    currentPasswordHelperText.textContent = '';
     passwordHelperText.textContent = '';
     passwordCheckHelperText.textContent = '';
 
     let isValid = true;
 
-    if (password === '') {
-        passwordGroup.classList.add('is-error');
-        passwordHelperText.textContent = '* 비밀번호를 입력해주세요.';
+    if (currentPassword === '') {
+        currentPasswordGroup.classList.add('is-error');
+        currentPasswordHelperText.textContent = '* 현재 비밀번호를 입력해주세요.';
         isValid = false;
-    } else if (!isValidPassword(password)) {
+    }
+
+    if (newPassword === '') {
+        passwordGroup.classList.add('is-error');
+        passwordHelperText.textContent = '* 새 비밀번호를 입력해주세요.';
+        isValid = false;
+    } else if (!isValidPassword(newPassword)) {
         passwordGroup.classList.add('is-error');
         passwordHelperText.textContent = '* 비밀번호는 8자 이상, 20자 이하이며 대문자, 소문자, 숫자, 특수문자를 각각 최소 1개 포함해야 합니다.';
         isValid = false;
     }
 
-    if (newPassword === '') {
+    if (newPasswordCheck === '') {
         passwordCheckGroup.classList.add('is-error');
-        passwordCheckHelperText.textContent = '* 비밀번호를 한번 더 입력해주세요.';
+        passwordCheckHelperText.textContent = '* 새 비밀번호를 한번 더 입력해주세요.';
         isValid = false;
-    } else if (password !== newPassword) {
+    } else if (newPassword !== newPasswordCheck) {
         passwordCheckGroup.classList.add('is-error');
         passwordCheckHelperText.textContent = '* 비밀번호와 다릅니다.';
         isValid = false;
@@ -54,6 +66,7 @@ function validatePasswordForm() {
     return isValid;
 }
 
+currentPasswordInput.addEventListener('input', validatePasswordForm);
 passwordInput.addEventListener('input', validatePasswordForm);
 passwordCheckInput.addEventListener('input', validatePasswordForm);
 
@@ -64,18 +77,19 @@ passwordSubmitButton.addEventListener('click', async () => {
         return;
     }
 
-    const password = passwordInput.value.trim();
-    const newPassword = passwordCheckInput.value.trim();
+    const currentPassword = currentPasswordInput.value.trim();
+    const newPassword = passwordInput.value.trim();
 
     try {
         await request('/user/password', {
             method: 'PATCH',
             body: JSON.stringify({
-                password: password,
+                password: currentPassword,
                 newPassword: newPassword,
             }),
         });
 
+        currentPasswordInput.value = '';
         passwordInput.value = '';
         passwordCheckInput.value = '';
         passwordSubmitButton.disabled = true;
