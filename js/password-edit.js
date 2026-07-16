@@ -102,6 +102,12 @@ passwordSubmitButton.addEventListener('click', async () => {
         }, 1500);
 
     } catch (error) {
+        if (error.body?.message === 'password_mismatch') {
+            currentPasswordGroup.classList.add('is-error');
+            currentPasswordHelperText.textContent = '* 현재 비밀번호가 일치하지 않습니다.';
+            return;
+        }
+
         alert('비밀번호 수정에 실패했습니다.');
         console.error(error);
     }
