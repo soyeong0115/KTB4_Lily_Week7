@@ -1,5 +1,6 @@
 import { request } from './api.js';
 import { renderComments } from './comment.js';
+import { showConfirmModal, showAlertModal } from './modal.js';
 
 const postId = new URLSearchParams(window.location.search).get('postId');
 
@@ -29,7 +30,10 @@ postEditButton.addEventListener("click", () => {
 
 // 삭제 버튼 클릭시 확인 모달 -> 확인 -> 게시글 삭제
 postDeleteButton.addEventListener("click", async () => {
-    const confirmDelete = confirm("정말로 게시글을 삭제하시겠습니까?");
+    const confirmDelete = await showConfirmModal({
+        title: '게시글을 삭제하시겠습니까?',
+        message: '삭제한 내용은 복구 할 수 없습니다.',
+    });
 
     if (!confirmDelete) {
         return;
@@ -40,7 +44,7 @@ postDeleteButton.addEventListener("click", async () => {
 
         window.location.href = './posts.html';
     } catch (error) {
-        alert('게시글 삭제에 실패했습니다.');
+        await showAlertModal({ message: '게시글 삭제에 실패했습니다.' });
         console.error(error);
     }
 });
@@ -54,7 +58,7 @@ export async function fetchPostDetail() {
         renderPostDetail(post);
 
     } catch (error) {
-        alert('게시글 상세 조회에 실패했습니다.');
+        await showAlertModal({ message: '게시글 상세 조회에 실패했습니다.' });
         console.error(error);
     }
 }
@@ -101,7 +105,7 @@ postLikeButton.addEventListener("click", async () => {
 
         fetchPostDetail();
     } catch (error) {
-        alert('좋아요 처리에 실패했습니다.');
+        await showAlertModal({ message: '좋아요 처리에 실패했습니다.' });
         console.error(error);
     } finally {
         postLikeButton.disabled = false;

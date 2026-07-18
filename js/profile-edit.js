@@ -1,4 +1,5 @@
 import { request } from './api.js';
+import { showConfirmModal, showAlertModal } from './modal.js';
 
 const emailText = document.querySelector('#email');
 const nicknameInput = document.querySelector('#nickname');
@@ -32,9 +33,10 @@ function showProfileImagePreview(imageUrl) {
 
 async function fetchMyProfile() {
     if (!accessToken) {
-        alert('로그인이 필요합니다.');
+        await showAlertModal({ message: '로그인이 필요합니다.' });
         window.location.href = './index.html';
-    } 
+        return;
+    }
 
     try {
         const profile = await request('/user/profile', { method: 'GET' });
@@ -52,7 +54,7 @@ async function fetchMyProfile() {
         }
 
     } catch (error) {
-        alert('회원정보를 불러오지 못했습니다.');
+        await showAlertModal({ message: '회원정보를 불러오지 못했습니다.' });
         console.error(error);
     }
 }
@@ -80,7 +82,7 @@ profileImageInput.addEventListener('click', async () => {
         showProfileImagePreview(response.imageUrl);
 
     } catch(error) {
-        alert('이미지 업로드에 실패했습니다.')
+        await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
         console.error(error);
     }
 });
@@ -131,8 +133,10 @@ profileSubmitButton.addEventListener('click', async () => {
 });
 
 profileWithdrawButton.addEventListener('click', async () => {
-    // 회원 탈퇴 모달 UI 구현 후 교체 예정
-    const confirmDelete = confirm("회원탈퇴 하시겠습니까?");
+    const confirmDelete = await showConfirmModal({
+        title: '회원탈퇴 하시겠습니까?',
+        message: '작성된 게시글과 댓글은 삭제됩니다.',
+    });
 
     if (!confirmDelete) {
         return;
@@ -145,7 +149,7 @@ profileWithdrawButton.addEventListener('click', async () => {
         window.location.href = './index.html';
 
     } catch (error) {
-        alert('회원 탈퇴에 실패했습니다.');
+        await showAlertModal({ message: '회원탈퇴에 실패했습니다.' });
         console.error(error);
     }
 });

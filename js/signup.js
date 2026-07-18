@@ -1,4 +1,5 @@
 import { request } from './api.js';
+import { showAlertModal } from './modal.js';
 
 const emailInput = document.querySelector('#email');
 const passwordInput = document.querySelector('#password');
@@ -195,7 +196,7 @@ profileImageInput.addEventListener('change', async () => {
         showProfileImagePreview(response.imageUrl);
 
     } catch (error) {
-        alert('이미지 업로드에 실패했습니다.');
+        await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
         console.error(error);
     }
 });

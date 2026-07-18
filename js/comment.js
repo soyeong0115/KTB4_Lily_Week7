@@ -1,5 +1,6 @@
 import { request } from './api.js';
 import { fetchPostDetail } from './post-detail.js';
+import { showConfirmModal, showAlertModal } from './modal.js';
 
 const commentList = document.querySelector('.comment-list');
 const commentTextarea = document.querySelector('.comment-form textarea');
@@ -67,7 +68,7 @@ commentSubmitButton.addEventListener('click', async () => {
         // 댓글 작성/수정 후에 댓글 목록 갱신
         fetchPostDetail();
     } catch (error) {
-        alert('댓글 등록에 실패했습니다.');
+        await showAlertModal({ message: '댓글 등록에 실패했습니다.' });
         console.error(error);
     } finally {
         updateCommentSubmitButtonState();
@@ -97,8 +98,10 @@ commentList.addEventListener('click', async (event) => {
     }
 
     if (event.target.classList.contains('comment-delete-button')) {
-        // 삭제 확인 모달 UI로 교체 예정
-        const confirmDelete = confirm('정말로 댓글을 삭제하시겠습니까?');
+        const confirmDelete = await showConfirmModal({
+            title: '댓글을 삭제하시겠습니까?',
+            message: '삭제한 내용은 복구 할 수 없습니다.',
+        });
 
         if (!confirmDelete) {
             return;
@@ -112,7 +115,7 @@ commentList.addEventListener('click', async (event) => {
             fetchPostDetail();
 
         } catch (error) {
-            alert('댓글 삭제에 실패했습니다.');
+            await showAlertModal({ message: '댓글 삭제에 실패했습니다.' });
             console.error(error);
         }
     }

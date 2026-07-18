@@ -1,4 +1,5 @@
 import { request } from './api.js';
+import { showAlertModal } from './modal.js';
 
 const postId = new URLSearchParams(window.location.search).get('postId');
 
@@ -37,7 +38,7 @@ async function fetchPostEdit() {
         updatePostEditButtonState();
 
     } catch (error) {
-        alert('게시글 정보를 불러오지 못했습니다.');
+        await showAlertModal({ message: '게시글 정보를 불러오지 못했습니다.' });
         console.error(error);
     }
 }
@@ -66,7 +67,7 @@ postImageInput.addEventListener('change', async () => {
         fileNameText.textContent = file.name;
 
     } catch (error) {
-        alert('이미지 업로드에 실패했습니다.');
+        await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
         console.error(error);
     }
 });
@@ -103,7 +104,7 @@ postEditButton.addEventListener('click', async () => {
         window.location.href = `./post-detail.html?postId=${postId}`;
 
     } catch (error) {
-        alert('게시글 수정에 실패했습니다.');
+        await showAlertModal({ message: '게시글 수정에 실패했습니다.' });
         console.error(error);
     }
 });

@@ -1,4 +1,5 @@
 import { request } from './api.js';
+import { showAlertModal } from './modal.js';
 
 const currentPasswordInput = document.querySelector('#current-password');
 const passwordInput = document.querySelector('#password');
@@ -108,7 +109,7 @@ passwordSubmitButton.addEventListener('click', async () => {
             return;
         }
 
-        alert('비밀번호 수정에 실패했습니다.');
+        await showAlertModal({ message: '비밀번호 수정에 실패했습니다.' });
         console.error(error);
     }
 });

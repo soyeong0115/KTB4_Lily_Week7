@@ -1,4 +1,5 @@
 import { request } from './api.js';
+import { showAlertModal } from './modal.js';
 
 const postTitleInput = document.querySelector('#title');
 const postContentInput = document.querySelector('#content');
@@ -44,7 +45,7 @@ postImageInput.addEventListener('change', async () => {
     } catch (error) {
         fileNameText.textContent = '파일을 선택해주세요.';
         postImageUrl = null;
-        alert('이미지 업로드에 실패했습니다.');
+        await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
         console.error(error);
     }
 });
