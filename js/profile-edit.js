@@ -3,7 +3,7 @@ import { request } from './api.js';
 const emailText = document.querySelector('#email');
 const nicknameInput = document.querySelector('#nickname');
 const profileImageInput = document.querySelector('#profileImageInput');
-const profileImagePreview = document.querySelector('.profile-edit-image');
+const profileImagePreview = document.querySelector('.profile-edit-photo');
 
 const helperText = document.querySelector('.profile-helper-text');
 
@@ -24,9 +24,6 @@ function showProfileImagePreview(imageUrl) {
     // 함수가 <img> 태그를 동적으로 생성해 넣는 방식
     if (!previewImage) {
         previewImage = document.createElement('img');
-        previewImage.style.width = '100%';
-        previewImage.style.height = '100%';
-        previewImage.style.objectFit = 'cover';
         profileImagePreview.prepend(previewImage);
     }
 

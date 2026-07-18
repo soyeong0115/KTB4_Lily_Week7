@@ -1,3 +1,21 @@
+:root {
+  --paper: #f6f3ea;
+  --paper-card: #fffdf7;
+  --paper-fold: #e6e1d2;
+  --ink: #1c1a15;
+  --ink-soft: #55503f;
+  --line: #1c1a15;
+
+  --tag-yellow: #f2e14d;
+  --tag-pink: #f3c6d3;
+  --tag-mint: #b9e3c6;
+  --tag-blue: #c3ddef;
+  --tag-lilac: #d9c9f0;
+
+  --font-display: "Playfair Display", "Apple SD Gothic Neo", serif;
+  --font-mono: "Space Mono", "Apple SD Gothic Neo", monospace;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,12 +26,12 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
-  background-color: #f4f5f7;
+  background-color: var(--paper);
 }
 
 body {
   font-family: "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
-  color: #111;
+  color: var(--ink);
 }
 
 h1,
@@ -34,29 +52,44 @@ textarea {
 .app {
   width: 100%;
   min-height: 100vh;
-  background-color: #f4f5f7;
+  background-color: var(--paper);
 }
 
 .header {
-  height: 82px;
-  border-bottom: 1px solid #333;
+  height: 92px;
+  border-bottom: 2px solid var(--line);
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 
   position: relative;
+  background-color: var(--paper);
 }
 
 .header-title {
   margin: 0;
 
-  font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  font-weight: 400;
-  font-size: 32px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 34px;
   line-height: 100%;
-  letter-spacing: 0;
+  letter-spacing: 1px;
   text-align: center;
+
+  color: var(--ink);
+  -webkit-text-stroke: 1px var(--ink);
+}
+
+.header-tagline {
+  margin: 4px 0 0;
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 .back-button {
@@ -72,93 +105,107 @@ textarea {
   line-height: 1;
 }
 
-/* 프로필 드롭다운 */
+/* 로고 드롭다운 메뉴 */
 
-.profile-menu-wrap {
+/* 오른쪽: 프로필 아바타 + 드롭다운 */
+
+.header-right {
   position: absolute;
-  right: calc(50% - 300px);
+  right: calc(50% - 558px);
   top: 20px;
 
-  width: 120px;
+  width: 38px;
+}
+
+.header-right summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.header-right summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-avatar {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background-color: var(--paper-fold);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar:hover {
+  box-shadow: 0 0 0 3px var(--tag-yellow);
+}
+
+.brand-dropdown {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
 
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.profile-menu-wrap summary {
-  list-style: none;
-}
-
-.profile-menu-wrap summary::-webkit-details-marker {
-  display: none;
-}
-
-.profile-icon {
-  width: 38px;
-  height: 38px;
-
-  border-radius: 50%;
-  border: none;
-  background-color: #fff;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.profile-icon:hover {
-  background-color: #e9e9e9;
-}
-
-.profile-dropdown {
-  width: 100px;
-  margin-top: 8px;
-  padding: 2px 0;
-
-  background-color: #d9d9d9;
-
-  text-align: center;
-
-  position: absolute;
-  left: 50%;
-  transform: translateX(-80%);
-}
-
-.profile-dropdown a {
+.brand-dropdown a {
   display: block;
-  width: 100%;
-  padding: 9px 0;
+  width: max-content;
+  min-width: 150px;
+  margin-top: -6px;
+  padding: 10px 22px;
 
-  color: #111;
-  font-size: 12px;
+  border: 1.5px solid var(--line);
+  background-color: var(--paper-card);
+  box-shadow: 2px 3px 0 0 rgba(28, 26, 21, 0.18);
+
+  color: var(--ink);
   text-decoration: none;
+  text-align: center;
+  white-space: nowrap;
+
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+
+  transition: transform 0.15s, background-color 0.15s;
 }
 
-.profile-dropdown a:hover {
-  background-color: #cfcfcf;
+.brand-dropdown a:first-child {
+  margin-top: 0;
+}
+
+.brand-dropdown a:nth-child(3n+1) { transform: rotate(-2deg); }
+.brand-dropdown a:nth-child(3n+2) { transform: rotate(1.5deg); }
+.brand-dropdown a:nth-child(3n+3) { transform: rotate(-1deg); }
+
+.brand-dropdown a:hover {
+  position: relative;
+  z-index: 1;
+
+  transform: rotate(0deg) scale(1.04);
+  background-color: var(--tag-yellow);
 }
 
 /* 공통 폼 */
-
-.main {
-  width: 420px;
-  margin: 0 auto;
-  padding-top: 110px;
-}
-
-.main.wide {
-  width: 560px;
-}
-
-.section-title {
-  text-align: center;
-  font-size: 26px;
-  margin-bottom: 36px;
-}
 
 .form-group {
   margin-bottom: 18px;
@@ -176,7 +223,7 @@ input,
 textarea {
   width: 100%;
 
-  border: 1px solid #333;
+  border: 1px solid var(--line);
   border-radius: 3px;
   background-color: transparent;
 
@@ -216,19 +263,27 @@ textarea {
   width: 100%;
   height: 40px;
 
-  border: 0;
+  border: 2px solid var(--line);
   border-radius: 4px;
-  background-color: #7f6aee;
+  background-color: var(--ink);
 
-  color: white;
+  color: var(--paper);
   font-weight: 700;
 
   cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: var(--tag-yellow);
+  color: var(--ink);
 }
 
 /* 비활성화 상태 */
 .primary-button:disabled {
-  background-color: #aca0eb;
+  border-color: var(--ink-soft);
+  background-color: var(--paper-fold);
+  color: var(--ink-soft);
   cursor: not-allowed;
 }
 
@@ -261,98 +316,116 @@ textarea {
 
 .login-main {
   width: 100%;
-  min-height: calc(100vh - 82px);
+  min-height: calc(100vh - 92px);
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding-top: 210px;
+  padding-top: 100px;
   padding-bottom: 120px;
 }
 
-.login-title {
-  margin: 0 0 34px;
-
-  text-align: center;
-  font-size: 26px;
-  font-weight: 700;
+.login-main .post-create-heading {
+  width: 360px;
+  text-align: left;
 }
 
 .login-form {
-  width: 320px;
+  position: relative;
+
+  width: 360px;
+  padding: 36px 36px 40px;
+
+  background-color: var(--paper-card);
+  border: 1.5px solid var(--line);
+  box-shadow: 5px 5px 0 0 rgba(28, 26, 21, 0.12);
+}
+
+.login-form::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 24px 24px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
 }
 
 .login-form .form-group {
-  margin-bottom: 16px;
-}
-
-.login-form input {
-  height: 28px;
-  padding: 0 10px;
-
-  font-size: 12px;
-}
-
-.login-form .primary-button {
-  height: 28px;
-  margin-top: 4px;
-
-  font-size: 12px;
-}
-
-.signup-link {
-  display: block;
-  width: fit-content;
-  margin: 10px auto 0;
-
-  color: #111;
-  text-decoration: none;
-  font-size: 12px;
+  margin-bottom: 18px;
 }
 
 /* 회원가입 페이지 */
 
 .signup-main {
   width: 100%;
-  min-height: calc(100vh - 82px);
+  min-height: calc(100vh - 92px);
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding: 86px 0 120px;
+  padding: 56px 0 120px;
 }
 
-.signup-title {
-  margin: 0 0 28px;
-
-  text-align: center;
-  font-size: 32px;
-  font-weight: 700;
+.signup-main .post-create-heading {
+  width: 420px;
+  text-align: left;
 }
 
 .signup-form {
-  width: 392px;
+  position: relative;
+
+  width: 420px;
+  padding: 36px 40px 40px;
+
+  background-color: var(--paper-card);
+  border: 1.5px solid var(--line);
+  box-shadow: 5px 5px 0 0 rgba(28, 26, 21, 0.12);
+}
+
+.signup-form::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 26px 26px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
 }
 
 .signup-profile-area {
   width: 100%;
   margin-bottom: 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .signup-profile-area .profile-image-label {
   display: block;
-  margin-bottom: 8px;
-
-  text-align: left;
-  font-size: 15px;
-  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .signup-profile-area .helper-text {
   margin: 0 0 12px;
-  text-align: left;
+  text-align: center;
 }
 
 .signup-profile-area .profile-image-input {
@@ -360,12 +433,12 @@ textarea {
 }
 
 .signup-profile-area .profile-image {
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
+  width: 130px;
+  height: 130px;
 
   border-radius: 50%;
-  background-color: #c4c4c4;
+  border: 1.5px dashed var(--line);
+  background-color: var(--paper-fold);
 
   display: flex;
   align-items: center;
@@ -373,53 +446,37 @@ textarea {
 
   font-size: 28px;
   font-weight: 300;
-  color: #111;
+  color: var(--ink-soft);
 
   cursor: pointer;
   overflow: hidden;
+  transition: background-color 0.15s;
 }
 
-.signup-main .form-group {
-  margin-bottom: 12px;
+.signup-profile-area .profile-image:hover {
+  background-color: var(--tag-yellow);
 }
 
-.signup-main .form-group label {
+.signup-form .form-group {
+  margin-bottom: 16px;
+}
+
+.signup-form .form-group label {
+  display: block;
   margin-bottom: 8px;
-
-  font-size: 15px;
-  font-weight: 700;
 }
 
-.signup-main input {
+.signup-form input {
   height: 36px;
   padding: 0 14px;
-
-  border: 1px solid #111;
-  border-radius: 3px;
-  background-color: transparent;
-
   font-size: 14px;
 }
 
-.signup-main .helper-text {
-  margin-top: 6px;
-  color: #ff0000;
-  font-size: 13px;
-}
-
-.signup-main .primary-button {
+.signup-form .primary-button {
   height: 40px;
   margin-top: 8px;
 
-  border-radius: 4px;
-  background-color: #7f6aee;
-
   font-size: 14px;
-}
-
-.signup-main .primary-button:disabled {
-  background-color: #aca0eb;
-  cursor: not-allowed;
 }
 
 .login-link-button {
@@ -433,7 +490,7 @@ textarea {
   border: none;
   background-color: transparent;
 
-  color: #111;
+  color: var(--ink);
   text-decoration: none;
   font-size: 14px;
   font-weight: 400;
@@ -443,172 +500,438 @@ textarea {
 
 .posts-main {
   width: 100%;
-  min-height: calc(100vh - 82px);
+  min-height: calc(100vh - 92px);
 
   padding-top: 40px;
   padding-bottom: 80px;
 }
 
-.posts-intro {
-  position: relative;
-
-  width: 592px;
+.posts-layout {
+  max-width: 1180px;
   margin: 0 auto;
+  padding: 0 32px;
 
-  text-align: center;
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
 }
 
-.posts-intro h2 {
+/* 사이드바 */
+
+.posts-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+
+  position: sticky;
+  top: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-box {
+  border: 1.5px solid var(--line);
+  background-color: var(--paper-card);
+  padding: 16px 14px 14px;
+  box-shadow: 3px 3px 0 0 rgba(28, 26, 21, 0.1);
+}
+
+.sidebar-tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+
+  border: 1px solid var(--line);
+  transform: rotate(-1.5deg);
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sidebar-info p {
   margin: 0;
 
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 1.35;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-soft);
 }
 
-.posts-intro h2 strong {
+.sidebar-info strong {
+  color: var(--ink);
+}
+
+.sidebar-auth-links {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+
+  margin: -8px 0;
+}
+
+.pastel-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+
+  height: 38px;
+
+  border: 1.5px solid var(--line);
+  border-radius: 0;
+
+  color: var(--ink);
+  text-decoration: none;
+
+  font-family: var(--font-mono);
+  font-size: 13px;
   font-weight: 700;
+  letter-spacing: 0.3px;
+
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.pastel-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 2px 3px 0 0 rgba(28, 26, 21, 0.15);
+}
+
+.pastel-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.pastel-blue {
+  background-color: var(--tag-blue);
+}
+
+.pastel-pink {
+  background-color: var(--tag-pink);
 }
 
 .write-button {
-  position: absolute;
-  right: 0;
-  top: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 
-  width: 138px;
-  height: 39px;
+  width: 100%;
+  height: 46px;
 
-  border: none;
-  border-radius: 18px;
-  background-color: #aca0eb;
+  border: 2px solid var(--line);
+  background-color: var(--ink);
 
-  color: white;
+  color: var(--paper);
   text-decoration: none;
+  text-transform: uppercase;
+
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.write-button:hover {
+  background-color: var(--tag-yellow);
+  color: var(--ink);
+}
+
+.write-button:active {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+.contributor-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.contributor-avatar {
+  aspect-ratio: 1;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 15px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 700;
-
-  cursor: pointer;
+  color: var(--ink);
 }
 
-.write-button:hover {
-  background-color: #7f6aee;
+.contributor-empty {
+  grid-column: 1 / -1;
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
 }
 
-.write-button:active {
-  background-color: #aca0eb;
-}
+/* 게시글 그리드 */
 
 .post-list {
-  width: 592px;
-  margin: 86px auto 0;
+  flex: 1;
+  min-width: 0;
 
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  column-count: 3;
+  column-gap: 24px;
 }
 
 .post-card {
-  width: 592px;
-  height: 169px;
+  position: relative;
+  display: block;
 
-  background-color: #ffffff;
-  border-radius: 10px;
-  overflow: hidden;
+  break-inside: avoid;
+  margin-bottom: 24px;
 
-  box-shadow: 3px 4px 4px 0px #cccccc40;
+  background-color: var(--paper-card);
+  border: 1.5px solid var(--line);
+  box-shadow: 4px 4px 0 0 rgba(28, 26, 21, 0.12);
 
-  color: #111;
+  color: var(--ink);
   text-decoration: none;
+}
 
-  display: flex;
-  flex-direction: column;
+.post-card::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 22px 22px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
+}
+
+.post-card-tag {
+  display: -webkit-box;
+  margin: 14px 14px 0;
+  padding: 8px 12px;
+
+  border: 1px solid var(--line);
+  transform: rotate(-1deg);
+
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.tag-yellow { background-color: var(--tag-yellow); }
+.tag-pink { background-color: var(--tag-pink); }
+.tag-mint { background-color: var(--tag-mint); }
+.tag-blue { background-color: var(--tag-blue); }
+.tag-lilac { background-color: var(--tag-lilac); }
+
+.post-card-graphic {
+  margin: 16px 14px 0;
+  border: 1px solid var(--line);
+}
+
+.graphic-a { height: 110px; }
+.graphic-b { height: 160px; }
+.graphic-c { height: 90px; }
+.graphic-d { height: 200px; }
+
+.pattern-1 {
+  background-image: repeating-linear-gradient(45deg, var(--paper-fold) 0 8px, var(--paper-card) 8px 16px);
+}
+
+.pattern-2 {
+  background-color: var(--paper-fold);
+  background-image: radial-gradient(circle at center, var(--ink-soft) 0 2px, transparent 2.5px);
+  background-size: 16px 16px;
+}
+
+.pattern-3 {
+  background-color: var(--paper-fold);
+  background-image: repeating-linear-gradient(-45deg, var(--ink-soft) 0 1.5px, transparent 1.5px 14px);
+}
+
+.pattern-4 {
+  background-image:
+    linear-gradient(135deg, var(--paper-fold) 25%, transparent 25% 50%, var(--paper-fold) 50% 75%, transparent 75%);
+  background-color: var(--paper-card);
+  background-size: 22px 22px;
+}
+
+.pattern-5 {
+  background-color: var(--paper-fold);
+  background-image: repeating-linear-gradient(90deg, var(--ink-soft) 0 1px, transparent 1px 10px);
 }
 
 .post-card-content {
-  flex: 1;
-  padding: 22px 24px 18px;
-}
-
-.post-card-content h3 {
-  margin: 0 0 18px;
-
-  font-size: 24px;
-  font-weight: 700;
+  padding: 14px;
 }
 
 .post-info-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .post-stats-text {
   margin: 0;
 
-  font-size: 14px;
-  color: #111;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2px;
+  color: var(--ink-soft);
 }
 
 .post-info-row time {
-  font-size: 14px;
-  color: #111;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
 }
 
 .post-author {
-  height: 62px;
-  padding: 0 24px;
+  height: auto;
+  padding: 10px 14px 14px;
 
-  border-top: 1px solid #dddddd;
+  border-top: 1px solid var(--paper-fold);
 
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .author-image {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
 
+  border: 1px solid var(--line);
   border-radius: 50%;
-  background-color: #d9d9d9;
+  background-color: var(--tag-blue);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
 
   flex-shrink: 0;
 }
 
 .post-author strong {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .posts-layout {
+    flex-direction: column;
+  }
+
+  .posts-sidebar {
+    width: 100%;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-box,
+  .write-button {
+    flex: 1 1 220px;
+  }
+
+  .post-list {
+    column-count: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .post-list {
+    column-count: 1;
+  }
 }
 
 /* 게시글 작성 페이지 */
 
 .post-create-main {
   width: 100%;
-  min-height: calc(100vh - 82px);
+  min-height: calc(100vh - 92px);
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding-top: 28px;
+  padding-top: 40px;
   padding-bottom: 120px;
 }
 
-.post-create-title {
-  margin: 0 0 56px;
+.post-create-heading {
+  width: 592px;
+  margin: 0 auto 18px;
+}
 
-  text-align: center;
-  font-size: 24px;
-  font-weight: 700;
+.post-create-heading .sidebar-tag {
+  margin-bottom: 10px;
+}
+
+.post-create-title {
+  margin: 0;
+
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--ink);
 }
 
 .post-create-form {
+  position: relative;
+
   width: 592px;
+  padding: 36px 40px 40px;
+
+  background-color: var(--paper-card);
+  border: 1.5px solid var(--line);
+  box-shadow: 5px 5px 0 0 rgba(28, 26, 21, 0.12);
+}
+
+.post-create-form::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 26px 26px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
 }
 
 .post-form-group {
@@ -620,8 +943,12 @@ textarea {
   display: block;
   margin-bottom: 8px;
 
-  font-size: 15px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 .post-form-group input {
@@ -631,8 +958,8 @@ textarea {
   padding: 0 14px;
 
   border: none;
-  border-top: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   border-radius: 0;
 
   background-color: transparent;
@@ -642,7 +969,7 @@ textarea {
 
 .post-form-group input::placeholder,
 .post-form-group textarea::placeholder {
-  color: #8f8f8f;
+  color: var(--ink-soft);
 }
 
 .post-form-group textarea {
@@ -652,8 +979,8 @@ textarea {
   padding: 20px 14px;
 
   border: none;
-  border-top: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   border-radius: 0;
 
   background-color: transparent;
@@ -687,17 +1014,22 @@ textarea {
   height: 30px;
   padding: 0 12px;
 
-  border: 1px solid #111;
+  border: 1px solid var(--line);
   border-radius: 3px;
-  background-color: #D9D9D9;
+  background-color: var(--paper-fold);
 
   font-size: 13px;
   cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.image-group .file-button:hover {
+  background-color: var(--tag-yellow);
 }
 
 .image-group span {
   font-size: 13px;
-  color: #111;
+  color: var(--ink-soft);
 }
 
 .post-submit-button {
@@ -707,44 +1039,70 @@ textarea {
   height: 36px;
   margin: 30px auto 0;
 
-  border: none;
+  border: 2px solid var(--line);
   border-radius: 4px;
 
-  background-color: #7f6aee;
+  background-color: var(--ink);
 
-  color: white;
+  color: var(--paper);
   font-size: 14px;
   font-weight: 700;
 
   cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .post-submit-button:disabled {
-  background-color: #aca0eb;
+  border-color: var(--ink-soft);
+  background-color: var(--paper-fold);
+  color: var(--ink-soft);
 }
 
 .post-create-form:has(#title:valid):has(#content:valid) .post-submit-button {
-  background-color: #7f6aee;
+  background-color: var(--ink);
 }
 
 .post-create-form:has(#title:valid):has(#content:valid) .post-submit-button:hover {
-  background-color: #7f6aee;
+  background-color: var(--tag-yellow);
+  color: var(--ink);
 }
 
 /* 게시글 상세 페이지 */
 
 .detail {
+  position: relative;
+
   width: 592px;
-  margin: 0 auto;
-  padding-top: 28px;
-  padding-bottom: 100px;
+  margin: 44px auto 64px;
+  padding: 32px 36px 18px;
+
+  background-color: var(--paper-card);
+  border: 1.5px solid var(--line);
+  box-shadow: 5px 5px 0 0 rgba(28, 26, 21, 0.12);
+}
+
+.detail::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 28px 28px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
 }
 
 /* 게시글 상단 */
 .detail-top {
   width: 100%;
   padding: 0 0 28px;
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1.5px solid var(--line);
 
   display: flex;
   justify-content: space-between;
@@ -754,7 +1112,8 @@ textarea {
 .detail-info h2 {
   margin-bottom: 22px;
 
-  font-size: 24px;
+  font-family: var(--font-display);
+  font-size: 26px;
   font-weight: 700;
 }
 
@@ -767,12 +1126,13 @@ textarea {
 
   padding-left: 48px;
 
-  font-size: 14px;
-  color: #111;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
 }
 
 .detail-meta::before {
-  content: "";
+  content: attr(data-initial);
 
   position: absolute;
   left: 0;
@@ -782,12 +1142,23 @@ textarea {
   width: 36px;
   height: 36px;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--line);
   border-radius: 50%;
-  background-color: #d9d9d9;
+  background-color: var(--tag-blue);
+
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .detail-author {
   font-weight: 700;
+  color: var(--ink);
 }
 
 /* 게시글 수정/삭제 버튼 위치 */
@@ -806,11 +1177,11 @@ textarea {
   height: 30px;
   padding: 0 12px;
 
-  border: 1px solid #7f6aee;
+  border: 1.5px solid var(--line);
   border-radius: 8px;
   background-color: transparent;
 
-  color: #111;
+  color: var(--ink);
   font-size: 14px;
   text-decoration: none;
 
@@ -819,10 +1190,11 @@ textarea {
   justify-content: center;
 
   cursor: pointer;
+  transition: background-color 0.15s;
 }
 
 .small-button:hover {
-  background-color: #f0edff;
+  background-color: var(--tag-yellow);
 }
 
 /* 게시글 이미지 */
@@ -831,14 +1203,18 @@ textarea {
   height: 306px;
   margin: 24px 0;
 
-  background-color: #d9d9d9;
+  border: 1px solid var(--line);
+  background-color: var(--paper-fold);
+  background-image: repeating-linear-gradient(45deg, var(--paper-fold) 0 8px, var(--paper-card) 8px 16px);
+
+  overflow: hidden;
 }
 
 /* 게시글 본문 */
 .post-content {
   font-size: 16px;
   line-height: 1.65;
-  color: #111;
+  color: var(--ink);
 }
 
 /* 좋아요 / 조회수 / 댓글 */
@@ -849,18 +1225,18 @@ textarea {
 
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
 
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1.5px solid var(--line);
 }
 
 .stat-box {
   width: 116px;
   height: 77px;
 
-  border: none;
-  border-radius: 16px;
-  background-color: #d9d9d9;
+  border: 1.5px solid var(--line);
+  border-radius: 0;
+  background-color: var(--paper-card);
 
   display: flex;
   flex-direction: column;
@@ -871,6 +1247,7 @@ textarea {
 }
 
 .stat-box strong {
+  font-family: var(--font-mono);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
@@ -879,43 +1256,52 @@ textarea {
 .stat-box span {
   margin-top: 4px;
 
-  font-size: 15px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 700;
+  color: var(--ink-soft);
 }
 
 #post-like-button {
-  background-color: #d9d9d9;
+  background-color: var(--paper-card);
   cursor: pointer;
 }
 
 /* 좋아요 누른 상태 */
 #post-like-button.is-liked {
-  background-color: #aca0eb;
+  background-color: var(--tag-yellow);
 }
 
 /* 댓글 작성 영역 */
 .comment-form {
+  position: relative;
+
   width: 100%;
-  height: 180px;
   margin-top: 24px;
 
-  border-radius: 12px;
-  background-color: #ffffff;
+  border: 1.5px solid var(--line);
+  background-color: var(--paper-card);
+}
 
-  overflow: hidden;
+.comment-form-tag {
+  position: absolute;
+  top: -13px;
+  left: 18px;
+  margin-bottom: 0;
 }
 
 .comment-form textarea {
   width: 100%;
-  height: 120px;
+  height: 96px;
 
-  padding: 34px 24px 16px;
+  padding: 28px 22px 0;
 
   border: none;
   border-radius: 0;
   background-color: transparent;
 
   font-size: 15px;
+  line-height: 1.5;
 
   resize: none;
 }
@@ -926,14 +1312,13 @@ textarea {
 }
 
 .comment-form textarea::placeholder {
-  color: #111;
+  color: var(--ink-soft);
 }
 
 .comment-form-bottom {
-  height: 60px;
-  padding: 10px 8px;
+  padding: 16px 20px;
 
-  border-top: 1px solid #dddddd;
+  border-top: 1.5px solid var(--line);
 
   display: flex;
   justify-content: flex-end;
@@ -944,58 +1329,79 @@ textarea {
   width: 138px;
   height: 39px;
 
-  border: none;
-  border-radius: 18px;
+  border: 2px solid var(--line);
+  border-radius: 0;
 
-  background-color: #aca0eb;
+  background-color: var(--ink);
 
-  color: white;
+  color: var(--paper);
   font-size: 15px;
   font-weight: 700;
 
   cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .comment-submit:hover {
-  background-color: #7f6aee;
+  background-color: var(--tag-yellow);
+  color: var(--ink);
 }
 
 .comment-submit:active {
-  background-color: #aca0eb;
+  background-color: var(--ink);
+  color: var(--paper);
 }
 
 /* 댓글 목록 */
 .comment-list {
-  margin-top: 22px;
+  margin-top: 32px;
 }
 
 .comment-item {
-  position: relative;
+  padding: 0 0 20px 48px;
+  margin-bottom: 20px;
 
-  padding: 0 0 24px 48px;
-  margin-bottom: 22px;
+  border-bottom: 1px solid var(--paper-fold);
+}
 
+.comment-item:last-child {
+  margin-bottom: 0;
   border-bottom: none;
 }
 
-.comment-item::before {
-  content: "";
+.comment-item-top {
+  position: relative;
+
+  min-height: 36px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment-item-top::before {
+  content: attr(data-initial);
 
   position: absolute;
-  left: 0;
-  top: 0;
+  left: -48px;
+  top: 50%;
+  transform: translateY(-50%);
 
   width: 36px;
   height: 36px;
 
-  border-radius: 50%;
-  background-color: #d9d9d9;
-}
-
-.comment-item-top {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background-color: var(--tag-mint);
+
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .comment-info {
@@ -1010,70 +1416,140 @@ textarea {
 }
 
 .comment-info time {
-  font-size: 14px;
-  color: #111;
-}
-
-.comment-button-group {
-  margin-top: -2px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
 }
 
 .comment-item p {
   margin-top: 14px;
 
   font-size: 15px;
-  color: #111;
-}
-
-.comment-submit {
-  background-color: #7f6aee;
-  color: white;
-  cursor: pointer;
+  color: var(--ink);
 }
 
 /* 입력 없을 때 */
 .comment-submit:disabled {
-  background-color: #aca0eb;
+  border-color: var(--ink-soft);
+  background-color: var(--paper-fold);
+  color: var(--ink-soft);
   cursor: not-allowed;
+}
+
+/* 비밀번호 수정 */
+
+.password-edit-main {
+  width: 100%;
+  min-height: calc(100vh - 92px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding-top: 56px;
+  padding-bottom: 120px;
+}
+
+.password-edit-main .post-create-heading {
+  width: 420px;
+  text-align: left;
+}
+
+.password-edit-form {
+  position: relative;
+
+  width: 420px;
+  padding: 40px 40px 44px;
+
+  background-color: var(--paper-card);
+  border: 1.5px solid var(--line);
+  box-shadow: 5px 5px 0 0 rgba(28, 26, 21, 0.12);
+}
+
+.password-edit-form::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 26px 26px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
+}
+
+.password-edit-form .form-group {
+  margin-bottom: 20px;
+}
+
+.password-edit-form .primary-button {
+  margin-top: 8px;
 }
 
 /* 회원정보 수정 */
 
 .profile-edit-main {
   width: 100%;
-  min-height: calc(100vh - 82px);
+  min-height: calc(100vh - 92px);
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding-top: 92px;
+  padding-top: 56px;
   padding-bottom: 120px;
 }
 
-.profile-edit-title {
-  margin: 0 0 24px;
-
-  text-align: center;
-  font-size: 28px;
-  font-weight: 700;
+.profile-edit-main .post-create-heading {
+  width: 440px;
+  text-align: left;
 }
 
 .profile-edit-form {
-  width: 392px;
+  position: relative;
+
+  width: 440px;
+  padding: 40px 44px 44px;
+
+  background-color: var(--paper-card);
+  border: 1.5px solid var(--line);
+  box-shadow: 5px 5px 0 0 rgba(28, 26, 21, 0.12);
+}
+
+.profile-edit-form::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 26px 26px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
 }
 
 .profile-edit-image-area {
   width: 100%;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .profile-edit-label {
   display: block;
-  margin-bottom: 18px;
-
-  font-size: 14px;
-  font-weight: 700;
+  margin-bottom: 14px;
 }
 
 .profile-image-input {
@@ -1084,70 +1560,79 @@ textarea {
   position: relative;
 
   width: 150px;
-  height: 150px;
-  margin: 0 auto;
+  height: 180px;
 
-  border-radius: 50%;
-  background-color: #bfbfbf;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: #ffffff;
+  border: 1px solid var(--line);
+  box-shadow: 3px 4px 0 0 rgba(28, 26, 21, 0.15);
+  transform: rotate(-3deg);
 
   cursor: pointer;
   overflow: hidden;
 }
 
-.profile-edit-image img {
+.profile-edit-photo {
   position: absolute;
-  inset: 0;
-  z-index: 0;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 34px;
+  z-index: 1;
+
+  overflow: hidden;
+  background-color: var(--paper-fold);
+  background-image: repeating-linear-gradient(45deg, var(--paper-fold) 0 6px, var(--paper-card) 6px 12px);
+}
+
+.profile-edit-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profile-edit-image:hover span {
-  background-color: rgba(0, 0, 0, 0.55);
+  opacity: 1;
 }
 
 .profile-edit-image span {
-  position: relative;
-  z-index: 1;
-
-  min-width: 54px;
-  height: 28px;
-  padding: 0 12px;
-
-  border: 2px solid #ffffff;
-  border-radius: 999px;
-  background-color: rgba(0, 0, 0, 0.45);
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 34px;
+  z-index: 2;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  background-color: rgba(28, 26, 21, 0.55);
+
   color: #ffffff;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 700;
-  line-height: 1;
+
+  opacity: 0;
+  transition: opacity 0.15s;
 }
 
 .profile-edit-field {
   width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .profile-edit-field label {
   display: block;
   margin-bottom: 8px;
-
-  font-size: 15px;
-  font-weight: 700;
 }
 
 .profile-edit-field p {
   margin-bottom: 14px;
 
   font-size: 14px;
-  color: #111;
+  color: var(--ink);
 }
 
 .profile-edit-field input {
@@ -1156,7 +1641,7 @@ textarea {
 
   padding: 0 14px;
 
-  border: 1px solid #111;
+  border: 1px solid var(--line);
   border-radius: 3px;
   background-color: transparent;
 
@@ -1183,15 +1668,21 @@ textarea {
   height: 40px;
   margin-top: 6px;
 
-  border: none;
+  border: 2px solid var(--line);
   border-radius: 4px;
-  background-color: #7f6aee;
+  background-color: var(--ink);
 
-  color: white;
+  color: var(--paper);
   font-size: 14px;
   font-weight: 700;
 
   cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.profile-submit-button:hover {
+  background-color: var(--tag-yellow);
+  color: var(--ink);
 }
 
 .profile-withdraw-button {
@@ -1216,10 +1707,11 @@ textarea {
   height: 54px;
   margin: 44px auto 0;
 
+  border: 2px solid var(--line);
   border-radius: 30px;
-  background-color: #7f6aee;
+  background-color: var(--ink);
 
-  color: white;
+  color: var(--paper);
   font-size: 18px;
   font-weight: 400;
 
@@ -1238,10 +1730,11 @@ textarea {
   height: 54px;
   margin: 44px auto 0;
 
+  border: 2px solid var(--line);
   border-radius: 30px;
-  background-color: #7f6aee;
+  background-color: var(--ink);
 
-  color: white;
+  color: var(--paper);
   font-size: 18px;
   font-weight: 400;
 
@@ -1257,7 +1750,7 @@ textarea {
 
 .modal-backdrop {
   min-height: 100vh;
-  background-color: #a9a9a9;
+  background-color: rgba(28, 26, 21, 0.55);
 
   display: flex;
   align-items: center;
@@ -1268,20 +1761,24 @@ textarea {
   width: 420px;
   padding: 48px 36px;
 
-  border-radius: 10px;
-  background-color: white;
+  border: 1.5px solid var(--line);
+  background-color: var(--paper-card);
+  box-shadow: 6px 6px 0 0 rgba(28, 26, 21, 0.18);
 
   text-align: center;
 }
 
 .modal h1 {
   margin: 0 0 28px;
+
+  font-family: var(--font-display);
   font-size: 24px;
 }
 
 .modal p {
   margin-bottom: 28px;
   font-size: 16px;
+  color: var(--ink-soft);
 }
 
 .modal-buttons {
@@ -1293,17 +1790,52 @@ textarea {
   flex: 1;
   height: 44px;
 
-  border: 0;
-  border-radius: 8px;
+  border: 2px solid var(--line);
+  border-radius: 0;
 
-  color: white;
   font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .cancel-button {
-  background-color: #222;
+  background-color: var(--paper-fold);
+  color: var(--ink);
+}
+
+.cancel-button:hover {
+  background-color: var(--paper-card);
 }
 
 .confirm-button {
-  background-color: #b69af5;
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+.confirm-button:hover {
+  background-color: var(--tag-yellow);
+  color: var(--ink);
+}
+
+/* 제목 하이라이터 강조 */
+
+.title-highlight {
+  padding: 0 3px;
+
+  background-image: linear-gradient(180deg, transparent 62%, var(--tag-yellow) 62%);
+  background-repeat: no-repeat;
+}
+
+.post-create-heading:has(.tag-pink) .title-highlight {
+  background-image: linear-gradient(180deg, transparent 62%, var(--tag-pink) 62%);
+}
+
+.post-create-heading:has(.tag-blue) .title-highlight {
+  background-image: linear-gradient(180deg, transparent 62%, var(--tag-blue) 62%);
+}
+
+.post-create-heading:has(.tag-mint) .title-highlight {
+  background-image: linear-gradient(180deg, transparent 62%, var(--tag-mint) 62%);
 }

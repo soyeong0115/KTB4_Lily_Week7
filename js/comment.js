@@ -130,7 +130,7 @@ export function renderComments(comments) {
 
         return `
             <article class="comment-item" data-comment-id="${comment.commentId}">
-                <div class="comment-item-top">
+                <div class="comment-item-top" data-initial="${comment.writer.nickname.charAt(0)}">
                     <div class="comment-info">
                         <strong>${comment.writer.nickname}</strong>
                         <time>${comment.createdAt}</time>

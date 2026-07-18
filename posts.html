@@ -4,39 +4,56 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>게시글 목록조회</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="app">
     <header class="header">
-      <h1 class="header-title">아무 말 대잔치</h1>
+      <h1 class="header-title">BABBLE.</h1>
+      <p class="header-tagline">Talk &amp; Chatter Zine</p>
 
-      <details class="profile-menu-wrap">
-        <summary class="profile-icon">🐧</summary>
-
-        <nav class="profile-dropdown">
-            <a href="./profile-edit.html">회원정보수정</a>
-            <a href="./password-edit.html">비밀번호수정</a>
-            <a href="./index.html">로그아웃</a>
-        </nav>
+      <details class="header-right">
+        <summary class="profile-avatar">🐧</summary>
+        <nav class="brand-dropdown"></nav>
       </details>
     </header>
 
     <main class="posts-main">
-      <section class="posts-intro">
-        <h2>
-          안녕하세요,<br />
-          아무 말 대잔치 <strong>게시판</strong> 입니다.
-        </h2>
+      <div class="posts-layout">
+        <aside class="posts-sidebar">
+          <div class="sidebar-box sidebar-info">
+            <span class="sidebar-tag tag-yellow">Info</span>
+            <p>
+              안녕하세요,<br />
+              <strong>BABBLE.</strong> 게시판입니다.<br />
+              머릿속에 떠오른 아무 말이나 편하게 남겨보세요.
+            </p>
+          </div>
 
-        <a class="write-button" href="./post-create.html">게시글 작성</a>
-      </section>
+          <div class="sidebar-auth-links">
+            <a class="pastel-button pastel-blue" href="./index.html">로그인</a>
+            <a class="pastel-button pastel-pink" href="./signup.html">회원가입</a>
+          </div>
 
-      <section class="post-list"></section>
+          <a class="write-button" href="./post-create.html">✎ 게시글 작성</a>
+
+          <div class="sidebar-box sidebar-contributors">
+            <span class="sidebar-tag tag-mint">Contributors</span>
+            <ul class="contributor-grid"></ul>
+          </div>
+        </aside>
+
+        <section class="post-list"></section>
+      </div>
+
       <div class="post-list-sentinel"></div>
     </main>
   </div>
 
+  <script type="module" src="./js/header-menu.js"></script>
   <script type="module" src="./js/posts.js"></script>
 </body>
 </html>
