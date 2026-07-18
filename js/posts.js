@@ -2,8 +2,16 @@ import { request } from './api.js';
 
 const POST_PAGE_SIZE = 10;
 
+const TAG_COLORS = ['tag-yellow', 'tag-pink', 'tag-mint', 'tag-blue', 'tag-lilac'];
+const GRAPHIC_HEIGHTS = ['graphic-a', 'graphic-b', 'graphic-c', 'graphic-d'];
+const GRAPHIC_PATTERNS = ['pattern-1', 'pattern-2', 'pattern-3', 'pattern-4', 'pattern-5'];
+const CONTRIBUTOR_LIMIT = 8;
+
 const postList = document.querySelector('.post-list');
 const postListSentinel = document.querySelector('.post-list-sentinel');
+const contributorGrid = document.querySelector('.contributor-grid');
+
+const seenContributors = new Set();
 
 let currentPage = 0;
 let hasNext = true;
@@ -46,30 +54,62 @@ function renderPosts(posts, isFirstPage) {
     }
 
     const postsHtml = posts.map((post) => {
+        const tagColor = TAG_COLORS[post.postId % TAG_COLORS.length];
+        const graphicHeight = GRAPHIC_HEIGHTS[post.postId % GRAPHIC_HEIGHTS.length];
+        const graphicPattern = GRAPHIC_PATTERNS[post.postId % GRAPHIC_PATTERNS.length];
+        const nickname = post.writer.nickname;
+
         return `
             <a class="post-card" href="./post-detail.html?postId=${post.postId}">
-                <div class="post-card-content">
-                    <h3>${post.titlePreview}</h3>
+                <span class="post-card-tag ${tagColor}">${post.titlePreview}</span>
+                <div class="post-card-graphic ${graphicHeight} ${graphicPattern}"></div>
 
+                <div class="post-card-content">
                     <div class="post-info-row">
                         <p class="post-stats-text">
-                            좋아요 ${post.likeCount}&nbsp;&nbsp;
-                            댓글 ${post.commentCount}&nbsp;&nbsp;
-                            조회수 ${post.viewCount}
+                            좋아요 ${post.likeCount} · 댓글 ${post.commentCount} · 조회수 ${post.viewCount}
                         </p>
                         <time>${post.createdAt}</time>
                     </div>
                 </div>
 
                 <div class="post-author">
-                    <div class="author-image"></div>
-                    <strong>${post.writer.nickname}</strong>
+                    <div class="author-image">${nickname.charAt(0)}</div>
+                    <strong>${nickname}</strong>
                 </div>
             </a>
         `;
     }).join('');
 
     postList.insertAdjacentHTML('beforeend', postsHtml);
+    renderContributors(posts);
+}
+
+function renderContributors(posts) {
+    if (!contributorGrid) {
+        return;
+    }
+
+    const newContributors = [];
+
+    posts.forEach((post) => {
+        const nickname = post.writer.nickname;
+
+        if (!seenContributors.has(nickname) && seenContributors.size + newContributors.length < CONTRIBUTOR_LIMIT) {
+            seenContributors.add(nickname);
+            newContributors.push(nickname);
+        }
+    });
+
+    if (newContributors.length === 0) {
+        return;
+    }
+
+    const contributorsHtml = newContributors
+        .map((nickname) => `<li class="contributor-avatar" title="${nickname}">${nickname.charAt(0)}</li>`)
+        .join('');
+
+    contributorGrid.insertAdjacentHTML('beforeend', contributorsHtml);
 }
 
 const postListObserver = new IntersectionObserver((entries) => {
