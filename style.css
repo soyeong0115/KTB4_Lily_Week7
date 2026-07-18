@@ -11,6 +11,7 @@
   --tag-mint: #b9e3c6;
   --tag-blue: #c3ddef;
   --tag-lilac: #d9c9f0;
+  --tag-red: #f0b3a8;
 
   --font-display: "Playfair Display", "Apple SD Gothic Neo", serif;
   --font-mono: "Space Mono", "Apple SD Gothic Neo", monospace;
@@ -746,6 +747,7 @@ textarea {
 .tag-mint { background-color: var(--tag-mint); }
 .tag-blue { background-color: var(--tag-blue); }
 .tag-lilac { background-color: var(--tag-lilac); }
+.tag-red { background-color: var(--tag-red); }
 
 .post-card-graphic {
   margin: 16px 14px 0;
@@ -1748,9 +1750,29 @@ textarea {
 
 /* 모달 */
 
+@keyframes modal-backdrop-in {
+  from { background-color: rgba(28, 26, 21, 0); }
+  to { background-color: rgba(28, 26, 21, 0.55); }
+}
+
+@keyframes modal-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .modal-backdrop {
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
   background-color: rgba(28, 26, 21, 0.55);
+  animation: modal-backdrop-in 0.15s ease-out;
 
   display: flex;
   align-items: center;
@@ -1758,42 +1780,71 @@ textarea {
 }
 
 .modal {
+  position: relative;
+
   width: 420px;
-  padding: 48px 36px;
+  max-width: calc(100vw - 32px);
+  padding: 40px 36px;
 
   border: 1.5px solid var(--line);
   background-color: var(--paper-card);
   box-shadow: 6px 6px 0 0 rgba(28, 26, 21, 0.18);
+  animation: modal-pop-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 
   text-align: center;
 }
 
+.modal::after {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 0;
+  height: 0;
+
+  border-style: solid;
+  border-width: 0 26px 26px 0;
+  border-color: transparent var(--paper-fold) transparent transparent;
+
+  filter: drop-shadow(-1px 1px 1px rgba(28, 26, 21, 0.25));
+}
+
+.modal-tag {
+  display: inline-block;
+  margin: 0 0 16px;
+
+  transform: rotate(-2deg);
+}
+
 .modal h1 {
-  margin: 0 0 28px;
+  margin: 0 0 14px;
 
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .modal p {
-  margin-bottom: 28px;
-  font-size: 16px;
+  margin-bottom: 32px;
+  font-size: 15px;
+  line-height: 1.5;
   color: var(--ink-soft);
 }
 
 .modal-buttons {
   display: flex;
-  gap: 18px;
+  gap: 12px;
 }
 
 .modal-buttons button {
   flex: 1;
   height: 44px;
 
-  border: 2px solid var(--line);
+  border: 1.5px solid var(--line);
   border-radius: 0;
 
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
 
   cursor: pointer;
