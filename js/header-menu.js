@@ -1,4 +1,4 @@
-import { request } from './api.js';
+import { request, API_BASE_URL } from './api.js';
 
 const TAG_COLORS = ['tag-yellow', 'tag-pink', 'tag-mint', 'tag-blue', 'tag-lilac'];
 
@@ -29,7 +29,7 @@ async function renderProfileAvatar() {
     const randomTagColor = TAG_COLORS[Math.floor(Math.random() * TAG_COLORS.length)];
 
     const avatarContent = profileImage
-        ? `<img src="http://localhost:8080${profileImage}" alt="" />`
+        ? `<img src="${API_BASE_URL}${profileImage}" alt="" />`
         : '';
 
     headerRight.innerHTML = `

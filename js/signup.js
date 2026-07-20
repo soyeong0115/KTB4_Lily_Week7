@@ -1,4 +1,4 @@
-import { request } from './api.js';
+import { request, API_BASE_URL } from './api.js';
 import { showAlertModal } from './modal.js';
 
 const emailInput = document.querySelector('#email');
@@ -24,7 +24,7 @@ function showProfileImagePreview(imageUrl) {
         profileImagePreview.appendChild(previewImage);
     }
 
-    previewImage.src = `http://localhost:8080${imageUrl}`;
+    previewImage.src = `${API_BASE_URL}${imageUrl}`;
 }
 
 function showHelperText(input, message) {

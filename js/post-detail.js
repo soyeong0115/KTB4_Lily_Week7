@@ -1,4 +1,4 @@
-import { request } from './api.js';
+import { request, API_BASE_URL } from './api.js';
 import { renderComments } from './comment.js';
 import { showConfirmModal, showAlertModal } from './modal.js';
 
@@ -73,7 +73,7 @@ function renderPostDetail(post) {
     postImageBox.textContent = '';
     if (post.postImage) {
         const postImage = document.createElement('img');
-        postImage.src = `http://localhost:8080${post.postImage}`;
+        postImage.src = `${API_BASE_URL}${post.postImage}`;
         postImage.style.width = '100%';
         postImage.style.height = '100%';
         postImage.style.objectFit = 'cover';

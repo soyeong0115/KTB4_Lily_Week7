@@ -1,4 +1,4 @@
-import { request } from './api.js';
+import { request, API_BASE_URL } from './api.js';
 import { showConfirmModal, showAlertModal } from './modal.js';
 
 const emailText = document.querySelector('#email');
@@ -28,7 +28,7 @@ function showProfileImagePreview(imageUrl) {
         profileImagePreview.prepend(previewImage);
     }
 
-    previewImage.src = `http://localhost:8080${imageUrl}`;
+    previewImage.src = `${API_BASE_URL}${imageUrl}`;
 }
 
 async function fetchMyProfile() {
