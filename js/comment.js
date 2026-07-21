@@ -9,26 +9,8 @@ const commentEditButton = document.querySelector('.comment-edit-button');
 const commentDeleteButton = document.querySelector('.comment-delete-button');
 
 const commentPostId = new URLSearchParams(window.location.search).get('postId');
-const accessToken = localStorage.getItem('accessToken');
 
-let currentUserId = null;
 let editingCommentId = null;
-
-async function fetchCurrentUser() {
-    if (!accessToken) {
-        return;
-    }
-
-    const profile = await request('/user/profile', { method: 'GET' });
-
-    currentUserId = profile.userId;
-}
-
-console.log('현재 주소:', window.location.href);
-console.log('commentPostId:', commentPostId);
-
-// 로그인한 사용자 정보 조회 후 내 댓글인지 판단 후 다시 렌더링
-fetchCurrentUser().then(fetchPostDetail);
 
 commentSubmitButton.disabled = true;
 
@@ -129,7 +111,7 @@ export function renderComments(comments) {
     }
 
     commentList.innerHTML = comments.map((comment) => {
-        const isMyComment = currentUserId === comment.writer.userId;
+        const isMyComment = comment.isMyComment;
 
         return `
             <article class="comment-item" data-comment-id="${comment.commentId}">
