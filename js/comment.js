@@ -111,7 +111,7 @@ export function renderComments(comments) {
     }
 
     commentList.innerHTML = comments.map((comment) => {
-        const isMyComment = comment.isMyComment;
+        const isMyComment = comment.myComment;
 
         return `
             <article class="comment-item" data-comment-id="${comment.commentId}">
