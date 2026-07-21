@@ -7,6 +7,7 @@ const postId = new URLSearchParams(window.location.search).get('postId');
 const postEditButton = document.getElementById('post-edit-button');
 const postDeleteButton = document.getElementById('post-delete-button');
 const postLikeButton = document.getElementById('post-like-button');
+const postButtonGroup = document.querySelector('.detail-button-group');
 
 const postTitle = document.querySelector('.detail-info h2');
 const postImageBox = document.querySelector('.post-image-box');
@@ -89,6 +90,8 @@ function renderPostDetail(post) {
     postLikeCount.textContent = post.likeCount;
     postViewCount.textContent = post.viewCount;
     postCommentCount.textContent = post.commentCount;
+
+    postButtonGroup.style.display = post.myPost ? 'flex' : 'none';
 
     isLiked = post.liked ?? false;
 
