@@ -22,6 +22,9 @@ const postCommentCount = postStats[2];
 
 let isLiked = false;
 
+const [navigationEntry] = performance.getEntriesByType('navigation');
+let shouldCountView = navigationEntry?.type !== 'reload';
+
 fetchPostDetail();
 
 postEditButton.addEventListener("click", () => {
@@ -51,7 +54,10 @@ postDeleteButton.addEventListener("click", async () => {
 
 export async function fetchPostDetail() {
     try {
-        const post = await request(`/posts/${postId}`, { method: 'GET' });
+        const countParam = shouldCountView ? '' : '?countView=false';
+        const post = await request(`/posts/${postId}${countParam}`, { method: 'GET' });
+
+        shouldCountView = false;
 
         console.log('게시글 상세 조회 응답:', post);
 
