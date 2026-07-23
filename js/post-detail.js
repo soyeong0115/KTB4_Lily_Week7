@@ -1,6 +1,6 @@
 import { request, API_BASE_URL } from './api.js';
 import { renderComments } from './comment.js';
-import { showConfirmModal, showAlertModal } from './modal.js';
+import { showConfirmModal, showAlertModal, showLoginRequiredModal, isAuthError } from './modal.js';
 import { getAvatarColor } from './avatar.js';
 
 const postId = new URLSearchParams(window.location.search).get('postId');
@@ -50,6 +50,11 @@ postDeleteButton.addEventListener("click", async () => {
 
         window.location.href = './posts.html';
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '게시글 삭제에 실패했습니다.' });
         console.error(error);
     }
@@ -119,6 +124,11 @@ postLikeButton.addEventListener("click", async () => {
 
         fetchPostDetail();
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '좋아요 처리에 실패했습니다.' });
         console.error(error);
     } finally {

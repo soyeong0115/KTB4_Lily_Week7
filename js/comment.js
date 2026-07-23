@@ -1,6 +1,6 @@
 import { request, API_BASE_URL } from './api.js';
 import { fetchPostDetail } from './post-detail.js';
-import { showConfirmModal, showAlertModal } from './modal.js';
+import { showConfirmModal, showAlertModal, showLoginRequiredModal, isAuthError } from './modal.js';
 import { getAvatarColor } from './avatar.js';
 
 const commentList = document.querySelector('.comment-list');
@@ -51,6 +51,11 @@ commentSubmitButton.addEventListener('click', async () => {
         // 댓글 작성/수정 후에 댓글 목록 갱신
         fetchPostDetail();
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '댓글 등록에 실패했습니다.' });
         console.error(error);
     } finally {
@@ -98,6 +103,11 @@ commentList.addEventListener('click', async (event) => {
             fetchPostDetail();
 
         } catch (error) {
+            if (isAuthError(error)) {
+                await showLoginRequiredModal();
+                return;
+            }
+
             await showAlertModal({ message: '댓글 삭제에 실패했습니다.' });
             console.error(error);
         }
@@ -107,7 +117,12 @@ commentList.addEventListener('click', async (event) => {
 
 export function renderComments(comments) {
     if (comments.length === 0) {
-        commentList.innerHTML = '<p>댓글이 없습니다.</p>';
+        commentList.innerHTML = `
+            <div class="comment-empty">
+                <span class="comment-empty-icon">💬</span>
+                <p>아직 댓글이 없어요.<br />가장 먼저 이야기를 남겨보세요!</p>
+            </div>
+        `;
         return;
     }
 
