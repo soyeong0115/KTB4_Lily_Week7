@@ -142,6 +142,11 @@ textarea {
   overflow: hidden;
   cursor: pointer;
   transition: box-shadow 0.15s;
+
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .profile-avatar img {

@@ -18,10 +18,12 @@ if (accessToken && sidebarAuth) {
 
 async function renderProfileAvatar() {
     let profileImage = null;
+    let nickname = '';
 
     try {
         const profile = await request('/user/profile', { method: 'GET' });
         profileImage = profile.profileImage;
+        nickname = profile.nickname ?? '';
     } catch (error) {
         console.error(error);
     }
@@ -30,7 +32,7 @@ async function renderProfileAvatar() {
 
     const avatarContent = profileImage
         ? `<img src="${API_BASE_URL}${profileImage}" alt="" />`
-        : '';
+        : nickname.charAt(0);
 
     headerRight.innerHTML = `
         <summary class="profile-avatar ${profileImage ? '' : randomTagColor}">${avatarContent}</summary>
