@@ -14,6 +14,7 @@ const postTitle = document.querySelector('.detail-info h2');
 const postImageBox = document.querySelector('.post-image-box');
 const postContent = document.querySelector('.post-content');
 const postAuthor = document.querySelector(".detail-author");
+const postAvatar = document.querySelector(".detail-avatar");
 const postMeta = document.querySelector(".detail-meta");
 const postCreatedAt = document.querySelector(".detail-meta time");
 const postStats = document.querySelectorAll(".stat-box strong");
@@ -74,8 +75,10 @@ export async function fetchPostDetail() {
 function renderPostDetail(post) {
     postTitle.textContent = post.title;
     postAuthor.textContent = post.writer.nickname;
-    postMeta.dataset.initial = post.writer.nickname.charAt(0);
-    postMeta.style.setProperty('--avatar-color', getAvatarColor(post.writer.userId));
+    postAvatar.style.setProperty('--avatar-color', getAvatarColor(post.writer.userId));
+    postAvatar.innerHTML = post.writer.profileImage
+        ? `<img src="${API_BASE_URL}${post.writer.profileImage}" alt="" />`
+        : post.writer.nickname.charAt(0);
     postCreatedAt.textContent = post.createdAt;
     postContent.textContent = post.content;
 

@@ -1,4 +1,4 @@
-import { request } from './api.js';
+import { request, API_BASE_URL } from './api.js';
 import { fetchPostDetail } from './post-detail.js';
 import { showConfirmModal, showAlertModal } from './modal.js';
 import { getAvatarColor } from './avatar.js';
@@ -114,10 +114,14 @@ export function renderComments(comments) {
     commentList.innerHTML = comments.map((comment) => {
         const isMyComment = comment.myComment;
         const avatarColor = getAvatarColor(comment.writer.userId);
+        const avatarContent = comment.writer.profileImage
+            ? `<img src="${API_BASE_URL}${comment.writer.profileImage}" alt="" />`
+            : comment.writer.nickname.charAt(0);
 
         return `
             <article class="comment-item" data-comment-id="${comment.commentId}">
-                <div class="comment-item-top" data-initial="${comment.writer.nickname.charAt(0)}" style="--avatar-color: ${avatarColor}">
+                <div class="comment-item-top">
+                    <span class="comment-avatar" style="--avatar-color: ${avatarColor}">${avatarContent}</span>
                     <div class="comment-info">
                         <strong>${comment.writer.nickname}</strong>
                         <time>${comment.createdAt}</time>
