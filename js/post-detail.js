@@ -1,6 +1,7 @@
 import { request, API_BASE_URL } from './api.js';
 import { renderComments } from './comment.js';
 import { showConfirmModal, showAlertModal } from './modal.js';
+import { getAvatarColor } from './avatar.js';
 
 const postId = new URLSearchParams(window.location.search).get('postId');
 
@@ -74,6 +75,7 @@ function renderPostDetail(post) {
     postTitle.textContent = post.title;
     postAuthor.textContent = post.writer.nickname;
     postMeta.dataset.initial = post.writer.nickname.charAt(0);
+    postMeta.style.setProperty('--avatar-color', getAvatarColor(post.writer.userId));
     postCreatedAt.textContent = post.createdAt;
     postContent.textContent = post.content;
 

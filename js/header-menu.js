@@ -1,6 +1,5 @@
 import { request, API_BASE_URL } from './api.js';
-
-const TAG_COLORS = ['tag-yellow', 'tag-pink', 'tag-mint', 'tag-blue', 'tag-lilac'];
+import { getAvatarColor } from './avatar.js';
 
 const headerRight = document.querySelector('.header-right');
 const sidebarAuth = document.querySelector('.sidebar-auth-links');
@@ -19,23 +18,23 @@ if (accessToken && sidebarAuth) {
 async function renderProfileAvatar() {
     let profileImage = null;
     let nickname = '';
+    let userId = null;
 
     try {
         const profile = await request('/user/profile', { method: 'GET' });
         profileImage = profile.profileImage;
         nickname = profile.nickname ?? '';
+        userId = profile.userId;
     } catch (error) {
         console.error(error);
     }
-
-    const randomTagColor = TAG_COLORS[Math.floor(Math.random() * TAG_COLORS.length)];
 
     const avatarContent = profileImage
         ? `<img src="${API_BASE_URL}${profileImage}" alt="" />`
         : nickname.charAt(0);
 
     headerRight.innerHTML = `
-        <summary class="profile-avatar ${profileImage ? '' : randomTagColor}">${avatarContent}</summary>
+        <summary class="profile-avatar" style="--avatar-color: ${getAvatarColor(userId)}">${avatarContent}</summary>
         <nav class="brand-dropdown">
             <a href="#" id="header-logout">로그아웃</a>
             <a href="./profile-edit.html">회원정보수정</a>

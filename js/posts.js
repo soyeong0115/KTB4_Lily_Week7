@@ -1,4 +1,5 @@
 import { request } from './api.js';
+import { getAvatarColor } from './avatar.js';
 
 const POST_PAGE_SIZE = 10;
 
@@ -58,6 +59,7 @@ function renderPosts(posts, isFirstPage) {
         const graphicHeight = GRAPHIC_HEIGHTS[post.postId % GRAPHIC_HEIGHTS.length];
         const graphicPattern = GRAPHIC_PATTERNS[post.postId % GRAPHIC_PATTERNS.length];
         const nickname = post.writer.nickname;
+        const avatarColor = getAvatarColor(post.writer.userId);
 
         return `
             <a class="post-card" href="./post-detail.html?postId=${post.postId}">
@@ -74,7 +76,7 @@ function renderPosts(posts, isFirstPage) {
                 </div>
 
                 <div class="post-author">
-                    <div class="author-image">${nickname.charAt(0)}</div>
+                    <div class="author-image" style="--avatar-color: ${avatarColor}">${nickname.charAt(0)}</div>
                     <strong>${nickname}</strong>
                 </div>
             </a>

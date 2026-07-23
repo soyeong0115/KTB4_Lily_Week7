@@ -1,6 +1,7 @@
 import { request } from './api.js';
 import { fetchPostDetail } from './post-detail.js';
 import { showConfirmModal, showAlertModal } from './modal.js';
+import { getAvatarColor } from './avatar.js';
 
 const commentList = document.querySelector('.comment-list');
 const commentTextarea = document.querySelector('.comment-form textarea');
@@ -112,10 +113,11 @@ export function renderComments(comments) {
 
     commentList.innerHTML = comments.map((comment) => {
         const isMyComment = comment.myComment;
+        const avatarColor = getAvatarColor(comment.writer.userId);
 
         return `
             <article class="comment-item" data-comment-id="${comment.commentId}">
-                <div class="comment-item-top" data-initial="${comment.writer.nickname.charAt(0)}">
+                <div class="comment-item-top" data-initial="${comment.writer.nickname.charAt(0)}" style="--avatar-color: ${avatarColor}">
                     <div class="comment-info">
                         <strong>${comment.writer.nickname}</strong>
                         <time>${comment.createdAt}</time>
