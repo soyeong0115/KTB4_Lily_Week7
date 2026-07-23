@@ -117,7 +117,12 @@ commentList.addEventListener('click', async (event) => {
 
 export function renderComments(comments) {
     if (comments.length === 0) {
-        commentList.innerHTML = '<p>댓글이 없습니다.</p>';
+        commentList.innerHTML = `
+            <div class="comment-empty">
+                <span class="comment-empty-icon">💬</span>
+                <p>아직 댓글이 없어요.<br />가장 먼저 이야기를 남겨보세요!</p>
+            </div>
+        `;
         return;
     }
 
