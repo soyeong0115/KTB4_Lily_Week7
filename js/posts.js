@@ -64,10 +64,14 @@ function renderPosts(posts, isFirstPage) {
             ? `<img src="${API_BASE_URL}${post.writer.profileImage}" alt="" />`
             : nickname.charAt(0);
 
+        const graphicContent = post.postImage
+            ? `<img src="${API_BASE_URL}${post.postImage}" alt="" />`
+            : '';
+
         return `
             <a class="post-card" href="./post-detail.html?postId=${post.postId}">
                 <span class="post-card-tag ${tagColor}">${post.titlePreview}</span>
-                <div class="post-card-graphic ${graphicHeight} ${graphicPattern}"></div>
+                <div class="post-card-graphic ${graphicHeight} ${graphicPattern}">${graphicContent}</div>
 
                 <div class="post-card-content">
                     <div class="post-info-row">

@@ -765,6 +765,13 @@ textarea {
 .post-card-graphic {
   margin: 16px 14px 0;
   border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.post-card-graphic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .graphic-a { height: 110px; }
