@@ -1,6 +1,6 @@
 import { request, API_BASE_URL } from './api.js';
 import { fetchPostDetail } from './post-detail.js';
-import { showConfirmModal, showAlertModal } from './modal.js';
+import { showConfirmModal, showAlertModal, showLoginRequiredModal, isAuthError } from './modal.js';
 import { getAvatarColor } from './avatar.js';
 
 const commentList = document.querySelector('.comment-list');
@@ -51,6 +51,11 @@ commentSubmitButton.addEventListener('click', async () => {
         // 댓글 작성/수정 후에 댓글 목록 갱신
         fetchPostDetail();
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '댓글 등록에 실패했습니다.' });
         console.error(error);
     } finally {
@@ -98,6 +103,11 @@ commentList.addEventListener('click', async (event) => {
             fetchPostDetail();
 
         } catch (error) {
+            if (isAuthError(error)) {
+                await showLoginRequiredModal();
+                return;
+            }
+
             await showAlertModal({ message: '댓글 삭제에 실패했습니다.' });
             console.error(error);
         }

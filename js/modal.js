@@ -41,6 +41,28 @@ export function showConfirmModal({ title, message, confirmText = '확인', cance
     });
 }
 
+// 로그인 자체가 안 된 상태인지 판단
+export function isAuthError(error) {
+    if (error.status === 401) {
+        return true;
+    }
+
+    return error.status === 403 && !error.body;
+}
+
+export async function showLoginRequiredModal() {
+    const goToLogin = await showConfirmModal({
+        title: '로그인이 필요합니다',
+        message: '다시 로그인해주세요.',
+        cancelText: '취소',
+        confirmText: '로그인하러 가기',
+    });
+
+    if (goToLogin) {
+        window.location.href = './index.html';
+    }
+}
+
 export function showAlertModal({ title = '안내', message, confirmText = '확인' }) {
     return new Promise((resolve) => {
         const backdrop = openModal(`

@@ -1,5 +1,5 @@
 import { request } from './api.js';
-import { showAlertModal } from './modal.js';
+import { showAlertModal, showLoginRequiredModal, isAuthError } from './modal.js';
 
 const postId = new URLSearchParams(window.location.search).get('postId');
 
@@ -67,6 +67,11 @@ postImageInput.addEventListener('change', async () => {
         fileNameText.textContent = file.name;
 
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
         console.error(error);
     }
@@ -104,6 +109,11 @@ postEditButton.addEventListener('click', async () => {
         window.location.href = `./post-detail.html?postId=${postId}`;
 
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '게시글 수정에 실패했습니다.' });
         console.error(error);
     }

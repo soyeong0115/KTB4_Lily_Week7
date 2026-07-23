@@ -1,5 +1,5 @@
 import { request } from './api.js';
-import { showAlertModal } from './modal.js';
+import { showAlertModal, showLoginRequiredModal, isAuthError } from './modal.js';
 
 const currentPasswordInput = document.querySelector('#current-password');
 const passwordInput = document.querySelector('#password');
@@ -106,6 +106,11 @@ passwordSubmitButton.addEventListener('click', async () => {
         if (error.body?.message === 'password_mismatch') {
             currentPasswordGroup.classList.add('is-error');
             currentPasswordHelperText.textContent = '* 현재 비밀번호가 일치하지 않습니다.';
+            return;
+        }
+
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
             return;
         }
 

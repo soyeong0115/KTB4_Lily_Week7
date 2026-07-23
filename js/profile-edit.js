@@ -1,5 +1,5 @@
 import { request, API_BASE_URL } from './api.js';
-import { showConfirmModal, showAlertModal } from './modal.js';
+import { showConfirmModal, showAlertModal, showLoginRequiredModal, isAuthError } from './modal.js';
 
 const emailText = document.querySelector('#email');
 const nicknameInput = document.querySelector('#nickname');
@@ -33,8 +33,7 @@ function showProfileImagePreview(imageUrl) {
 
 async function fetchMyProfile() {
     if (!accessToken) {
-        await showAlertModal({ message: '로그인이 필요합니다.' });
-        window.location.href = './index.html';
+        await showLoginRequiredModal();
         return;
     }
 
@@ -54,6 +53,11 @@ async function fetchMyProfile() {
         }
 
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '회원정보를 불러오지 못했습니다.' });
         console.error(error);
     }
@@ -82,6 +86,11 @@ profileImageInput.addEventListener('click', async () => {
         showProfileImagePreview(response.imageUrl);
 
     } catch(error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
         console.error(error);
     }
@@ -128,6 +137,12 @@ profileSubmitButton.addEventListener('click', async () => {
             return;
         }
 
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
+        await showAlertModal({ message: '회원정보 수정에 실패했습니다.' });
         console.error(error);
     }
 });
@@ -149,6 +164,11 @@ profileWithdrawButton.addEventListener('click', async () => {
         window.location.href = './index.html';
 
     } catch (error) {
+        if (isAuthError(error)) {
+            await showLoginRequiredModal();
+            return;
+        }
+
         await showAlertModal({ message: '회원탈퇴에 실패했습니다.' });
         console.error(error);
     }
