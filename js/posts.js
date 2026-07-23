@@ -1,4 +1,5 @@
-import { request } from './api.js';
+import { request, API_BASE_URL } from './api.js';
+import { getAvatarColor } from './avatar.js';
 
 const POST_PAGE_SIZE = 10;
 
@@ -58,6 +59,10 @@ function renderPosts(posts, isFirstPage) {
         const graphicHeight = GRAPHIC_HEIGHTS[post.postId % GRAPHIC_HEIGHTS.length];
         const graphicPattern = GRAPHIC_PATTERNS[post.postId % GRAPHIC_PATTERNS.length];
         const nickname = post.writer.nickname;
+        const avatarColor = getAvatarColor(post.writer.userId);
+        const avatarContent = post.writer.profileImage
+            ? `<img src="${API_BASE_URL}${post.writer.profileImage}" alt="" />`
+            : nickname.charAt(0);
 
         return `
             <a class="post-card" href="./post-detail.html?postId=${post.postId}">
@@ -74,7 +79,7 @@ function renderPosts(posts, isFirstPage) {
                 </div>
 
                 <div class="post-author">
-                    <div class="author-image">${nickname.charAt(0)}</div>
+                    <div class="author-image" style="--avatar-color: ${avatarColor}">${avatarContent}</div>
                     <strong>${nickname}</strong>
                 </div>
             </a>
@@ -93,11 +98,11 @@ function renderContributors(posts) {
     const newContributors = [];
 
     posts.forEach((post) => {
-        const nickname = post.writer.nickname;
+        const { userId, nickname, profileImage } = post.writer;
 
-        if (!seenContributors.has(nickname) && seenContributors.size + newContributors.length < CONTRIBUTOR_LIMIT) {
-            seenContributors.add(nickname);
-            newContributors.push(nickname);
+        if (!seenContributors.has(userId) && seenContributors.size + newContributors.length < CONTRIBUTOR_LIMIT) {
+            seenContributors.add(userId);
+            newContributors.push({ userId, nickname, profileImage });
         }
     });
 
@@ -106,7 +111,13 @@ function renderContributors(posts) {
     }
 
     const contributorsHtml = newContributors
-        .map((nickname) => `<li class="contributor-avatar" title="${nickname}">${nickname.charAt(0)}</li>`)
+        .map(({ userId, nickname, profileImage }) => {
+            const avatarContent = profileImage
+                ? `<img src="${API_BASE_URL}${profileImage}" alt="" />`
+                : nickname.charAt(0);
+
+            return `<li class="contributor-avatar" title="${nickname}" style="--avatar-color: ${getAvatarColor(userId)}">${avatarContent}</li>`;
+        })
         .join('');
 
     contributorGrid.insertAdjacentHTML('beforeend', contributorsHtml);
