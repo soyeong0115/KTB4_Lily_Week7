@@ -672,11 +672,19 @@ textarea {
 
   border: 1px solid var(--line);
   border-radius: 50%;
+  background-color: var(--avatar-color, var(--paper-fold));
+  overflow: hidden;
 
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
   color: var(--ink);
+}
+
+.contributor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .contributor-empty {
@@ -845,6 +853,13 @@ textarea {
   color: var(--ink);
 
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.author-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .post-author strong {
@@ -1138,9 +1153,7 @@ textarea {
   color: var(--ink-soft);
 }
 
-.detail-meta::before {
-  content: attr(data-initial);
-
+.detail-avatar {
   position: absolute;
   left: 0;
   top: 50%;
@@ -1156,11 +1169,18 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 50%;
   background-color: var(--avatar-color, var(--tag-blue));
+  overflow: hidden;
 
   font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 700;
   color: var(--ink);
+}
+
+.detail-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .detail-author {
@@ -1386,9 +1406,7 @@ textarea {
   align-items: center;
 }
 
-.comment-item-top::before {
-  content: attr(data-initial);
-
+.comment-avatar {
   position: absolute;
   left: -48px;
   top: 50%;
@@ -1404,11 +1422,18 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 50%;
   background-color: var(--avatar-color, var(--tag-mint));
+  overflow: hidden;
 
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
+}
+
+.comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .comment-info {
