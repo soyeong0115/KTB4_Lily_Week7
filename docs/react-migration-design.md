@@ -24,11 +24,12 @@
   - 로그인: 프로필 아바타 → 클릭 시 드롭다운(로그아웃/회원정보수정/비밀번호수정)
 - **모달**: `alert()`/`confirm()`을 대체하는 커스텀 확인/알림 모달 (삭제 확인, 에러 안내 등 전역 공용)
 - **인증**: JWT `accessToken`을 `localStorage`에 저장, `js/api.js`의 공통 `request()` 함수가 매 요청에 `Authorization` 헤더 자동 부착
+- **아바타**: 프로필 사진이 없으면 `userId % 5`로 계산한 고정 색상 배경 + 닉네임 첫 글자로 표시 (같은 사람이면 헤더/목록/상세/댓글/기여자 목록 어디서 봐도 항상 같은 색). 실제 프로필 사진을 올린 경우에도 이 5곳 전부에 동일한 사진이 표시됨 (`js/avatar.js`의 `getAvatarColor` 공용 함수)
 
 ### 1-3. 핵심 기능
 
 - 회원가입/로그인/로그아웃, 회원정보·비밀번호 수정, 회원 탈퇴
-- 게시글 CRUD (이미지 업로드 포함)
+- 게시글 CRUD (이미지 업로드 포함), 내가 쓴 게시글에만 수정/삭제 버튼 노출 (서버가 내려주는 `myPost` 값으로 판단)
 - 댓글 CRUD (내가 쓴 댓글에만 수정/삭제 버튼 노출, 서버가 내려주는 `myComment` 값으로 판단)
 - 좋아요 토글
 - 조회수 카운트 (작성자 본인 제외, 새로고침 시 중복 방지 — `PerformanceNavigationTiming`으로 새로고침 여부 판단)
@@ -91,6 +92,8 @@ src/
 │   └── useInfiniteScroll.js     # IntersectionObserver 래핑
 ├── contexts/
 │   └── AuthContext.jsx          # accessToken, 로그인 여부, 로그아웃 함수 전역 제공
+├── utils/
+│   └── avatarColor.js           # 기존 js/avatar.js(getAvatarColor) 포팅 — userId 기반 고정 색상 계산
 └── api/
     ├── client.js                # 기존 js/api.js(request 함수) 포팅
     ├── authApi.js
@@ -119,8 +122,10 @@ src/
 ### 2-4. 컴포넌트별 역할 요약
 
 - **Header / AuthMenu**: 전역에서 로그인 상태만 구독하고, 실제 로그인/회원가입/프로필 링크는 `AuthMenu`가 조건부 렌더링
-- **PostCard**: 목록 API 응답 하나(post)를 props로 받아 순수하게 렌더링만 담당 (색상 태그/그래픽 패턴은 postId 기반으로 컴포넌트 내부에서 결정)
+- **avatarColor 유틸**: `userId % 5`로 태그 색상 인덱스를 계산하는 순수 함수. `Header`, `PostCard`, `CommentItem`, `PostSidebar`(Contributors)가 전부 이 함수 하나를 공유해서, 프로필 사진이 없을 때도 어디서 봐도 같은 사람은 같은 배경색으로 보이도록 함
+- **PostCard**: 목록 API 응답 하나(post)를 props로 받아 순수하게 렌더링만 담당 (색상 태그/그래픽 패턴은 postId 기반, 작성자 아바타 색상은 `avatarColor` 유틸로 결정)
 - **PostForm**: 작성/수정 페이지가 동일한 필드 구성을 쓰므로 `mode="create" | "edit"` prop으로 하나의 컴포넌트를 공유
+- **PostDetailPage**: `myPost`(서버 응답)를 기준으로 수정/삭제 버튼 노출 여부를 결정 (`CommentItem`의 `myComment`와 동일한 패턴)
 - **CommentItem**: `myComment`(서버 응답)를 기준으로 수정/삭제 버튼 노출 여부만 결정, 실제 삭제 확인은 `useModal` 훅 통해 처리
 - **Modal**: `ConfirmModal`/`AlertModal`이 하나의 `Modal` 베이스 위에서 버튼 구성만 다르게 가져가는 구조. 현재 바닐라 JS의 Promise 기반 `showConfirmModal`/`showAlertModal`(`js/modal.js`)을 `useModal` 훅으로 그대로 승격
 - **ProtectedRoute**: `js/profile-edit.js`에 있던 "로그인 안 되어 있으면 index로 리다이렉트" 로직을 라우트 가드로 승격
