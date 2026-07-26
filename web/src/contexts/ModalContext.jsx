@@ -1,3 +1,4 @@
+import Modal from '../components/common/Modal';
 import { createContext } from 'react';
 import { useState, useRef } from 'react';
 
@@ -34,6 +35,7 @@ export function ModalProvider({ children }) {
     return (
         <ModalContext.Provider value={{ modalState, showConfirm, showAlert, handleConfirm, handleCancel }}>
             {children}
+            <Modal modalState={modalState} onConfirm={handleConfirm} onCancel={handleCancel}></Modal>
         </ModalContext.Provider>
     );
 }
