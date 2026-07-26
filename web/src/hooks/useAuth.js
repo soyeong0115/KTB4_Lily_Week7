@@ -1,4 +1,7 @@
-// TODO: AuthContext 소비용 훅 구현
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
+
 export function useAuth() {
-    throw new Error('useAuth is not implemented yet');
+    const context = useContext(AuthContext);
+    return context;
 }
