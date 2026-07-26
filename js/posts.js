@@ -73,7 +73,9 @@ function renderPosts(posts, isFirstPage) {
                 <div class="post-card-content">
                     <div class="post-info-row">
                         <p class="post-stats-text">
-                            좋아요 ${post.likeCount} · 댓글 ${post.commentCount} · 조회수 ${post.viewCount}
+                            <span class="stat-item"><img class="stat-icon" src="./svg/heart.svg" alt="좋아요" />${post.likeCount}</span>
+                            <span class="stat-item"><img class="stat-icon" src="./svg/comment.svg" alt="댓글" />${post.commentCount}</span>
+                            <span class="stat-item"><img class="stat-icon" src="./svg/eye.svg" alt="조회수" />${post.viewCount}</span>
                         </p>
                         <time>${post.createdAt}</time>
                     </div>
