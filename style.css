@@ -807,12 +807,26 @@ textarea {
 }
 
 .post-stats-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
 
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.2px;
   color: var(--ink-soft);
+}
+
+.stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-icon {
+  width: 11px;
+  height: 11px;
 }
 
 .post-info-row time {
@@ -1393,7 +1407,8 @@ textarea {
 }
 
 .comment-empty-icon {
-  font-size: 28px;
+  width: 28px;
+  height: 28px;
 }
 
 .comment-empty p {
@@ -1472,8 +1487,18 @@ textarea {
   color: var(--ink-soft);
 }
 
-.comment-item p {
-  margin-top: 14px;
+.comment-content {
+  position: relative;
+  z-index: 1;
+
+  display: inline-block;
+  max-width: 100%;
+
+  margin-top: 8px;
+  padding: 10px 14px;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
 
   font-size: 15px;
   color: var(--ink);
