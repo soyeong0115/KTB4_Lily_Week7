@@ -34,6 +34,7 @@
 - 좋아요 토글
 - 조회수 카운트 (작성자 본인 제외, 새로고침 시 중복 방지 — `PerformanceNavigationTiming`으로 새로고침 여부 판단)
 - 무한 스크롤 (IntersectionObserver로 다음 페이지 로드)
+- 게시글 목록에 썸네일 이미지/본문 미리보기 표시 (이미지 없으면 본문 미리보기만)
 - 폼 유효성 검사 및 인라인 에러 메시지
 
 ### 1-4. 현재 구조의 한계 (마이그레이션 동기)
@@ -92,6 +93,7 @@ src/
 │   └── useInfiniteScroll.js     # IntersectionObserver 래핑
 ├── contexts/
 │   └── AuthContext.jsx          # accessToken, 로그인 여부, 로그아웃 함수 전역 제공
+|   └── ModalContext.jsx 
 ├── utils/
 │   └── avatarColor.js           # 기존 js/avatar.js(getAvatarColor) 포팅 — userId 기반 고정 색상 계산
 └── api/
@@ -129,6 +131,54 @@ src/
 - **CommentItem**: `myComment`(서버 응답)를 기준으로 수정/삭제 버튼 노출 여부만 결정, 실제 삭제 확인은 `useModal` 훅 통해 처리
 - **Modal**: `ConfirmModal`/`AlertModal`이 하나의 `Modal` 베이스 위에서 버튼 구성만 다르게 가져가는 구조. 현재 바닐라 JS의 Promise 기반 `showConfirmModal`/`showAlertModal`(`js/modal.js`)을 `useModal` 훅으로 그대로 승격
 - **ProtectedRoute**: `js/profile-edit.js`에 있던 "로그인 안 되어 있으면 index로 리다이렉트" 로직을 라우트 가드로 승격
+
+### 2-5. 컴포넌트 상세 설계
+
+4장의 마이그레이션 단계를 진행하면서, 컴포넌트/훅 단위로 state·부수효과·의존관계를 아래 형식으로 구체화합니다. (피드백 반영: 컴포넌트 이름 + 한 줄 설명 수준을 넘어서, 실제 구현 직전 수준까지 미리 정리)
+
+#### 모달 (ModalContext / useModal / Modal)
+
+**배경**: `showConfirmModal`/`showAlertModal`(`js/modal.js`)은 `comment.js`, `post-detail.js`, `post-create.js`, `post-edit.js`, `profile-edit.js`, `password-edit.js`, `signup.js` 등 거의 전 페이지에서 호출됨. 지금은 모달 DOM이 `document.body`에 바로 붙는 전역 오버레이이기 때문에, React에서도 컴포넌트 로컬 state가 아니라 **Context로 전역 공유**해야 함 (`AuthContext`와 동일한 이유).
+
+**파일별 역할**
+
+| 파일 | 역할 |
+|---|---|
+| `contexts/ModalContext.jsx` | state 소유 + Promise 생성/완료 로직 + `ModalProvider` (내부에서 `Modal` 렌더링까지 포함) |
+| `hooks/useModal.js` | `ModalContext`를 소비하는 얇은 훅. 컴포넌트에서는 `useModal()`로만 접근 |
+| `components/common/Modal.jsx` | 순수 표시 컴포넌트. Promise/resolve를 전혀 모름 — props로 받은 상태를 그리고, 받은 콜백을 그대로 실행만 함 |
+
+**State — `ModalContext` 안에 위치**
+
+| 이름 | 종류 | 용도 |
+|---|---|---|
+| `modalState` | `useState` | 현재 열린 모달 내용 (`null`이면 닫힘) — `{ type, title, message, confirmText, cancelText }` |
+| `resolveRef` | `useRef` | Promise의 `resolve` 함수를 보관. `showConfirm`에서 만들어져서 `handleConfirm`/`handleCancel`에서 꺼내 씀. 화면에 그려지는 값이 아니라서(리렌더링 트리거 불필요) state 대신 ref 사용 |
+
+**함수 — `ModalContext` 안에 위치**
+
+| 함수 | 하는 일 |
+|---|---|
+| `showConfirm(options)` | `new Promise`로 감싸서 `resolve`를 `resolveRef`에 저장 → `modalState` 오픈 → Promise 반환 (호출부에서 `await`) |
+| `showAlert(options)` | 위와 동일한 패턴, 버튼 1개(확인)만 있는 버전 |
+| `handleConfirm` | `resolveRef.current(true)` 호출 → `modalState`를 `null`로 리셋 |
+| `handleCancel` | `resolveRef.current(false)` 호출 → `modalState`를 `null`로 리셋 |
+
+`handleConfirm`/`handleCancel`이 `Modal.jsx`가 아니라 `ModalContext`에 있는 이유: `resolveRef`는 `showConfirm`이 호출된 그 컴포넌트(Context) 안에서만 유효한 값이라, 같은 파일 안에서 만들고 같은 파일 안에서 꺼내 써야 함. `Modal.jsx`는 이 함수들을 `onConfirm`/`onCancel` props로 받아서 버튼 클릭 시 그대로 실행만 함.
+
+**useEffect**: 없음 — 순수 이벤트 기반 상태 전이라 부수효과 불필요
+
+**의존 관계**
+
+```
+App.jsx
+ └─ ModalProvider (ModalContext.jsx)
+     ├─ <Modal modalState={modalState} onConfirm={handleConfirm} onCancel={handleCancel} />
+     │    (modalState가 null이면 Modal 내부에서 아무것도 렌더링 안 함)
+     └─ {children} — 앱의 나머지 전체
+          └─ (어디서든) useModal() 호출 → showConfirm/showAlert 사용
+               예: CommentItem, PostDetailPage, PostCreatePage, ProfileEditPage 등
+```
 
 ## 3. 상태와 데이터 흐름
 
