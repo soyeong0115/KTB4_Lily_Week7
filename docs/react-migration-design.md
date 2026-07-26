@@ -180,6 +180,24 @@ App.jsx
                예: CommentItem, PostDetailPage, PostCreatePage, ProfileEditPage 등
 ```
 
+#### AuthMenu
+
+**배경**: `Header`가 항상 렌더링하는 자식. 로그인 여부에 따라 로그인/회원가입 링크 또는 로그아웃 버튼을 보여줌. (1차 구현은 간단 버전 — 프로필 사진/닉네임 표시는 이후 단계에서 추가 예정)
+
+**State**: 없음 — 자체 state 없이 `useAuth()`가 반환하는 `isLoggedIn`/`logout`만 그대로 사용
+
+**useEffect**: 없음 — fetch나 구독 등 외부와 동기화할 게 없고, Context에서 받은 값을 그대로 렌더링만 하기 때문
+
+**의존 관계**
+```
+App.jsx
+ └─ AuthProvider (AuthContext.jsx)
+     └─ Header
+         └─ AuthMenu — useAuth()로 AuthContext 구독
+              isLoggedIn=false → <Link to="/login">, <Link to="/signup">
+              isLoggedIn=true  → <button onClick={logout}>로그아웃</button>
+```
+
 ## 3. 상태와 데이터 흐름
 
 ### 3-1. 전역 상태 (Context)
