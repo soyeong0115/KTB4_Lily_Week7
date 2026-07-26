@@ -4,8 +4,6 @@ import { getAvatarColor } from './avatar.js';
 const POST_PAGE_SIZE = 10;
 
 const TAG_COLORS = ['tag-yellow', 'tag-pink', 'tag-mint', 'tag-blue', 'tag-lilac'];
-const GRAPHIC_HEIGHTS = ['graphic-a', 'graphic-b', 'graphic-c', 'graphic-d'];
-const GRAPHIC_PATTERNS = ['pattern-1', 'pattern-2', 'pattern-3', 'pattern-4', 'pattern-5'];
 const CONTRIBUTOR_LIMIT = 8;
 
 const postList = document.querySelector('.post-list');
@@ -56,23 +54,28 @@ function renderPosts(posts, isFirstPage) {
 
     const postsHtml = posts.map((post) => {
         const tagColor = TAG_COLORS[post.postId % TAG_COLORS.length];
-        const graphicHeight = GRAPHIC_HEIGHTS[post.postId % GRAPHIC_HEIGHTS.length];
-        const graphicPattern = GRAPHIC_PATTERNS[post.postId % GRAPHIC_PATTERNS.length];
         const nickname = post.writer.nickname;
         const avatarColor = getAvatarColor(post.writer.userId);
         const avatarContent = post.writer.profileImage
             ? `<img src="${API_BASE_URL}${post.writer.profileImage}" alt="" />`
             : nickname.charAt(0);
 
+        const thumbnailImage = post.postImage
+            ? `<div class="post-card-image"><img src="${API_BASE_URL}${post.postImage}" alt="" /></div>`
+            : '';
+
         return `
             <a class="post-card" href="./post-detail.html?postId=${post.postId}">
                 <span class="post-card-tag ${tagColor}">${post.titlePreview}</span>
-                <div class="post-card-graphic ${graphicHeight} ${graphicPattern}"></div>
+                ${thumbnailImage}
+                <p class="post-card-preview">${post.contentPreview ?? ''}</p>
 
                 <div class="post-card-content">
                     <div class="post-info-row">
                         <p class="post-stats-text">
-                            좋아요 ${post.likeCount} · 댓글 ${post.commentCount} · 조회수 ${post.viewCount}
+                            <span class="stat-item"><img class="stat-icon" src="./svg/heart.svg" alt="좋아요" />${post.likeCount}</span>
+                            <span class="stat-item"><img class="stat-icon" src="./svg/comment.svg" alt="댓글" />${post.commentCount}</span>
+                            <span class="stat-item"><img class="stat-icon" src="./svg/eye.svg" alt="조회수" />${post.viewCount}</span>
                         </p>
                         <time>${post.createdAt}</time>
                     </div>

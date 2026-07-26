@@ -11,6 +11,8 @@ const commentDeleteButton = document.querySelector('.comment-delete-button');
 
 const commentPostId = new URLSearchParams(window.location.search).get('postId');
 
+const COMMENT_COLORS = ['tag-yellow', 'tag-pink', 'tag-mint', 'tag-blue', 'tag-lilac'];
+
 let editingCommentId = null;
 
 commentSubmitButton.disabled = true;
@@ -119,7 +121,7 @@ export function renderComments(comments) {
     if (comments.length === 0) {
         commentList.innerHTML = `
             <div class="comment-empty">
-                <span class="comment-empty-icon">💬</span>
+                <img class="comment-empty-icon" src="./svg/sad.svg" alt="" />
                 <p>아직 댓글이 없어요.<br />가장 먼저 이야기를 남겨보세요!</p>
             </div>
         `;
@@ -129,6 +131,7 @@ export function renderComments(comments) {
     commentList.innerHTML = comments.map((comment) => {
         const isMyComment = comment.myComment;
         const avatarColor = getAvatarColor(comment.writer.userId);
+        const contentColor = COMMENT_COLORS[comment.commentId % COMMENT_COLORS.length];
         const avatarContent = comment.writer.profileImage
             ? `<img src="${API_BASE_URL}${comment.writer.profileImage}" alt="" />`
             : comment.writer.nickname.charAt(0);
@@ -158,7 +161,7 @@ export function renderComments(comments) {
                     }
                 </div>
 
-                <p class="comment-content">${comment.content}</p>
+                <p class="comment-content ${contentColor}">${comment.content}</p>
             </article>
         `;
     }).join('');
