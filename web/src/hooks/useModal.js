@@ -1,5 +1,24 @@
-// TODO: 기존 js/modal.js(showConfirmModal/showAlertModal/showLoginRequiredModal)를
-// Promise 기반 훅으로 승격
+import { useContext } from 'react';
+import { ModalContext } from '../contexts/ModalContext';
+import { useNavigate } from 'react-router-dom';
+
 export function useModal() {
-    throw new Error('useModal is not implemented yet');
+    const context = useContext(ModalContext);
+    const navigate = useNavigate();
+
+    async function showLoginRequireModal() {
+        const goToLogin = await context.showConfirm({
+            title: '로그인이 필요합니다',
+            message: '다시 로그인해주세요.',
+            cancelText: '취소',
+            confirmText: '로그인하러 가기',
+        });
+
+        if (goToLogin) {
+            navigate('/login');
+        }
+    };
+
+    return({ showLoginRequireModal, ...context });
 }
+
