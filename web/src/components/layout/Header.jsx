@@ -1,4 +1,11 @@
+import AuthMenu from './AuthMenu.jsx';
+
 export default function Header() {
-    // TODO: 로고 + AuthMenu 구현
-    return null;
+    return (
+        <header className="header">
+            <h1 className="header-title">BABBLE.</h1>
+            <p className="header-tagline">Talk & Chatter Zine</p>
+            <AuthMenu />
+        </header>
+    );
 }
