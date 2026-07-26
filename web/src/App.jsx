@@ -9,10 +9,11 @@ import PostEditPage from './pages/PostEditPage.jsx';
 import ProfileEditPage from './pages/ProfileEditPage.jsx';
 import PasswordEditPage from './pages/PasswordEditPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import { ModalProvider } from './contexts/ModalContext.jsx';
 
-// 라우팅 표 (docs/react-migration-design.md 2-3 참고)
 export default function App() {
     return (
+      <ModalProvider>
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<PostsPage />} />
@@ -53,5 +54,6 @@ export default function App() {
                 />
             </Routes>
         </BrowserRouter>
+      </ModalProvider>
     );
 }
