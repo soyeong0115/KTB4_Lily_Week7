@@ -10,9 +10,11 @@ import ProfileEditPage from './pages/ProfileEditPage.jsx';
 import PasswordEditPage from './pages/PasswordEditPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { ModalProvider } from './contexts/ModalContext.jsx';
+import { AuthProvider } from './contexts/AuthContext.jsx';
 
 export default function App() {
     return (
+    <AuthProvider>
       <ModalProvider>
         <BrowserRouter>
             <Routes>
@@ -55,5 +57,6 @@ export default function App() {
             </Routes>
         </BrowserRouter>
       </ModalProvider>
+    </AuthProvider>
     );
 }
