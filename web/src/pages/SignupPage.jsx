@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import SidebarTag from '../components/common/SidebarTag.jsx';
 import PrimaryButton from '../components/common/PrimaryButton.jsx';
 import { useState } from 'react';
-import { request } from '../api/client.js';
+import { API_BASE_URL, request } from '../api/client.js';
+import { useModal } from '../hooks/useModal.js';
 
 export default function SignupPage() {
+    const { showAlertModal} = useModal();
     const navigate = useNavigate();
 
     const [ email, setEmail ] = useState('');
@@ -27,6 +29,8 @@ export default function SignupPage() {
  
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,20}$/;
+
+    const [ profileImageUrl, setProfileImageUrl ] = useState('');
     
     function handleEmailBlur() {
         if (email === '') {
@@ -91,10 +95,11 @@ export default function SignupPage() {
         try {
             const data = await request('/auth/signup', {
                 method: 'POST',
-                body: JSON.stringify({ email, password, nickname }),
+                body: JSON.stringify({ email, password, nickname, profileImage: profileImageUrl }),
             });
 
             navigate('/login');
+
         } catch (error) {
             const message = error.body?.message;
 
@@ -106,8 +111,30 @@ export default function SignupPage() {
 
             if (message === 'nickname_duplicated') {
                 setNicknameError('* 중복된 닉네임 입니다.');
+                setIsNicknameValid(false);
                 return;
             }
+
+            console.error(error);
+        }
+    }
+
+    async function handleImageChange(e) {
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const data = await request('/images', {
+                method: 'POST',
+                body: formData,
+            });
+
+            setProfileImageUrl(data.imageUrl);
+
+        } catch (error) {
+            await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
+            console.error(error);
         }
     }
 
@@ -128,9 +155,16 @@ export default function SignupPage() {
                         className="profile-image-input"
                         type="file"
                         accept="image/*"
+                        onChange={handleImageChange}
                     />
 
-                    <label className="profile-image" htmlFor="profileImageInput">＋</label>
+                    <label className="profile-image" htmlFor="profileImageInput">
+                        {profileImageUrl ? (
+                            <img src={`${API_BASE_URL}${profileImageUrl}`} alt="" />
+                        ) : (
+                            '＋'
+                        )}
+                    </label>
                 </section>
 
                 <div className={`form-group ${emailError ? 'is-error' : ''}`}>
