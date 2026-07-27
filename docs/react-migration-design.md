@@ -198,6 +198,56 @@ App.jsx
               isLoggedIn=true  → <button onClick={logout}>로그아웃</button>
 ```
 
+#### ProtectedRoute
+
+**배경**: `App.jsx`에서 로그인 필요한 라우트(`/posts/new`, `/posts/:postId/edit`, `/profile/edit`, `/password/edit`)를 감싸는 라우트 가드. 기존 `js/profile-edit.js` 등 페이지마다 흩어져 있던 "로그인 안 되어 있으면 리다이렉트" 체크를 한 곳으로 모음
+
+**State**: 없음 — `useAuth()`의 `isLoggedIn`만 그대로 사용
+
+**useEffect**: 없음 — 렌더링 시점에 `isLoggedIn` 값만 보고 즉시 `children` 또는 `<Navigate>`를 반환하는 순수 조건부 렌더링이라 부수효과 불필요
+
+**의존 관계**
+```
+App.jsx
+ └─ AuthProvider
+     └─ <Route element={<ProtectedRoute><PostCreatePage /></ProtectedRoute>} /> 등
+          isLoggedIn=false → <Navigate to="/login" /> (실제 페이지는 렌더링 안 됨)
+          isLoggedIn=true  → children(실제 페이지) 그대로 렌더링
+```
+
+#### LoginPage
+
+**배경**: `js/login.js`의 이메일/비밀번호 검증 + 로그인 API 호출 로직을 포팅
+
+**State**: 필드값(`email`, `password`) + 필드마다 에러 메시지/유효 여부 쌍(`emailError`/`isEmailValid`, `passwordError`/`isPasswordValid`) — 총 6개. 에러 메시지(표시용 문자열)와 유효 여부(버튼 활성화 판단용 boolean)를 분리해서 관리 — `js/login.js`의 `validationState` 객체를 필드별 boolean state로 풀어낸 것과 텍스트 콘텐츠(DOM 조작)를 state로 승격한 것의 조합
+
+**useEffect**: 없음 — 검증은 `onBlur` 이벤트 시점에만 실행(입력 중이 아니라 포커스를 벗어날 때), 제출은 버튼 클릭 시점에만 실행. 둘 다 렌더링과 무관하게 이벤트에 반응하는 것이라 useEffect 불필요
+
+**의존 관계**
+```
+LoginPage
+ ├─ useAuth() → login(accessToken) 호출 (로그인 성공 시 AuthContext에 토큰 저장)
+ ├─ useNavigate() → 로그인 성공 시 '/'(게시글 목록)로 이동
+ └─ request() (api/client.js) → POST /auth/login 호출
+```
+
+#### SignupPage
+
+**배경**: `js/signup.js` 포팅. `LoginPage`보다 필드가 많고(이메일/비밀번호/비밀번호확인/닉네임) 프로필 이미지 업로드가 추가로 있음
+
+**State**: 필드값 5개(`email`, `password`, `passwordCheck`, `nickname`, `profileImageUrl`) + 필드마다 에러/유효 쌍 4개(이미지 제외, 총 8개) — `LoginPage`와 같은 패턴을 필드 수만큼 확장. `passwordCheck`는 `password`와 일치 여부까지 함께 검사하는 게 다른 필드와의 차이점
+
+**useEffect**: 없음 — `LoginPage`와 동일하게 전부 이벤트(blur/change/click) 기반
+
+**의존 관계**
+```
+SignupPage
+ ├─ useModal() → showAlertModal (이미지 업로드 실패 시 알림)
+ ├─ useNavigate() → 회원가입 성공 시 '/login'으로 이동
+ └─ request() (api/client.js) → POST /images(이미지 업로드), POST /auth/signup(가입)
+```
+회원가입 실패 시 서버 응답의 `message`(`email_duplicated`/`nickname_duplicated`)에 따라 해당 필드의 에러 state만 개별적으로 갱신 — `js/signup.js`와 동일한 분기 처리
+
 ## 3. 상태와 데이터 흐름
 
 ### 3-1. 전역 상태 (Context)
