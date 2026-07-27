@@ -1,11 +1,15 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import SidebarTag from '../components/common/SidebarTag.jsx';
 import PrimaryButton from '../components/common/PrimaryButton.jsx';
 import { useState } from 'react';
+import { request } from '../api/client.js';
+import { useAuth } from '../hooks/useAuth.js';
 
 export default function LoginPage() {
-    // TODO: 제출 핸들러 구현
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
     const [ email, setEmail ] = useState('');
     const [ password, setPassword ] = useState('');
 
@@ -23,7 +27,7 @@ export default function LoginPage() {
             setEmailError('* 이메일을 입력해주세요.');
             setIsEmailValid(false);
         } else if (!emailRegex.test(email)) {
-            setEmailError('* 올바른 이메일 주소 형식을 입력해주세요. (예: example@adapterz.kr)');
+            setEmailError('* 올바른 이메일 주소 형식을 입력해주세요. (예: example@babble.com');
             setIsEmailValid(false);
         } else {
             setEmailError('');
@@ -42,6 +46,22 @@ export default function LoginPage() {
             setPasswordError('');
             setIsPasswordValid(true);
         }
+    }
+
+    async function  handleLogin() {
+        try {
+            const data = await request('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password }),
+            });
+
+            login(data.accessToken);
+            navigate('/');
+            
+        } catch (error) {
+            setPasswordError('* 이메일 또는 비밀번호를 확인해주세요.');
+        }
+
     }
 
     return (
@@ -78,7 +98,7 @@ export default function LoginPage() {
                     <p className="helper-text">{passwordError}</p>
                 </div>
 
-                <PrimaryButton disabled>로그인</PrimaryButton>
+                <PrimaryButton disabled={!isEmailValid || !isPasswordValid} onClick={handleLogin}>로그인</PrimaryButton>
                 <Link className="text-link" to="/signup">회원가입</Link>
             </form>
         </main>
