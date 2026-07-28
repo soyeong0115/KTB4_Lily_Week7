@@ -248,6 +248,87 @@ SignupPage
 ```
 회원가입 실패 시 서버 응답의 `message`(`email_duplicated`/`nickname_duplicated`)에 따라 해당 필드의 에러 state만 개별적으로 갱신 — `js/signup.js`와 동일한 분기 처리
 
+#### useInfiniteScroll
+
+**배경**: `js/posts.js`의 `IntersectionObserver` 기반 무한 스크롤 로직을 훅으로 승격. 지금까지 만든 훅(`useModal`, `useAuth`)은 이미 있는 Context를 소비만 했는데, 이건 브라우저 API(`IntersectionObserver`)를 직접 다루는 **처음 만드는 진짜 커스텀 훅**
+
+**시그니처**: `const sentinelRef = useInfiniteScroll(callback)` — sentinel 역할을 할 DOM 요소에 붙일 `ref`를 반환
+
+**State**: 없음
+
+**useEffect**: **있음** (이 마이그레이션에서 처음으로 실제로 필요한 useEffect) — `IntersectionObserver`는 리액트가 모르는 브라우저 API라서, "화면에 렌더링된 뒤에 DOM 요소를 관찰 대상으로 등록"하는 부수효과가 필요함. 컴포넌트가 사라질 때 관찰을 멈추는 **cleanup 함수**(`observer.disconnect()`)도 필요 — `useEffect`가 함수를 반환하면 그게 cleanup으로 실행됨
+
+**의존 관계**
+```
+PostList
+ └─ useInfiniteScroll(fetchPosts) → sentinelRef 반환
+      sentinel DOM 요소가 화면에 보이면 → fetchPosts() 실행
+```
+
+#### PostCard
+
+**배경**: `js/posts.js`의 `renderPosts` 안 카드 1개 렌더링 부분을 컴포넌트로 분리 (컴포넌트 분리 기준 1번: 목록/아이템 분리)
+
+**State**: 없음, **useEffect**: 없음 — `post` 객체 하나를 props로 받아 순수 렌더링만 함
+
+**의존 관계**
+```
+PostList
+ └─ PostCard (post 하나씩, key={post.postId})
+      ├─ avatarColor 유틸 → 작성자 아바타 색상
+      └─ react-router Link → '/posts/:postId'로 이동 (기존 <a href> 대체)
+```
+
+#### PostList
+
+**배경**: 게시글 목록 fetch + 무한 스크롤 담당. `js/posts.js`의 `fetchPosts`/`currentPage`/`hasNext`/`isLoading` 전역 변수를 컴포넌트 state로 승격
+
+**State**: `posts`(배열), `page`, `hasNext`, `isLoading` — 원본의 모듈 스코프 변수 4개를 그대로 state로 대응
+
+**useEffect**: **있음** — 마운트 시 첫 페이지(0페이지)를 자동으로 불러와야 하므로, 빈 의존성 배열(`[]`)로 마운트 시 1회만 `fetchPosts()` 실행. 이후 페이지는 `useInfiniteScroll`의 콜백으로 트리거됨 (같은 `fetchPosts` 함수를 공유 — `isLoading`/`hasNext` 가드가 중복 호출을 막아줌, 원본과 동일한 방어 로직)
+
+**의존 관계 / 데이터 흐름**
+```
+PostsPage
+ └─ PostList (props: onPostsFetched)
+      ├─ fetchPosts() 성공 시: setPosts로 목록 갱신 + onPostsFetched(newPosts) 호출 (부모에게 새로 받아온 게시글 전달)
+      └─ useInfiniteScroll(fetchPosts)로 무한 스크롤 연결
+```
+
+#### PostSidebar
+
+**배경**: Info 박스 + (로그인 여부에 따라) 로그인/회원가입 링크 또는 글쓰기 버튼 + Contributors 목록
+
+**State**: 없음 — `contributors`는 props로 받음(아래 "상태 끌어올리기" 참고), 로그인 여부는 `useAuth()`로 직접 구독
+
+**useEffect**: 없음 — 전부 props/Context를 그대로 렌더링
+
+**의존 관계**
+```
+PostsPage
+ └─ PostSidebar (props: contributors)
+      useAuth().isLoggedIn=false → 로그인/회원가입 링크
+      useAuth().isLoggedIn=true  → 글쓰기 버튼
+      contributors.map(...) → 기여자 아바타 목록
+```
+
+#### PostsPage — 상태 끌어올리기(Lifting State Up)
+
+**문제**: Contributors 데이터는 `PostList`가 fetch하는 게시글에서 뽑아내야 하는데(작성자 정보), 화면에 표시하는 건 `PostSidebar`다. 이 둘은 형제 컴포넌트라 서로 직접 데이터를 주고받을 수 없음 — 리액트에서 형제끼리 상태를 공유하려면 **공통 부모가 그 상태를 들고 있어야 함**(데이터 흐름 원칙 3-4와 동일한 이유)
+
+**해결**: `contributors` state를 부모인 `PostsPage`가 소유. `PostList`가 새 게시글을 받아올 때마다 `onPostsFetched(newPosts)` 콜백으로 부모에게 알리고, `PostsPage`가 그 안에서 중복 제거(`userId` 기준, 최대 8명 — 원본의 `seenContributors` Set/`CONTRIBUTOR_LIMIT`과 동일한 규칙) 후 `contributors`를 갱신, `PostSidebar`에 props로 내려줌
+
+**State**: `contributors`(배열)
+
+**useEffect**: 없음 — `onPostsFetched` 콜백 안에서 동기적으로 계산 후 `setContributors` 호출, 별도 부수효과 불필요
+
+**의존 관계**
+```
+PostsPage (contributors state 소유)
+ ├─ PostSidebar ← contributors (읽기 전용 props)
+ └─ PostList → onPostsFetched(newPosts) 호출 (부모의 setContributors 트리거)
+```
+
 ## 3. 상태와 데이터 흐름
 
 ### 3-1. 전역 상태 (Context)
