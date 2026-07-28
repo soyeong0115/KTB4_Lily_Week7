@@ -1,15 +1,25 @@
-import { use, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
-// TODO: IntersectionObserver 래핑 (기존 js/posts.js의 postListObserver 로직 참고)
-export function useInfiniteScroll(callback) {
+export function useInfiniteScroll({ onIntersect, isLoadingRef, hasNextPageRef, root = null, threshold = 0.1 }) {
     const targetRef = useRef(null);
 
+    const handleObserver = useCallback((entries) => {
+        const target = entries[0];
+
+        if (target.isIntersecting && !isLoadingRef.current && hasNextPageRef.current) {
+            onIntersect();
+        }
+    }, [onIntersect, isLoadingRef, hasNextPageRef]);
+
     useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                callback();
+        const observer = new IntersectionObserver(
+            handleObserver,
+            {
+                root,
+                rootMargin: '0px',
+                threshold
             }
-        });
+        );
 
         const target = targetRef.current;
 
@@ -20,9 +30,7 @@ export function useInfiniteScroll(callback) {
         return () => {
             observer.disconnect();
         };
-    }, [callback]);
-
-    
+    }, [handleObserver, root, threshold]);
 
     return targetRef;
 }
