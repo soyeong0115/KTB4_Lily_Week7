@@ -1,5 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { request } from "../../api/client";
+import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
+import PostCard from "./PostCard.jsx";
 
 export default function PostList({ onPostsFetched }) {
     const pageRef = useRef(0);
@@ -30,4 +32,18 @@ export default function PostList({ onPostsFetched }) {
         }
     }, [onPostsFetched]);
 
+    useEffect(() => {
+        fetchPosts();
+    }, []);
+
+    const targetRef = useInfiniteScroll({ onIntersect: fetchPosts, isLoadingRef, hasNextPageRef: hasNextRef });
+
+    return (
+        <>
+            {posts.map((post) => (
+                <PostCard post={post} key={post.postId} />
+            ))}
+            <div ref={targetRef}></div>
+        </>
+    );
 }
