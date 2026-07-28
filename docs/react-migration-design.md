@@ -252,17 +252,20 @@ SignupPage
 
 **배경**: `js/posts.js`의 `IntersectionObserver` 기반 무한 스크롤 로직을 훅으로 승격. 지금까지 만든 훅(`useModal`, `useAuth`)은 이미 있는 Context를 소비만 했는데, 이건 브라우저 API(`IntersectionObserver`)를 직접 다루는 **처음 만드는 진짜 커스텀 훅**
 
-**시그니처**: `const sentinelRef = useInfiniteScroll(callback)` — sentinel 역할을 할 DOM 요소에 붙일 `ref`를 반환
+**시그니처**: `const { loaderRef } = useInfiniteScroll({ onIntersect, isLoadingRef, hasNextPageRef, root, threshold })`
 
-**State**: 없음
+처음엔 `callback`만 받는 단순한 형태로 설계했는데, 실제로 만들다 보니 `callback`(=`fetchPosts`)이 `PostList`가 리렌더링될 때마다 매번 새로 만들어지는 함수라 `useEffect`가 의존성(`[callback]`) 때문에 불필요하게 자주 재실행되는(observer disconnect→재생성) 문제가 있었음. 그래서 `isLoading`/`hasNext`를 **ref**로 받아 observer 콜백 내부에서 직접 최신값을 읽고, `onIntersect` 자체도 `useCallback`으로 감싸서 참조를 고정 — 리렌더링과 무관하게 observer가 유지되도록 개선
 
-**useEffect**: **있음** (이 마이그레이션에서 처음으로 실제로 필요한 useEffect) — `IntersectionObserver`는 리액트가 모르는 브라우저 API라서, "화면에 렌더링된 뒤에 DOM 요소를 관찰 대상으로 등록"하는 부수효과가 필요함. 컴포넌트가 사라질 때 관찰을 멈추는 **cleanup 함수**(`observer.disconnect()`)도 필요 — `useEffect`가 함수를 반환하면 그게 cleanup으로 실행됨
+**State**: 없음 (내부적으로 `loaderRef`, `observerRef` 두 개의 `useRef`만 사용 — `observerRef`는 매번 새 observer를 만들기 전에 이전 것을 정리하기 위한 용도)
+
+**useEffect**: **있음** — `IntersectionObserver`는 리액트가 모르는 브라우저 API라서 DOM에 렌더링된 뒤 관찰 대상으로 등록하는 부수효과가 필요함. 의존성 배열은 `[handleObserver, root, threshold]` — `callback` 그 자체가 아니라 `useCallback`으로 감싼 `handleObserver`를 의존성으로 둬서, `onIntersect`/`isLoadingRef`/`hasNextPageRef`가 안 바뀌면 `handleObserver`도 참조가 안 바뀌고, 그러면 이 effect도 재실행이 안 됨(불필요한 observer 재생성 방지). cleanup에서 `observer.disconnect()` + `observerRef.current = null`
 
 **의존 관계**
 ```
 PostList
- └─ useInfiniteScroll(fetchPosts) → sentinelRef 반환
-      sentinel DOM 요소가 화면에 보이면 → fetchPosts() 실행
+ ├─ isLoadingRef, hasNextPageRef (useRef) → fetchPosts 안에서 최신값 읽기용
+ └─ useInfiniteScroll({ onIntersect: fetchPosts, isLoadingRef, hasNextPageRef }) → loaderRef 반환
+      loader DOM 요소가 화면에 보이고 + 로딩중 아니고 + 다음 페이지 있으면 → fetchPosts() 실행
 ```
 
 #### PostCard
@@ -283,16 +286,16 @@ PostList
 
 **배경**: 게시글 목록 fetch + 무한 스크롤 담당. `js/posts.js`의 `fetchPosts`/`currentPage`/`hasNext`/`isLoading` 전역 변수를 컴포넌트 state로 승격
 
-**State**: `posts`(배열), `page`, `hasNext`, `isLoading` — 원본의 모듈 스코프 변수 4개를 그대로 state로 대응
+**State**: `posts`(배열)만 실제 `useState` — 화면에 그려지는 값이라 바뀌면 리렌더링 필요. `page`, `hasNext`, `isLoading`은 **`useRef`**로 관리 — 셋 다 화면에 직접 표시되는 값이 아니라 "다음 fetch를 어떻게 할지" 판단하는 내부 제어용 값이라, `useInfiniteScroll` 설계와 같은 이유로 ref를 씀 (state로 하면 바뀔 때마다 불필요한 리렌더링 + `fetchPosts` 함수 재생성 → observer 재연결까지 이어짐)
 
-**useEffect**: **있음** — 마운트 시 첫 페이지(0페이지)를 자동으로 불러와야 하므로, 빈 의존성 배열(`[]`)로 마운트 시 1회만 `fetchPosts()` 실행. 이후 페이지는 `useInfiniteScroll`의 콜백으로 트리거됨 (같은 `fetchPosts` 함수를 공유 — `isLoading`/`hasNext` 가드가 중복 호출을 막아줌, 원본과 동일한 방어 로직)
+**useEffect**: **있음** — 마운트 시 첫 페이지(0페이지)를 자동으로 불러와야 하므로, 빈 의존성 배열(`[]`)로 마운트 시 1회만 `fetchPosts()` 실행. 이후 페이지는 `useInfiniteScroll`이 트리거함
 
 **의존 관계 / 데이터 흐름**
 ```
 PostsPage
  └─ PostList (props: onPostsFetched)
-      ├─ fetchPosts() 성공 시: setPosts로 목록 갱신 + onPostsFetched(newPosts) 호출 (부모에게 새로 받아온 게시글 전달)
-      └─ useInfiniteScroll(fetchPosts)로 무한 스크롤 연결
+      ├─ fetchPosts() — useCallback으로 감싸서 참조 고정. 성공 시: setPosts로 목록 갱신 + onPostsFetched(newPosts) 호출 + pageRef/hasNextRef 갱신
+      └─ useInfiniteScroll({ onIntersect: fetchPosts, isLoadingRef, hasNextPageRef })로 무한 스크롤 연결
 ```
 
 #### PostSidebar
