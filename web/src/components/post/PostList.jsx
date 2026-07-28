@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { request } from "../../api/client";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import PostCard from "./PostCard.jsx";
@@ -41,7 +42,13 @@ export default function PostList({ onPostsFetched }) {
     const targetRef = useInfiniteScroll({ onIntersect: fetchPosts, isLoadingRef, hasNextPageRef: hasNextRef });
 
     if (hasLoadedOnce && posts.length === 0) {
-        return <p>게시글이 없습니다.</p>;
+        return (
+            <div className="post-list-empty">
+                <img className="post-list-empty-icon" src="/svg/sad.svg" alt="" />
+                <p>아직 게시글이 없어요.<br />BABBLE.에 첫 이야기를 남겨보세요!</p>
+                <Link className="write-button post-list-empty-button" to="/posts/new">✎ 게시글 작성</Link>
+            </div>
+        );
     }
 
     return (
