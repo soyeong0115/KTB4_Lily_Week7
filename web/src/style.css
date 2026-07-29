@@ -740,6 +740,7 @@ textarea {
   color: var(--ink-soft);
 }
 
+
 .post-card {
   position: relative;
   display: block;
@@ -797,41 +798,38 @@ textarea {
 .tag-lilac { background-color: var(--tag-lilac); }
 .tag-red { background-color: var(--tag-red); }
 
-.post-card-graphic {
+.post-card-image {
+  height: 160px;
   margin: 16px 14px 0;
   border: 1px solid var(--line);
+  overflow: hidden;
 }
 
-.graphic-a { height: 110px; }
-.graphic-b { height: 160px; }
-.graphic-c { height: 90px; }
-.graphic-d { height: 200px; }
-
-.pattern-1 {
-  background-image: repeating-linear-gradient(45deg, var(--paper-fold) 0 8px, var(--paper-card) 8px 16px);
+.post-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.pattern-2 {
-  background-color: var(--paper-fold);
-  background-image: radial-gradient(circle at center, var(--ink-soft) 0 2px, transparent 2.5px);
-  background-size: 16px 16px;
+.post-card-preview {
+  margin: 10px 14px 0;
+  padding: 0;
+
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  word-break: break-word;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.pattern-3 {
-  background-color: var(--paper-fold);
-  background-image: repeating-linear-gradient(-45deg, var(--ink-soft) 0 1.5px, transparent 1.5px 14px);
-}
-
-.pattern-4 {
-  background-image:
-    linear-gradient(135deg, var(--paper-fold) 25%, transparent 25% 50%, var(--paper-fold) 50% 75%, transparent 75%);
-  background-color: var(--paper-card);
-  background-size: 22px 22px;
-}
-
-.pattern-5 {
-  background-color: var(--paper-fold);
-  background-image: repeating-linear-gradient(90deg, var(--ink-soft) 0 1px, transparent 1px 10px);
+.post-card-tag + .post-card-preview {
+  margin-top: 22px;
 }
 
 .post-card-content {
@@ -845,12 +843,26 @@ textarea {
 }
 
 .post-stats-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
 
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.2px;
   color: var(--ink-soft);
+}
+
+.stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-icon {
+  width: 11px;
+  height: 11px;
 }
 
 .post-info-row time {
@@ -1272,6 +1284,13 @@ textarea {
   overflow: hidden;
 }
 
+.post-image-box img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* 게시글 본문 */
 .post-content {
   font-size: 16px;
@@ -1431,7 +1450,8 @@ textarea {
 }
 
 .comment-empty-icon {
-  font-size: 28px;
+  width: 28px;
+  height: 28px;
 }
 
 .comment-empty p {
@@ -1510,8 +1530,18 @@ textarea {
   color: var(--ink-soft);
 }
 
-.comment-item p {
-  margin-top: 14px;
+.comment-content {
+  position: relative;
+  z-index: 1;
+
+  display: inline-block;
+  max-width: 100%;
+
+  margin-top: 8px;
+  padding: 10px 14px;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
 
   font-size: 15px;
   color: var(--ink);
