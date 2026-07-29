@@ -122,11 +122,9 @@ export default function PostDetailPage() {
                     )}
                 </section>
 
-                {post.postImage && (
-                    <div className="post-image-box">
-                        <img src={`${API_BASE_URL}${post.postImage}`} alt="" />
-                    </div>
-                )}
+                <div className="post-image-box">
+                    {post.postImage && <img src={`${API_BASE_URL}${post.postImage}`} alt="" />}
+                </div>
 
                 <p className="post-content">{post.content}</p>
 
