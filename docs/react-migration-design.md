@@ -380,6 +380,37 @@ PostDetailPage (editingComment state 소유)
            "삭제" 클릭 → 확인 모달 → 삭제 API → onChanged() → 부모가 fetchPostDetail 재실행
 ```
 
+#### PostForm — `js/post-create.js` vs `js/post-edit.js` diff 기반 설계
+
+**diff 결과**: 두 파일을 비교해보면 필드 구성(제목/내용/이미지)과 검증 로직이 사실상 동일하고, 다른 부분은 아래 5가지뿐
+
+| 다른 점 | post-create | post-edit |
+|---|---|---|
+| 마운트 시 초기 fetch | 없음(빈 폼) | 있음(`GET /posts/:id`로 기존 값 채움) |
+| 제출 API | `POST /posts` | `PATCH /posts/:id` |
+| 제출 성공 후 이동 | `/`(목록) | `/posts/:id`(상세) |
+| 헤딩 태그/문구 | `tag-yellow` "New Post"/"작성" | `tag-pink` "Edit Post"/"수정" |
+| 제출 버튼 라벨 | "완료" | "수정하기" |
+
+나머지(제목/내용 컨트롤드 인풋, 이미지 업로드, 유효성 검사, 에러 표시)는 완전히 동일 로직이라 `PostForm` 하나로 합치고 `mode`("create" | "edit") prop으로 위 5가지만 분기
+
+**참고**: 원본은 `post-create.js`가 `blur` 시점에 `post-edit.js`가 `input` 시점에 검증하는 미묘한 차이가 있었는데, React에서는 컨트롤드 인풋이라 `title`/`content` state가 타이핑마다 항상 최신값이고 버튼 `disabled`도 렌더링마다 다시 계산되는 값이라 이 차이 자체가 자연스럽게 사라짐(둘 다 실시간 검증과 동일하게 동작) — 이식하면서 없어진 원본 간 사소한 동작 차이
+
+**State**: `title`, `content`(컨트롤드 인풋), `imageUrl`(업로드/기존 이미지 경로), `fileName`(파일 선택 영역에 표시할 텍스트), `error`(제출/검증 실패 메시지), `isSubmitting`(제출 중 버튼 비활성화용)
+
+**useEffect**: `mode === 'edit'`일 때만 마운트 시 기존 게시글을 fetch해서 `title`/`content`/`imageUrl`/`fileName` 초기값 채움. 의존성 `[postId]` (create 모드에선 `postId`가 없으므로 effect 내부에서 `mode` 체크 후 조기 반환)
+
+**의존 관계**
+```
+PostCreatePage → <PostForm mode="create" />
+PostEditPage   → <PostForm mode="edit" postId={postId} />
+
+PostForm
+ ├─ useModal() → showAlertModal, showLoginRequiredModal, isAuthError
+ ├─ useNavigate() → 성공 시 mode에 따라 '/' 또는 `/posts/${postId}`
+ └─ request() → GET(edit 초기 로드)/POST 또는 PATCH(제출)/POST(이미지 업로드)
+```
+
 ## 3. 상태와 데이터 흐름
 
 ### 3-1. 전역 상태 (Context)
