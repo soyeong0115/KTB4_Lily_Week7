@@ -145,7 +145,7 @@ src/
 | 파일 | 역할 |
 |---|---|
 | `contexts/ModalContext.jsx` | state 소유 + Promise 생성/완료 로직 + `ModalProvider` (내부에서 `Modal` 렌더링까지 포함) |
-| `hooks/useModal.js` | `ModalContext`를 소비하는 얇은 훅. 컴포넌트에서는 `useModal()`로만 접근 |
+| `hooks/useModal.js` | `ModalContext`를 소비하는 얇은 훅. 컴포넌트에서는 `useModal()`로만 접근. **공개 API 이름은 `showConfirmModal`/`showAlertModal`/`showLoginRequiredModal`/`isAuthError`** — `ModalContext`의 내부 함수명(`showConfirm`/`showAlert`)과 다르게, 원본 바닐라 `js/modal.js`의 함수명과 맞춰서 이 훅 안에서 이름을 바꿔 내보냄 (`showConfirmModal: context.showConfirm` 형태). `isAuthError`도 여기서 직접 구현 |
 | `components/common/Modal.jsx` | 순수 표시 컴포넌트. Promise/resolve를 전혀 모름 — props로 받은 상태를 그리고, 받은 콜백을 그대로 실행만 함 |
 
 **State — `ModalContext` 안에 위치**
@@ -176,9 +176,11 @@ App.jsx
      ├─ <Modal modalState={modalState} onConfirm={handleConfirm} onCancel={handleCancel} />
      │    (modalState가 null이면 Modal 내부에서 아무것도 렌더링 안 함)
      └─ {children} — 앱의 나머지 전체
-          └─ (어디서든) useModal() 호출 → showConfirm/showAlert 사용
+          └─ (어디서든) useModal() 호출 → showConfirmModal/showAlertModal/showLoginRequiredModal/isAuthError 사용
                예: CommentItem, PostDetailPage, PostCreatePage, ProfileEditPage 등
 ```
+
+**버그 수정 이력**: 5단계에서 `useModal()`의 실제 반환값이 `showConfirm`/`showAlert`(이름 안 바뀜)뿐이고 `isAuthError`는 아예 없다는 걸 발견 — 여러 컴포넌트가 존재하지 않는 함수를 호출해서 런타임에 크래시가 나는 버그였음. `useModal.js`에서 이름을 바꿔 내보내고 `isAuthError`를 구현하는 것으로 수정 (1단계 구현 때부터 있었던 버그, 실제 실패 경로를 브라우저로 테스트하기 전까진 드러나지 않았음)
 
 #### AuthMenu
 
