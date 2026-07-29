@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 
+import Header from '../components/layout/Header.jsx';
 import SidebarTag from '../components/common/SidebarTag.jsx';
 import PrimaryButton from '../components/common/PrimaryButton.jsx';
 import { useState } from 'react';
@@ -139,6 +140,8 @@ export default function SignupPage() {
     }
 
     return (
+        <>
+        <Header backTo="/" />
         <main className="signup-main">
             <div className="post-create-heading">
                 <SidebarTag color="tag-pink">✎ Join Us</SidebarTag>
@@ -223,5 +226,6 @@ export default function SignupPage() {
                 <Link className="login-link-button" to="/login">로그인하러 가기</Link>
             </form>
         </main>
+        </>
     );
 }
