@@ -73,6 +73,7 @@ export default function PasswordEditPage() {
             setNewPassword('');
             setNewPasswordCheck('');
             setIsToastVisible(true);
+            
         } catch (error) {
             if (error.body?.message === 'password_mismatch') {
                 setCurrentPasswordError('* 현재 비밀번호가 일치하지 않습니다.');
@@ -91,7 +92,7 @@ export default function PasswordEditPage() {
 
     return (
         <>
-            <Header />
+            <Header backToPrevious />
             <main className="password-edit-main">
                 <div className="post-create-heading">
                     <SidebarTag color="tag-mint">✎ Security</SidebarTag>

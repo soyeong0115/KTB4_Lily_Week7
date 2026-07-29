@@ -99,11 +99,17 @@ textarea {
   top: 50%;
   transform: translateY(-50%);
 
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+
   text-decoration: none;
   color: #111;
   font-size: 42px;
   font-weight: 300;
   line-height: 1;
+  font-family: inherit;
 }
 
 /* 로고 드롭다운 메뉴 */

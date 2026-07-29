@@ -135,7 +135,7 @@ export default function ProfileEditPage() {
 
     return (
         <>
-            <Header />
+            <Header backToPrevious />
             <main className="profile-edit-main">
                 <div className="post-create-heading">
                     <SidebarTag color="tag-blue">✎ My Profile</SidebarTag>
