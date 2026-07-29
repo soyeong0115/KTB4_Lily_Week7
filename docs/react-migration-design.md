@@ -411,6 +411,60 @@ PostForm
  └─ request() → GET(edit 초기 로드)/POST 또는 PATCH(제출)/POST(이미지 업로드)
 ```
 
+#### Toast (신규 공용 컴포넌트)
+
+**배경**: `profile-edit.js`/`password-edit.js` 둘 다 "수정완료" 토스트를 쓰는데, CSS(`profile-complete-toast`/`edit-password-complete-toast`)가 클래스 이름만 다르고 스타일은 완전히 동일 — 컴포넌트 분리 기준 3번("2곳 이상에서 재사용")에 해당해서 `components/common/Toast.jsx`로 새로 뽑음 (기존 폴더 구조엔 없던 컴포넌트라 추가)
+
+**props**: `message`(표시할 텍스트), `isShow`(boolean), `onHide`(자동으로 숨길 시점에 부모에게 알리는 콜백)
+
+**State**: 없음
+
+**useEffect**: **있음** — `isShow`가 `true`가 되면 일정 시간(1.5초) 후 `onHide()`를 호출하는 타이머를 설치. `isShow`가 `false`로 바뀌거나 컴포넌트가 사라지면 타이머를 정리(cleanup)해야 하므로 `setTimeout`의 ID를 저장해뒀다가 `return () => clearTimeout(id)`로 정리. 의존성 `[isShow, onHide]` — 타이머를 부모가 아니라 `Toast` 자신이 관리해서, 호출하는 쪽(`ProfileEditPage`/`PasswordEditPage`)은 `setTimeout` 코드를 반복해서 쓸 필요 없이 `isShow`만 `true`로 켜주면 됨
+
+**애니메이션**: 기존 `display: none` ↔ `flex` 토글은 즉시 나타났다 사라져서 부드러운 느낌이 없음 → `opacity` + `transition`으로 교체해서 서서히 사라지는 효과로 개선 (기존 동작에서 벗어나는 개선점)
+
+**의존 관계**
+```
+ProfileEditPage / PasswordEditPage
+ └─ <Toast message="..." isShow={isToastVisible} onHide={() => setIsToastVisible(false)} />
+      Toast 내부 타이머가 시간 다 되면 onHide() 호출 → 부모의 isToastVisible을 false로
+```
+
+#### ProfileEditPage
+
+**배경**: `js/profile-edit.js` 포팅. 프로필 이미지 변경 + 닉네임 수정 + 회원 탈퇴
+
+**State**: `email`(조회 전용, 수정 불가), `nickname`, `profileImageUrl`, `error`, `isToastVisible`
+
+**useEffect**: 마운트 시 `GET /user/profile`로 내 정보 조회해서 `email`/`nickname`/`profileImageUrl` 채움. 의존성 `[]`
+
+**원본 버그 수정**: 원본 `profileImageInput.addEventListener('click', ...)`는 실제로는 `'change'`여야 하는 부분(파일 선택 전 `click` 시점엔 아직 `files[0]`이 없어서 정상 동작 안 했을 가능성이 있는 원본 자체의 버그) — React 포팅 시 `onChange`로 수정
+
+**회원 탈퇴**: `showConfirmModal` → `DELETE /user` → 원본은 `localStorage.removeItem('accessToken')` 직접 호출 + `window.location.href`였는데, React에서는 `useAuth().logout()`(Context 갱신까지 됨) + `useNavigate()`로 대체 — 로그아웃 상태가 즉시 Header/AuthMenu에도 반영됨(전체 새로고침 불필요)
+
+**의존 관계**
+```
+ProfileEditPage
+ ├─ useAuth() → logout() (탈퇴 성공 시)
+ ├─ useModal(), useNavigate(), request()
+ └─ Toast (props: message="수정완료", isShow={isToastVisible}, onHide)
+```
+
+#### PasswordEditPage
+
+**배경**: `js/password-edit.js` 포팅. 현재 비밀번호 확인 + 새 비밀번호 변경, 필드 3개 모두 실시간 검증
+
+**State**: `currentPassword`, `newPassword`, `newPasswordCheck`(컨트롤드 인풋) + 필드별 에러 3개(`currentPasswordError`, `newPasswordError`, `newPasswordCheckError`) + `isToastVisible` — `LoginPage`/`SignupPage`에서 썼던 "값 state + 에러 state 쌍" 패턴 그대로 확장 적용
+
+**useEffect**: 없음 — 조회할 기존 데이터가 없는 순수 입력 폼
+
+**의존 관계**
+```
+PasswordEditPage
+ ├─ useModal(), request()
+ └─ Toast (props: message="수정 완료", isShow={isToastVisible}, onHide)
+```
+
 ## 3. 상태와 데이터 흐름
 
 ### 3-1. 전역 상태 (Context)
