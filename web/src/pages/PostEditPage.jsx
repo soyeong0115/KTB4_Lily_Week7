@@ -1,4 +1,15 @@
+import { useParams } from 'react-router-dom';
+
+import Header from '../components/layout/Header.jsx';
+import PostForm from '../components/post/PostForm.jsx';
+
 export default function PostEditPage() {
-    // TODO: PostEditPage 구현
-    return null;
+    const { postId } = useParams();
+
+    return (
+        <>
+            <Header />
+            <PostForm mode="edit" postId={postId} />
+        </>
+    );
 }
