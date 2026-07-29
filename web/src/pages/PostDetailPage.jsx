@@ -97,7 +97,7 @@ export default function PostDetailPage() {
 
     return (
         <>
-            <Header />
+            <Header backTo="/" />
             <main className="detail">
                 <section className="detail-top">
                     <div className="detail-info">

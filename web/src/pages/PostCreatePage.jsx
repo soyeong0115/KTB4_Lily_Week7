@@ -4,7 +4,7 @@ import PostForm from '../components/post/PostForm.jsx';
 export default function PostCreatePage() {
     return (
         <>
-            <Header />
+            <Header backTo="/" />
             <PostForm mode="create" />
         </>
     );

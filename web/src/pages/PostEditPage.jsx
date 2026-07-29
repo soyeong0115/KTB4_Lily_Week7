@@ -8,7 +8,7 @@ export default function PostEditPage() {
 
     return (
         <>
-            <Header />
+            <Header backTo={`/posts/${postId}`} />
             <PostForm mode="edit" postId={postId} />
         </>
     );
