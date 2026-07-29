@@ -1,4 +1,11 @@
+import Header from '../components/layout/Header.jsx';
+import PostForm from '../components/post/PostForm.jsx';
+
 export default function PostCreatePage() {
-    // TODO: PostCreatePage 구현
-    return null;
+    return (
+        <>
+            <Header />
+            <PostForm mode="create" />
+        </>
+    );
 }
