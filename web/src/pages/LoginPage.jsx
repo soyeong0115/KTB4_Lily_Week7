@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 
+import Header from '../components/layout/Header.jsx';
 import SidebarTag from '../components/common/SidebarTag.jsx';
 import PrimaryButton from '../components/common/PrimaryButton.jsx';
 import { useState } from 'react';
@@ -65,6 +66,8 @@ export default function LoginPage() {
     }
 
     return (
+        <>
+        <Header />
         <main className="login-main">
             <div className="post-create-heading">
                 <SidebarTag color="tag-yellow">✎ Welcome Back</SidebarTag>
@@ -102,5 +105,6 @@ export default function LoginPage() {
                 <Link className="text-link" to="/signup">회원가입</Link>
             </form>
         </main>
+        </>
     );
 }
