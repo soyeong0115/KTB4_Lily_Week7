@@ -111,44 +111,46 @@ export default function PostDetailPage() {
                             </span>
                             <span className="detail-author">{post.writer.nickname}</span>
                             <time>{post.createdAt}</time>
+                            <span className="detail-view-count">
+                                <img className="detail-stat-icon" src="/svg/eye.svg" alt="조회수" />
+                                {post.viewCount}
+                            </span>
+
+                            {post.myPost && (
+                                <div className="small-button-group detail-button-group">
+                                    <Link className="small-button" to={`/posts/${postId}/edit`}>수정</Link>
+                                    <button className="small-button post-delete-button" type="button" onClick={handleDelete}>삭제</button>
+                                </div>
+                            )}
                         </div>
                     </div>
-
-                    {post.myPost && (
-                        <div className="small-button-group detail-button-group">
-                            <Link className="small-button" to={`/posts/${postId}/edit`}>수정</Link>
-                            <button className="small-button post-delete-button" type="button" onClick={handleDelete}>삭제</button>
-                        </div>
-                    )}
                 </section>
 
-                <div className="post-image-box">
-                    {post.postImage && <img src={`${API_BASE_URL}${post.postImage}`} alt="" />}
-                </div>
+                {post.postImage && (
+                    <div className="post-image-box">
+                        <img src={`${API_BASE_URL}${post.postImage}`} alt="" />
+                    </div>
+                )}
 
                 <p className="post-content">{post.content}</p>
 
-                <section className="post-stats">
+                <section className="detail-stats">
                     <button
-                        className={`stat-box${post.liked ? ' is-liked' : ''}`}
-                        id="post-like-button"
+                        className={`detail-stat-pill detail-like-button${post.liked ? ' is-liked' : ''}`}
                         type="button"
                         onClick={handleLike}
                         disabled={isLiking}
                     >
-                        <strong>{post.likeCount}</strong>
-                        <span>좋아요</span>
+                        <svg className="detail-stat-icon" viewBox="0 0 14 14" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M7 12.2C4.4 10.4 1.4 8.3 1.4 5.3 1.4 3.4 2.9 2 4.7 2c1 0 2 .5 2.3 1.3C7.3 2.5 8.3 2 9.3 2c1.8 0 3.3 1.4 3.3 3.3 0 3-3 5.1-5.6 6.9Z" />
+                        </svg>
+                        <span className="detail-stat-text"><span>좋아요</span><span>{post.likeCount}</span></span>
                     </button>
 
-                    <div className="stat-box">
-                        <strong>{post.viewCount}</strong>
-                        <span>조회수</span>
-                    </div>
-
-                    <div className="stat-box">
-                        <strong>{post.commentCount}</strong>
-                        <span>댓글</span>
-                    </div>
+                    <span className="detail-stat-pill">
+                        <img className="detail-stat-icon" src="/svg/comment.svg" alt="댓글" />
+                        <span className="detail-stat-text"><span>댓글</span><span>{post.commentCount}</span></span>
+                    </span>
                 </section>
 
                 <CommentForm

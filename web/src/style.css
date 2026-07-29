@@ -1178,10 +1178,6 @@ textarea {
   width: 100%;
   padding: 0 0 28px;
   border-bottom: 1.5px solid var(--line);
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .detail-info h2 {
@@ -1237,14 +1233,11 @@ textarea {
 }
 
 .detail-author {
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink);
 }
 
-/* 게시글 수정/삭제 버튼 위치 */
-.detail-button-group {
-  margin-top: 48px;
-}
 
 /* 수정 / 삭제 버튼 */
 .small-button-group {
@@ -1299,64 +1292,78 @@ textarea {
 
 /* 게시글 본문 */
 .post-content {
+  margin-top: 32px;
+
   font-size: 16px;
   line-height: 1.65;
   color: var(--ink);
 }
 
-/* 좋아요 / 조회수 / 댓글 */
-.post-stats {
+/* 좋아요 / 댓글 */
+.detail-stats {
   width: 100%;
-  margin: 28px auto 24px;
-  padding-bottom: 34px;
+  margin: 20px auto 0;
+  padding-bottom: 20px;
 
   display: flex;
   justify-content: center;
-  gap: 12px;
-
-  border-bottom: 1.5px solid var(--line);
+  align-items: center;
+  gap: 10px;
 }
 
-.stat-box {
-  width: 116px;
-  height: 77px;
+.detail-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 
-  border: 1.5px solid var(--line);
-  border-radius: 0;
+  padding: 8px 16px;
+
+  border: 1.3px solid var(--line);
+  border-radius: 20px;
   background-color: var(--paper-card);
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-}
-
-.stat-box strong {
   font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-box span {
-  margin-top: 4px;
-
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--ink-soft);
 }
 
-#post-like-button {
-  background-color: var(--paper-card);
+.detail-like-button {
   cursor: pointer;
 }
 
+.detail-stat-icon {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--ink-soft);
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.detail-stat-text {
+  display: inline-flex;
+  gap: 3px;
+}
+
+/* 조회수 (상단 메타 정보) */
+.detail-view-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+
+  font-weight: 700;
+}
+
 /* 좋아요 누른 상태 */
-#post-like-button.is-liked {
-  background-color: var(--tag-yellow);
+.detail-like-button.is-liked {
+  border-color: #e0607a;
+  color: #e0607a;
+}
+
+.detail-like-button.is-liked .detail-stat-icon {
+  fill: #e0607a;
+  stroke: #e0607a;
 }
 
 /* 댓글 작성 영역 */
