@@ -72,6 +72,7 @@ export default function SignupPage() {
             setIsPasswordCheckValid(false);
         } else {
             setPasswordError('');
+            setPasswordCheckError('');
             setIsPasswordCheckValid(true);
         }
     }
