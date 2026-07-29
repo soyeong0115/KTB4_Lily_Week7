@@ -4,9 +4,13 @@ import Toast from '../components/common/Toast.jsx';
 import { API_BASE_URL, request } from '../api/client.js';
 import { useEffect, useState } from 'react';
 import { useModal } from '../hooks/useModal.js';
+import { useAuth } from '../hooks/useAuth.js';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProfileEditPage() {
-    const { showAlertModal, showLoginRequiredModal, isAuthError } = useModal();
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+    const { showAlertModal, showConfirmModal, showLoginRequiredModal, isAuthError } = useModal();
     const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
     const [profileImageUrl, setProfileImageUrl] = useState(null);
@@ -62,6 +66,73 @@ export default function ProfileEditPage() {
         }
     }
 
+    async function handleSubmit() {
+        if (nickname.trim() === '') {
+            setError('* 닉네임을 입력해주세요.');
+            return;
+        }
+
+        if (nickname.length > 10) {
+            setError('* 닉네임은 최대 10자까지 작성 가능합니다.');
+            return;
+        }
+
+        try {
+            await request('/user/profile', {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    nickname: nickname,
+                    profileImage: profileImageUrl,
+                })
+            });
+
+            setError('');
+            setIsToastVisible(true);
+        } catch (error) {
+            if (error.body?.message === 'nickname_duplicated') {
+                setError('* 중복된 닉네임입니다.');
+                return;
+            }
+
+            if (isAuthError(error)) {
+                await showLoginRequiredModal();
+                return;
+            }
+
+            await showAlertModal({ message: '회원정보 수정에 실패했습니다.' });
+            console.error(error);
+        }
+    }
+
+    async function handleWithdraw() {
+        const comfirmWithdraw = await showConfirmModal({
+            title: '회원탈퇴 하시겠습니까?',
+            message: '작성된 게시글과 댓글은 삭제됩니다.'
+        });
+
+        if (!comfirmWithdraw) {
+            return;
+        }
+
+        try {
+            await request('/user', {
+                method: 'DELETE'
+            });
+
+            logout();
+            navigate('/login');
+
+        } catch (error) {
+            if (isAuthError(error)) {
+                await showLoginRequiredModal();
+                return;
+            }
+
+            await showAlertModal({ message: '회원탈퇴에 실패했습니다.' });
+            console.error(error);
+        }
+    }
+
     return (
         <>
             <Header />
@@ -106,16 +177,16 @@ export default function ProfileEditPage() {
                             value={nickname}
                             onChange={(e) => setNickname(e.target.value)}
                          />
-                        <p className="profile-helper-text"></p>
+                        <p className="profile-helper-text">{error}</p>
                     </div>
 
-                    <button className="profile-submit-button" type="button">수정하기</button>
+                    <button className="profile-submit-button" type="button" onClick={handleSubmit}>수정하기</button>
 
-                    <button className="profile-withdraw-button" type="button">
+                    <button className="profile-withdraw-button" type="button" onClick={handleWithdraw}>
                         회원 탈퇴
                     </button>
 
-                    <Toast message="수정완료" isShow={false} onHide={() => {}} />
+                    <Toast message="수정완료" isShow={isToastVisible} onHide={() => setIsToastVisible(false)} />
                 </form>
             </main>
         </>
