@@ -332,6 +332,52 @@ PostsPage (contributors state 소유)
  └─ PostList → onPostsFetched(newPosts) 호출 (부모의 setContributors 트리거)
 ```
 
+#### PostDetailPage
+
+**배경**: `js/post-detail.js` 포팅. 게시글 본문 + 좋아요 + 조회수 + 댓글 CRUD + (작성자 본인이면) 수정/삭제를 모두 다루는 페이지. 조회수는 새로고침이나 같은 페이지 안에서의 재조회 때 중복으로 올라가면 안 되고, 수정/삭제 버튼은 작성자 본인한테만 보여야 한다고 판단해서, 이 두 가지 상태를 어떻게 관리할지 직접 설계함
+
+**State**: `post` — 게시글 상세 응답 객체 전체(제목/본문/작성자/좋아요/조회수/`myPost`/`liked`/`comments` 배열까지)를 그대로 하나의 state로 보관. 원본도 이 모든 값을 개별 DOM에 흩뿌려 넣긴 하지만 결국 한 번의 fetch 응답을 그대로 반영하는 구조라, React에서도 쪼개지 않고 객체 하나로 유지 (3-2 원칙과 동일). `isLiking`(boolean) — 좋아요 요청 진행 중 버튼을 비활성화하기 위한 값, 화면에 직접 반영(disabled)되므로 state
+
+**조회수 처리 방식 (`shouldCountViewRef`)**: 원본은 모듈 스코프 변수 `shouldCountView`를 `PerformanceNavigationTiming`으로 초기화(`navigationEntry?.type !== 'reload'`)하고, 첫 fetch 이후 `false`로 바꿔서 "새로고침이 아닌 최초 진입일 때만, 그리고 이 페이지에 머무는 동안 딱 한 번만" 조회수를 세도록 함. React에서는 이 값이 **화면에 그려지지 않는 제어용 플래그**라 `useRef`로 관리 — `shouldCountViewRef.current`를 첫 fetch 성공 후 `false`로 바꿔서, 좋아요/댓글 CRUD 후 같은 페이지에서 재조회(`fetchPostDetail` 재호출)할 때는 조회수가 중복으로 안 올라가게 함. 초기값 계산(`performance.getEntriesByType('navigation')[0]?.type !== 'reload'`)은 컴포넌트 마운트 시 한 번만 필요하므로 `useRef(() => ...)`처럼 lazy하게 초기화
+
+**게시글 상세 상태의 소유자 (`myPost`)**: 서버 응답의 `post.myPost`(boolean)를 그대로 `post` state 안에 두고, JSX에서 `{post.myPost && <div className="detail-button-group">...}`로 조건부 렌더링. 원본은 `postButtonGroup.style.display = post.myPost ? 'flex' : 'none'`로 CSS를 직접 토글했는데, React에서는 버튼 그룹 자체를 DOM에 아예 안 그리는 방식이라 더 명확함 — "소유자가 아니면 버튼이 화면에 존재하지 않는다"는 게 코드에 그대로 드러남 (CommentItem의 `myComment` 조건부 렌더링과 동일한 패턴, 이미 검증된 방식)
+
+**useEffect**: **있음** — `postId`(URL 파라미터, `useParams()`로 받음)가 바뀔 때마다 `fetchPostDetail()` 재실행. 의존성 `[postId]`
+
+**의존 관계**
+```
+PostDetailPage
+ ├─ useParams() → postId
+ ├─ useModal() → showConfirmModal(삭제 확인)/showAlertModal(에러)/showLoginRequiredModal, isAuthError
+ ├─ useNavigate() → 삭제 성공 시 '/'로 이동
+ ├─ request() → GET(조회, countView 쿼리 포함)/DELETE(삭제)/POST,DELETE(좋아요)
+ ├─ CommentForm (props: postId, editingComment, onSuccess)
+ └─ CommentList (props: comments, postId, onEditRequest, onChanged)
+```
+
+#### CommentForm / CommentList / CommentItem — 댓글 수정 상태 끌어올리기
+
+**문제**: "댓글 수정" 버튼은 `CommentItem`(`CommentList` 안) 안에 있는데, 실제로 그 반응을 받아야 하는 건 별도 형제 컴포넌트인 `CommentForm`(텍스트를 채우고 "댓글 수정" 모드로 전환)이다. `CommentItem`과 `CommentForm`은 형제 컴포넌트라 서로 직접 데이터를 주고받을 수 없다 — 리액트에서 형제끼리 상태를 공유하려면 공통 부모가 그 상태를 들고 있어야 하므로(데이터 흐름 원칙 3-4), `editingComment`도 둘의 공통 부모인 `PostDetailPage`가 소유해야 함
+
+**해결**: `editingComment`(수정 중인 댓글 객체, 없으면 `null`) state를 `PostDetailPage`가 소유. `CommentItem`의 "수정" 클릭 → `onEditRequest(comment)` 콜백으로 부모에 전달 → 부모가 `editingComment`를 갱신 → `CommentForm`이 props로 받아서 텍스트/버튼 라벨을 "수정 모드"로 전환
+
+**State (CommentForm)**: `content`(입력값, 로컬 state — 다른 컴포넌트가 몰라도 되는 입력 중 값이라 로컬로 유지, 데이터 흐름 원칙 "전역으로 꼭 필요한 값만 Context, 나머지는 지역 상태"와 동일)
+
+**State (CommentList, CommentItem)**: 없음 — `comments` 배열은 `PostDetailPage`의 `post.comments`를 그대로 props로 받아 렌더링만 함 (댓글도 게시글 상세 응답에 포함되어 있어 별도 fetch 없음)
+
+**useEffect**: 셋 다 없음 — `editingComment`가 바뀌면 `CommentForm`은 그냥 다음 렌더링에서 `props.editingComment.content`를 입력창 초기값으로 반영(controlled input이라 리렌더링 시 자동 반영됨), 별도 동기화 로직 불필요
+
+**의존 관계**
+```
+PostDetailPage (editingComment state 소유)
+ ├─ CommentForm ← editingComment (props)
+ │    제출 성공 시 → onSuccess() 호출 (부모가 fetchPostDetail 재실행 + editingComment를 null로 리셋)
+ └─ CommentList ← comments, postId (props)
+      └─ CommentItem (comment 하나씩, myComment면 수정/삭제 버튼)
+           "수정" 클릭 → onEditRequest(comment) → 부모의 editingComment 갱신
+           "삭제" 클릭 → 확인 모달 → 삭제 API → onChanged() → 부모가 fetchPostDetail 재실행
+```
+
 ## 3. 상태와 데이터 흐름
 
 ### 3-1. 전역 상태 (Context)
