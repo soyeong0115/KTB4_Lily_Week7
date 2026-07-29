@@ -90,8 +90,8 @@ export default function PostForm({ mode, postId }) {
             }
 
             await showAlertModal(isEditMode
-                ? { message: '* 게시글 수정에 실패했습니다.' }
-                : { message: '* 게시글 작성에 실패했습니다.' }
+                ? { message: '게시글 수정에 실패했습니다.' }
+                : { message: '게시글 작성에 실패했습니다.' }
             );
             console.error(error);
         }
