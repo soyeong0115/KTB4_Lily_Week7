@@ -12,6 +12,9 @@ export default function Toast({ message, isShow, onHide }) {
     }, [isShow, onHide]);
 
     return (
-        <div className={`toast${isShow ? ' is-show' : ''}`}>{message}</div>
+        <div className={`toast${isShow ? ' is-show' : ''}`}>
+            <img className="toast-icon" src="/svg/check.svg" alt="" />
+            {message}
+        </div>
     );
 }
