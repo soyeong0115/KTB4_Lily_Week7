@@ -1,0 +1,533 @@
+# BABBLE. React Migration 설계 문서
+
+현재 바닐라 JS/HTML/CSS로 만들어진 게시판 서비스 "BABBLE."을 React로 마이그레이션하기 위한 설계 문서입니다.
+
+## 1. 기존 프로젝트 분석
+
+### 1-1. 페이지 구성 (8개)
+
+| 페이지 | 파일 | 주요 기능 |
+|---|---|---|
+| 로그인 | index.html | 이메일/비밀번호 로그인, 유효성 검사 |
+| 회원가입 | signup.html | 프로필 이미지 업로드, 이메일/비밀번호/닉네임 입력·검증 |
+| 게시글 목록 | posts.html | 게시글 그리드 카드, 무한 스크롤, 사이드바(소개/로그인·회원가입/글쓰기/기여자 목록) |
+| 게시글 상세 | post-detail.html | 본문, 좋아요, 조회수, 댓글 CRUD, 게시글 수정/삭제(작성자만) |
+| 게시글 작성 | post-create.html | 제목/내용/이미지 입력 |
+| 게시글 수정 | post-edit.html | 작성 폼과 동일 구조 + 기존 값 프리필 |
+| 회원정보수정 | profile-edit.html | 프로필 사진, 닉네임 수정, 회원 탈퇴 |
+| 비밀번호수정 | password-edit.html | 현재/새 비밀번호 변경 |
+
+### 1-2. 공통 요소
+
+- **헤더**: 로고(BABBLE.) + 로그인 상태에 따라 분기되는 영역
+  - 비로그인: 로그인/회원가입 버튼 (게시글 목록 사이드바에 위치)
+  - 로그인: 프로필 아바타 → 클릭 시 드롭다운(로그아웃/회원정보수정/비밀번호수정)
+- **모달**: `alert()`/`confirm()`을 대체하는 커스텀 확인/알림 모달 (삭제 확인, 에러 안내 등 전역 공용)
+- **인증**: JWT `accessToken`을 `localStorage`에 저장, `js/api.js`의 공통 `request()` 함수가 매 요청에 `Authorization` 헤더 자동 부착
+- **아바타**: 프로필 사진이 없으면 `userId % 5`로 계산한 고정 색상 배경 + 닉네임 첫 글자로 표시 (같은 사람이면 헤더/목록/상세/댓글/기여자 목록 어디서 봐도 항상 같은 색). 실제 프로필 사진을 올린 경우에도 이 5곳 전부에 동일한 사진이 표시됨 (`js/avatar.js`의 `getAvatarColor` 공용 함수)
+
+### 1-3. 핵심 기능
+
+- 회원가입/로그인/로그아웃, 회원정보·비밀번호 수정, 회원 탈퇴
+- 게시글 CRUD (이미지 업로드 포함), 내가 쓴 게시글에만 수정/삭제 버튼 노출 (서버가 내려주는 `myPost` 값으로 판단)
+- 댓글 CRUD (내가 쓴 댓글에만 수정/삭제 버튼 노출, 서버가 내려주는 `myComment` 값으로 판단)
+- 좋아요 토글
+- 조회수 카운트 (작성자 본인 제외, 새로고침 시 중복 방지 — `PerformanceNavigationTiming`으로 새로고침 여부 판단)
+- 무한 스크롤 (IntersectionObserver로 다음 페이지 로드)
+- 게시글 목록에 썸네일 이미지/본문 미리보기 표시 (이미지 없으면 본문 미리보기만)
+- 폼 유효성 검사 및 인라인 에러 메시지
+
+### 1-4. 현재 구조의 한계 (마이그레이션 동기)
+
+- 페이지마다 `<script>`로 로드되는 JS 파일이 독립적으로 DOM을 직접 조작(`querySelector` + `innerHTML`) → 상태와 뷰가 강하게 결합되어 있어 재사용/테스트가 어려움
+- "로그인 여부", "내 댓글인지" 같은 값을 페이지마다 각자 `localStorage`/API 응답에서 다시 계산 → 로직 중복
+- 컴포넌트 단위 재사용이 불가능해서 카드/버튼/폼 필드 같은 반복 UI를 매번 문자열 템플릿으로 새로 씀
+
+## 2. 예상 컴포넌트 구조
+
+### 2-1. 컴포넌트 분리 기준
+
+무작정 잘게 쪼개지 않고, 아래 4가지 기준에 해당할 때만 별도 컴포넌트로 분리합니다.
+
+1. **목록/아이템 분리** — `.map()`으로 반복 렌더링되는 대상은 분리 (`PostList`/`PostCard`, `CommentList`/`CommentItem`)
+2. **독립적인 상태·로직 보유** — 자체 입력 상태나 제출 로직이 있으면 분리 (`CommentForm`은 텍스트 입력 상태 + 제출 로직이 있어 단순 표시용인 `CommentList`와 분리)
+3. **여러 페이지에서 재사용** — 2곳 이상에서 쓰이면 공용 컴포넌트로 (`Header`, `Modal`, `SidebarTag`, `PrimaryButton`)
+4. **위 세 조건에 해당 안 되면 분리하지 않음** — 한 페이지에서만 쓰이고 표시 로직만 있는 경우 상위 컴포넌트에 인라인으로 유지 (예: 좋아요/조회수/댓글수 표시는 `PostDetailPage` 안에 그대로 둠)
+
+### 2-2. 폴더 구조
+
+```
+src/
+├── App.jsx                     # 라우터 진입점
+├── pages/
+│   ├── LoginPage.jsx
+│   ├── SignupPage.jsx
+│   ├── PostsPage.jsx
+│   ├── PostDetailPage.jsx
+│   ├── PostCreatePage.jsx
+│   ├── PostEditPage.jsx
+│   ├── ProfileEditPage.jsx
+│   └── PasswordEditPage.jsx
+├── components/
+│   ├── layout/
+│   │   ├── Header.jsx           # 로고 + AuthMenu
+│   │   └── AuthMenu.jsx         # 로그인 상태에 따라 AuthLinks | ProfileDropdown 분기
+│   ├── post/
+│   │   ├── PostList.jsx         # 무한 스크롤 컨테이너
+│   │   ├── PostCard.jsx         # 목록 카드 1개
+│   │   ├── PostForm.jsx         # 작성/수정 공용 폼
+│   │   └── PostSidebar.jsx      # Info/Auth/Contributors/글쓰기 버튼
+│   ├── comment/
+│   │   ├── CommentForm.jsx
+│   │   ├── CommentList.jsx
+│   │   └── CommentItem.jsx      # myComment면 수정/삭제 버튼 노출
+│   ├── common/
+│   │   ├── Modal.jsx            # ConfirmModal / AlertModal 공용 베이스
+│   │   ├── SidebarTag.jsx       # 색상 태그 칩
+│   │   ├── PrimaryButton.jsx
+│   │   └── FormField.jsx        # label + input + helperText 묶음
+│   └── ProtectedRoute.jsx       # accessToken 없으면 로그인 페이지로 리다이렉트
+├── hooks/
+│   ├── useAuth.js               # AuthContext 소비용
+│   ├── useModal.js              # 모달 열기/닫기 + Promise 기반 confirm/alert
+│   └── useInfiniteScroll.js     # IntersectionObserver 래핑
+├── contexts/
+│   └── AuthContext.jsx          # accessToken, 로그인 여부, 로그아웃 함수 전역 제공
+|   └── ModalContext.jsx 
+├── utils/
+│   └── avatarColor.js           # 기존 js/avatar.js(getAvatarColor) 포팅 — userId 기반 고정 색상 계산
+└── api/
+    ├── client.js                # 기존 js/api.js(request 함수) 포팅
+    ├── authApi.js
+    ├── postApi.js
+    ├── commentApi.js
+    └── userApi.js
+```
+
+(`PostStats`처럼 한 페이지에서만 쓰이고 표시 전용인 요소는 위 분리 기준 4번에 따라 별도 파일로 빼지 않고 `PostDetailPage` 내부에 둡니다.)
+
+### 2-3. 라우팅
+
+| 경로 | 페이지 | 인증 필요 |
+|---|---|---|
+| `/` | `PostsPage` (게시글 목록) | X — 로그인 여부와 무관하게 진입 가능한 홈 화면 역할을 겸함 |
+| `/login` | `LoginPage` | X |
+| `/signup` | `SignupPage` | X |
+| `/posts/:postId` | `PostDetailPage` | X (단, 좋아요·댓글 작성은 로그인 필요) |
+| `/posts/new` | `PostCreatePage` | O |
+| `/posts/:postId/edit` | `PostEditPage` | O (작성자만) |
+| `/profile/edit` | `ProfileEditPage` | O |
+| `/password/edit` | `PasswordEditPage` | O |
+
+`PostsPage`는 이름은 "게시글 목록"이지만 실제로는 `/` 루트 경로에 매핑되어 로그인 여부와 상관없이 첫 진입 화면(홈) 역할도 겸합니다. 컴포넌트 이름을 `HomePage` 등으로 따로 바꾸지 않고, 라우팅 표로 역할을 명시하는 방식을 택했습니다.
+
+### 2-4. 컴포넌트별 역할 요약
+
+- **Header / AuthMenu**: 전역에서 로그인 상태만 구독하고, 실제 로그인/회원가입/프로필 링크는 `AuthMenu`가 조건부 렌더링
+- **avatarColor 유틸**: `userId % 5`로 태그 색상 인덱스를 계산하는 순수 함수. `Header`, `PostCard`, `CommentItem`, `PostSidebar`(Contributors)가 전부 이 함수 하나를 공유해서, 프로필 사진이 없을 때도 어디서 봐도 같은 사람은 같은 배경색으로 보이도록 함
+- **PostCard**: 목록 API 응답 하나(post)를 props로 받아 순수하게 렌더링만 담당 (색상 태그/그래픽 패턴은 postId 기반, 작성자 아바타 색상은 `avatarColor` 유틸로 결정)
+- **PostForm**: 작성/수정 페이지가 동일한 필드 구성을 쓰므로 `mode="create" | "edit"` prop으로 하나의 컴포넌트를 공유
+- **PostDetailPage**: `myPost`(서버 응답)를 기준으로 수정/삭제 버튼 노출 여부를 결정 (`CommentItem`의 `myComment`와 동일한 패턴)
+- **CommentItem**: `myComment`(서버 응답)를 기준으로 수정/삭제 버튼 노출 여부만 결정, 실제 삭제 확인은 `useModal` 훅 통해 처리
+- **Modal**: `ConfirmModal`/`AlertModal`이 하나의 `Modal` 베이스 위에서 버튼 구성만 다르게 가져가는 구조. 현재 바닐라 JS의 Promise 기반 `showConfirmModal`/`showAlertModal`(`js/modal.js`)을 `useModal` 훅으로 그대로 승격
+- **ProtectedRoute**: `js/profile-edit.js`에 있던 "로그인 안 되어 있으면 index로 리다이렉트" 로직을 라우트 가드로 승격
+
+### 2-5. 컴포넌트 상세 설계
+
+4장의 마이그레이션 단계를 진행하면서, 컴포넌트/훅 단위로 state·부수효과·의존관계를 아래 형식으로 구체화합니다. (피드백 반영: 컴포넌트 이름 + 한 줄 설명 수준을 넘어서, 실제 구현 직전 수준까지 미리 정리)
+
+#### 모달 (ModalContext / useModal / Modal)
+
+**배경**: `showConfirmModal`/`showAlertModal`(`js/modal.js`)은 `comment.js`, `post-detail.js`, `post-create.js`, `post-edit.js`, `profile-edit.js`, `password-edit.js`, `signup.js` 등 거의 전 페이지에서 호출됨. 지금은 모달 DOM이 `document.body`에 바로 붙는 전역 오버레이이기 때문에, React에서도 컴포넌트 로컬 state가 아니라 **Context로 전역 공유**해야 함 (`AuthContext`와 동일한 이유).
+
+**파일별 역할**
+
+| 파일 | 역할 |
+|---|---|
+| `contexts/ModalContext.jsx` | state 소유 + Promise 생성/완료 로직 + `ModalProvider` (내부에서 `Modal` 렌더링까지 포함) |
+| `hooks/useModal.js` | `ModalContext`를 소비하는 얇은 훅. 컴포넌트에서는 `useModal()`로만 접근. **공개 API 이름은 `showConfirmModal`/`showAlertModal`/`showLoginRequiredModal`/`isAuthError`** — `ModalContext`의 내부 함수명(`showConfirm`/`showAlert`)과 다르게, 원본 바닐라 `js/modal.js`의 함수명과 맞춰서 이 훅 안에서 이름을 바꿔 내보냄 (`showConfirmModal: context.showConfirm` 형태). `isAuthError`도 여기서 직접 구현 |
+| `components/common/Modal.jsx` | 순수 표시 컴포넌트. Promise/resolve를 전혀 모름 — props로 받은 상태를 그리고, 받은 콜백을 그대로 실행만 함 |
+
+**State — `ModalContext` 안에 위치**
+
+| 이름 | 종류 | 용도 |
+|---|---|---|
+| `modalState` | `useState` | 현재 열린 모달 내용 (`null`이면 닫힘) — `{ type, title, message, confirmText, cancelText }` |
+| `resolveRef` | `useRef` | Promise의 `resolve` 함수를 보관. `showConfirm`에서 만들어져서 `handleConfirm`/`handleCancel`에서 꺼내 씀. 화면에 그려지는 값이 아니라서(리렌더링 트리거 불필요) state 대신 ref 사용 |
+
+**함수 — `ModalContext` 안에 위치**
+
+| 함수 | 하는 일 |
+|---|---|
+| `showConfirm(options)` | `new Promise`로 감싸서 `resolve`를 `resolveRef`에 저장 → `modalState` 오픈 → Promise 반환 (호출부에서 `await`) |
+| `showAlert(options)` | 위와 동일한 패턴, 버튼 1개(확인)만 있는 버전 |
+| `handleConfirm` | `resolveRef.current(true)` 호출 → `modalState`를 `null`로 리셋 |
+| `handleCancel` | `resolveRef.current(false)` 호출 → `modalState`를 `null`로 리셋 |
+
+`handleConfirm`/`handleCancel`이 `Modal.jsx`가 아니라 `ModalContext`에 있는 이유: `resolveRef`는 `showConfirm`이 호출된 그 컴포넌트(Context) 안에서만 유효한 값이라, 같은 파일 안에서 만들고 같은 파일 안에서 꺼내 써야 함. `Modal.jsx`는 이 함수들을 `onConfirm`/`onCancel` props로 받아서 버튼 클릭 시 그대로 실행만 함.
+
+**useEffect**: 없음 — 순수 이벤트 기반 상태 전이라 부수효과 불필요
+
+**의존 관계**
+
+```
+App.jsx
+ └─ ModalProvider (ModalContext.jsx)
+     ├─ <Modal modalState={modalState} onConfirm={handleConfirm} onCancel={handleCancel} />
+     │    (modalState가 null이면 Modal 내부에서 아무것도 렌더링 안 함)
+     └─ {children} — 앱의 나머지 전체
+          └─ (어디서든) useModal() 호출 → showConfirmModal/showAlertModal/showLoginRequiredModal/isAuthError 사용
+               예: CommentItem, PostDetailPage, PostCreatePage, ProfileEditPage 등
+```
+
+**버그 수정 이력**: 5단계에서 `useModal()`의 실제 반환값이 `showConfirm`/`showAlert`(이름 안 바뀜)뿐이고 `isAuthError`는 아예 없다는 걸 발견 — 여러 컴포넌트가 존재하지 않는 함수를 호출해서 런타임에 크래시가 나는 버그였음. `useModal.js`에서 이름을 바꿔 내보내고 `isAuthError`를 구현하는 것으로 수정 (1단계 구현 때부터 있었던 버그, 실제 실패 경로를 브라우저로 테스트하기 전까진 드러나지 않았음)
+
+#### AuthMenu
+
+**배경**: `Header`가 항상 렌더링하는 자식. 로그인 여부에 따라 로그인/회원가입 링크 또는 로그아웃 버튼을 보여줌. (1차 구현은 간단 버전 — 프로필 사진/닉네임 표시는 이후 단계에서 추가 예정)
+
+**State**: 없음 — 자체 state 없이 `useAuth()`가 반환하는 `isLoggedIn`/`logout`만 그대로 사용
+
+**useEffect**: 없음 — fetch나 구독 등 외부와 동기화할 게 없고, Context에서 받은 값을 그대로 렌더링만 하기 때문
+
+**의존 관계**
+```
+App.jsx
+ └─ AuthProvider (AuthContext.jsx)
+     └─ Header
+         └─ AuthMenu — useAuth()로 AuthContext 구독
+              isLoggedIn=false → <Link to="/login">, <Link to="/signup">
+              isLoggedIn=true  → <button onClick={logout}>로그아웃</button>
+```
+
+#### ProtectedRoute
+
+**배경**: `App.jsx`에서 로그인 필요한 라우트(`/posts/new`, `/posts/:postId/edit`, `/profile/edit`, `/password/edit`)를 감싸는 라우트 가드. 기존 `js/profile-edit.js` 등 페이지마다 흩어져 있던 "로그인 안 되어 있으면 리다이렉트" 체크를 한 곳으로 모음
+
+**State**: 없음 — `useAuth()`의 `isLoggedIn`만 그대로 사용
+
+**useEffect**: 없음 — 렌더링 시점에 `isLoggedIn` 값만 보고 즉시 `children` 또는 `<Navigate>`를 반환하는 순수 조건부 렌더링이라 부수효과 불필요
+
+**의존 관계**
+```
+App.jsx
+ └─ AuthProvider
+     └─ <Route element={<ProtectedRoute><PostCreatePage /></ProtectedRoute>} /> 등
+          isLoggedIn=false → <Navigate to="/login" /> (실제 페이지는 렌더링 안 됨)
+          isLoggedIn=true  → children(실제 페이지) 그대로 렌더링
+```
+
+#### LoginPage
+
+**배경**: `js/login.js`의 이메일/비밀번호 검증 + 로그인 API 호출 로직을 포팅
+
+**State**: 필드값(`email`, `password`) + 필드마다 에러 메시지/유효 여부 쌍(`emailError`/`isEmailValid`, `passwordError`/`isPasswordValid`) — 총 6개. 에러 메시지(표시용 문자열)와 유효 여부(버튼 활성화 판단용 boolean)를 분리해서 관리 — `js/login.js`의 `validationState` 객체를 필드별 boolean state로 풀어낸 것과 텍스트 콘텐츠(DOM 조작)를 state로 승격한 것의 조합
+
+**useEffect**: 없음 — 검증은 `onBlur` 이벤트 시점에만 실행(입력 중이 아니라 포커스를 벗어날 때), 제출은 버튼 클릭 시점에만 실행. 둘 다 렌더링과 무관하게 이벤트에 반응하는 것이라 useEffect 불필요
+
+**의존 관계**
+```
+LoginPage
+ ├─ useAuth() → login(accessToken) 호출 (로그인 성공 시 AuthContext에 토큰 저장)
+ ├─ useNavigate() → 로그인 성공 시 '/'(게시글 목록)로 이동
+ └─ request() (api/client.js) → POST /auth/login 호출
+```
+
+#### SignupPage
+
+**배경**: `js/signup.js` 포팅. `LoginPage`보다 필드가 많고(이메일/비밀번호/비밀번호확인/닉네임) 프로필 이미지 업로드가 추가로 있음
+
+**State**: 필드값 5개(`email`, `password`, `passwordCheck`, `nickname`, `profileImageUrl`) + 필드마다 에러/유효 쌍 4개(이미지 제외, 총 8개) — `LoginPage`와 같은 패턴을 필드 수만큼 확장. `passwordCheck`는 `password`와 일치 여부까지 함께 검사하는 게 다른 필드와의 차이점
+
+**useEffect**: 없음 — `LoginPage`와 동일하게 전부 이벤트(blur/change/click) 기반
+
+**의존 관계**
+```
+SignupPage
+ ├─ useModal() → showAlertModal (이미지 업로드 실패 시 알림)
+ ├─ useNavigate() → 회원가입 성공 시 '/login'으로 이동
+ └─ request() (api/client.js) → POST /images(이미지 업로드), POST /auth/signup(가입)
+```
+회원가입 실패 시 서버 응답의 `message`(`email_duplicated`/`nickname_duplicated`)에 따라 해당 필드의 에러 state만 개별적으로 갱신 — `js/signup.js`와 동일한 분기 처리
+
+#### useInfiniteScroll
+
+**배경**: `js/posts.js`의 `IntersectionObserver` 기반 무한 스크롤 로직을 훅으로 승격. 지금까지 만든 훅(`useModal`, `useAuth`)은 이미 있는 Context를 소비만 했는데, 이건 브라우저 API(`IntersectionObserver`)를 직접 다루는 **처음 만드는 진짜 커스텀 훅**
+
+**시그니처**: `const { loaderRef } = useInfiniteScroll({ onIntersect, isLoadingRef, hasNextPageRef, root, threshold })`
+
+처음엔 `callback`만 받는 단순한 형태로 설계했는데, 실제로 만들다 보니 `callback`(=`fetchPosts`)이 `PostList`가 리렌더링될 때마다 매번 새로 만들어지는 함수라 `useEffect`가 의존성(`[callback]`) 때문에 불필요하게 자주 재실행되는(observer disconnect→재생성) 문제가 있었음. 그래서 `isLoading`/`hasNext`를 **ref**로 받아 observer 콜백 내부에서 직접 최신값을 읽고, `onIntersect` 자체도 `useCallback`으로 감싸서 참조를 고정 — 리렌더링과 무관하게 observer가 유지되도록 개선
+
+**State**: 없음 (내부적으로 `loaderRef`, `observerRef` 두 개의 `useRef`만 사용 — `observerRef`는 매번 새 observer를 만들기 전에 이전 것을 정리하기 위한 용도)
+
+**useEffect**: **있음** — `IntersectionObserver`는 리액트가 모르는 브라우저 API라서 DOM에 렌더링된 뒤 관찰 대상으로 등록하는 부수효과가 필요함. 의존성 배열은 `[handleObserver, root, threshold]` — `callback` 그 자체가 아니라 `useCallback`으로 감싼 `handleObserver`를 의존성으로 둬서, `onIntersect`/`isLoadingRef`/`hasNextPageRef`가 안 바뀌면 `handleObserver`도 참조가 안 바뀌고, 그러면 이 effect도 재실행이 안 됨(불필요한 observer 재생성 방지). cleanup에서 `observer.disconnect()` + `observerRef.current = null`
+
+**의존 관계**
+```
+PostList
+ ├─ isLoadingRef, hasNextPageRef (useRef) → fetchPosts 안에서 최신값 읽기용
+ └─ useInfiniteScroll({ onIntersect: fetchPosts, isLoadingRef, hasNextPageRef }) → loaderRef 반환
+      loader DOM 요소가 화면에 보이고 + 로딩중 아니고 + 다음 페이지 있으면 → fetchPosts() 실행
+```
+
+#### PostCard
+
+**배경**: `js/posts.js`의 `renderPosts` 안 카드 1개 렌더링 부분을 컴포넌트로 분리 (컴포넌트 분리 기준 1번: 목록/아이템 분리)
+
+**State**: 없음, **useEffect**: 없음 — `post` 객체 하나를 props로 받아 순수 렌더링만 함
+
+**의존 관계**
+```
+PostList
+ └─ PostCard (post 하나씩, key={post.postId})
+      ├─ avatarColor 유틸 → 작성자 아바타 색상
+      └─ react-router Link → '/posts/:postId'로 이동 (기존 <a href> 대체)
+```
+
+#### PostList
+
+**배경**: 게시글 목록 fetch + 무한 스크롤 담당. `js/posts.js`의 `fetchPosts`/`currentPage`/`hasNext`/`isLoading` 전역 변수를 컴포넌트 state로 승격
+
+**State**: `posts`(배열)만 실제 `useState` — 화면에 그려지는 값이라 바뀌면 리렌더링 필요. `page`, `hasNext`, `isLoading`은 **`useRef`**로 관리 — 셋 다 화면에 직접 표시되는 값이 아니라 "다음 fetch를 어떻게 할지" 판단하는 내부 제어용 값이라, `useInfiniteScroll` 설계와 같은 이유로 ref를 씀 (state로 하면 바뀔 때마다 불필요한 리렌더링 + `fetchPosts` 함수 재생성 → observer 재연결까지 이어짐)
+
+**useEffect**: **있음** — 마운트 시 첫 페이지(0페이지)를 자동으로 불러와야 하므로, 빈 의존성 배열(`[]`)로 마운트 시 1회만 `fetchPosts()` 실행. 이후 페이지는 `useInfiniteScroll`이 트리거함
+
+**의존 관계 / 데이터 흐름**
+```
+PostsPage
+ └─ PostList (props: onPostsFetched)
+      ├─ fetchPosts() — useCallback으로 감싸서 참조 고정. 성공 시: setPosts로 목록 갱신 + onPostsFetched(newPosts) 호출 + pageRef/hasNextRef 갱신
+      └─ useInfiniteScroll({ onIntersect: fetchPosts, isLoadingRef, hasNextPageRef })로 무한 스크롤 연결
+```
+
+#### PostSidebar
+
+**배경**: Info 박스 + (로그인 여부에 따라) 로그인/회원가입 링크 또는 글쓰기 버튼 + Contributors 목록
+
+**State**: 없음 — `contributors`는 props로 받음(아래 "상태 끌어올리기" 참고), 로그인 여부는 `useAuth()`로 직접 구독
+
+**useEffect**: 없음 — 전부 props/Context를 그대로 렌더링
+
+**의존 관계**
+```
+PostsPage
+ └─ PostSidebar (props: contributors)
+      useAuth().isLoggedIn=false → 로그인/회원가입 링크
+      useAuth().isLoggedIn=true  → 글쓰기 버튼
+      contributors.map(...) → 기여자 아바타 목록
+```
+
+#### PostsPage — 상태 끌어올리기(Lifting State Up)
+
+**문제**: Contributors 데이터는 `PostList`가 fetch하는 게시글에서 뽑아내야 하는데(작성자 정보), 화면에 표시하는 건 `PostSidebar`다. 이 둘은 형제 컴포넌트라 서로 직접 데이터를 주고받을 수 없음 — 리액트에서 형제끼리 상태를 공유하려면 **공통 부모가 그 상태를 들고 있어야 함**(데이터 흐름 원칙 3-4와 동일한 이유)
+
+**해결**: `contributors` state를 부모인 `PostsPage`가 소유. `PostList`가 새 게시글을 받아올 때마다 `onPostsFetched(newPosts)` 콜백으로 부모에게 알리고, `PostsPage`가 그 안에서 중복 제거(`userId` 기준, 최대 8명 — 원본의 `seenContributors` Set/`CONTRIBUTOR_LIMIT`과 동일한 규칙) 후 `contributors`를 갱신, `PostSidebar`에 props로 내려줌
+
+**State**: `contributors`(배열)
+
+**useEffect**: 없음 — `onPostsFetched` 콜백 안에서 동기적으로 계산 후 `setContributors` 호출, 별도 부수효과 불필요
+
+**의존 관계**
+```
+PostsPage (contributors state 소유)
+ ├─ PostSidebar ← contributors (읽기 전용 props)
+ └─ PostList → onPostsFetched(newPosts) 호출 (부모의 setContributors 트리거)
+```
+
+#### PostDetailPage
+
+**배경**: `js/post-detail.js` 포팅. 게시글 본문 + 좋아요 + 조회수 + 댓글 CRUD + (작성자 본인이면) 수정/삭제를 모두 다루는 페이지. 조회수는 새로고침이나 같은 페이지 안에서의 재조회 때 중복으로 올라가면 안 되고, 수정/삭제 버튼은 작성자 본인한테만 보여야 한다고 판단해서, 이 두 가지 상태를 어떻게 관리할지 직접 설계함
+
+**State**: `post` — 게시글 상세 응답 객체 전체(제목/본문/작성자/좋아요/조회수/`myPost`/`liked`/`comments` 배열까지)를 그대로 하나의 state로 보관. 원본도 이 모든 값을 개별 DOM에 흩뿌려 넣긴 하지만 결국 한 번의 fetch 응답을 그대로 반영하는 구조라, React에서도 쪼개지 않고 객체 하나로 유지 (3-2 원칙과 동일). `isLiking`(boolean) — 좋아요 요청 진행 중 버튼을 비활성화하기 위한 값, 화면에 직접 반영(disabled)되므로 state
+
+**조회수 처리 방식 (`shouldCountViewRef`)**: 원본은 모듈 스코프 변수 `shouldCountView`를 `PerformanceNavigationTiming`으로 초기화(`navigationEntry?.type !== 'reload'`)하고, 첫 fetch 이후 `false`로 바꿔서 "새로고침이 아닌 최초 진입일 때만, 그리고 이 페이지에 머무는 동안 딱 한 번만" 조회수를 세도록 함. React에서는 이 값이 **화면에 그려지지 않는 제어용 플래그**라 `useRef`로 관리 — `shouldCountViewRef.current`를 첫 fetch 성공 후 `false`로 바꿔서, 좋아요/댓글 CRUD 후 같은 페이지에서 재조회(`fetchPostDetail` 재호출)할 때는 조회수가 중복으로 안 올라가게 함. 초기값 계산(`performance.getEntriesByType('navigation')[0]?.type !== 'reload'`)은 컴포넌트 마운트 시 한 번만 필요하므로 `useRef(() => ...)`처럼 lazy하게 초기화
+
+**게시글 상세 상태의 소유자 (`myPost`)**: 서버 응답의 `post.myPost`(boolean)를 그대로 `post` state 안에 두고, JSX에서 `{post.myPost && <div className="detail-button-group">...}`로 조건부 렌더링. 원본은 `postButtonGroup.style.display = post.myPost ? 'flex' : 'none'`로 CSS를 직접 토글했는데, React에서는 버튼 그룹 자체를 DOM에 아예 안 그리는 방식이라 더 명확함 — "소유자가 아니면 버튼이 화면에 존재하지 않는다"는 게 코드에 그대로 드러남 (CommentItem의 `myComment` 조건부 렌더링과 동일한 패턴, 이미 검증된 방식)
+
+**useEffect**: **있음** — `postId`(URL 파라미터, `useParams()`로 받음)가 바뀔 때마다 `fetchPostDetail()` 재실행. 의존성 `[postId]`
+
+**의존 관계**
+```
+PostDetailPage
+ ├─ useParams() → postId
+ ├─ useModal() → showConfirmModal(삭제 확인)/showAlertModal(에러)/showLoginRequiredModal, isAuthError
+ ├─ useNavigate() → 삭제 성공 시 '/'로 이동
+ ├─ request() → GET(조회, countView 쿼리 포함)/DELETE(삭제)/POST,DELETE(좋아요)
+ ├─ CommentForm (props: postId, editingComment, onSuccess)
+ └─ CommentList (props: comments, postId, onEditRequest, onChanged)
+```
+
+#### CommentForm / CommentList / CommentItem — 댓글 수정 상태 끌어올리기
+
+**문제**: "댓글 수정" 버튼은 `CommentItem`(`CommentList` 안) 안에 있는데, 실제로 그 반응을 받아야 하는 건 별도 형제 컴포넌트인 `CommentForm`(텍스트를 채우고 "댓글 수정" 모드로 전환)이다. `CommentItem`과 `CommentForm`은 형제 컴포넌트라 서로 직접 데이터를 주고받을 수 없다 — 리액트에서 형제끼리 상태를 공유하려면 공통 부모가 그 상태를 들고 있어야 하므로(데이터 흐름 원칙 3-4), `editingComment`도 둘의 공통 부모인 `PostDetailPage`가 소유해야 함
+
+**해결**: `editingComment`(수정 중인 댓글 객체, 없으면 `null`) state를 `PostDetailPage`가 소유. `CommentItem`의 "수정" 클릭 → `onEditRequest(comment)` 콜백으로 부모에 전달 → 부모가 `editingComment`를 갱신 → `CommentForm`이 props로 받아서 텍스트/버튼 라벨을 "수정 모드"로 전환
+
+**State (CommentForm)**: `content`(입력값, 로컬 state — 다른 컴포넌트가 몰라도 되는 입력 중 값이라 로컬로 유지, 데이터 흐름 원칙 "전역으로 꼭 필요한 값만 Context, 나머지는 지역 상태"와 동일)
+
+**State (CommentList, CommentItem)**: 없음 — `comments` 배열은 `PostDetailPage`의 `post.comments`를 그대로 props로 받아 렌더링만 함 (댓글도 게시글 상세 응답에 포함되어 있어 별도 fetch 없음)
+
+**useEffect**: 셋 다 없음 — `editingComment`가 바뀌면 `CommentForm`은 그냥 다음 렌더링에서 `props.editingComment.content`를 입력창 초기값으로 반영(controlled input이라 리렌더링 시 자동 반영됨), 별도 동기화 로직 불필요
+
+**의존 관계**
+```
+PostDetailPage (editingComment state 소유)
+ ├─ CommentForm ← editingComment (props)
+ │    제출 성공 시 → onSuccess() 호출 (부모가 fetchPostDetail 재실행 + editingComment를 null로 리셋)
+ └─ CommentList ← comments, postId (props)
+      └─ CommentItem (comment 하나씩, myComment면 수정/삭제 버튼)
+           "수정" 클릭 → onEditRequest(comment) → 부모의 editingComment 갱신
+           "삭제" 클릭 → 확인 모달 → 삭제 API → onChanged() → 부모가 fetchPostDetail 재실행
+```
+
+#### PostForm — `js/post-create.js` vs `js/post-edit.js` diff 기반 설계
+
+**diff 결과**: 두 파일을 비교해보면 필드 구성(제목/내용/이미지)과 검증 로직이 사실상 동일하고, 다른 부분은 아래 5가지뿐
+
+| 다른 점 | post-create | post-edit |
+|---|---|---|
+| 마운트 시 초기 fetch | 없음(빈 폼) | 있음(`GET /posts/:id`로 기존 값 채움) |
+| 제출 API | `POST /posts` | `PATCH /posts/:id` |
+| 제출 성공 후 이동 | `/`(목록) | `/posts/:id`(상세) |
+| 헤딩 태그/문구 | `tag-yellow` "New Post"/"작성" | `tag-pink` "Edit Post"/"수정" |
+| 제출 버튼 라벨 | "완료" | "수정하기" |
+
+나머지(제목/내용 컨트롤드 인풋, 이미지 업로드, 유효성 검사, 에러 표시)는 완전히 동일 로직이라 `PostForm` 하나로 합치고 `mode`("create" | "edit") prop으로 위 5가지만 분기
+
+**참고**: 원본은 `post-create.js`가 `blur` 시점에 `post-edit.js`가 `input` 시점에 검증하는 미묘한 차이가 있었는데, React에서는 컨트롤드 인풋이라 `title`/`content` state가 타이핑마다 항상 최신값이고 버튼 `disabled`도 렌더링마다 다시 계산되는 값이라 이 차이 자체가 자연스럽게 사라짐(둘 다 실시간 검증과 동일하게 동작) — 이식하면서 없어진 원본 간 사소한 동작 차이
+
+**State**: `title`, `content`(컨트롤드 인풋), `imageUrl`(업로드/기존 이미지 경로), `fileName`(파일 선택 영역에 표시할 텍스트), `error`(제출/검증 실패 메시지), `isSubmitting`(제출 중 버튼 비활성화용)
+
+**useEffect**: `mode === 'edit'`일 때만 마운트 시 기존 게시글을 fetch해서 `title`/`content`/`imageUrl`/`fileName` 초기값 채움. 의존성 `[postId]` (create 모드에선 `postId`가 없으므로 effect 내부에서 `mode` 체크 후 조기 반환)
+
+**의존 관계**
+```
+PostCreatePage → <PostForm mode="create" />
+PostEditPage   → <PostForm mode="edit" postId={postId} />
+
+PostForm
+ ├─ useModal() → showAlertModal, showLoginRequiredModal, isAuthError
+ ├─ useNavigate() → 성공 시 mode에 따라 '/' 또는 `/posts/${postId}`
+ └─ request() → GET(edit 초기 로드)/POST 또는 PATCH(제출)/POST(이미지 업로드)
+```
+
+#### Toast (신규 공용 컴포넌트)
+
+**배경**: `profile-edit.js`/`password-edit.js` 둘 다 "수정완료" 토스트를 쓰는데, CSS(`profile-complete-toast`/`edit-password-complete-toast`)가 클래스 이름만 다르고 스타일은 완전히 동일 — 컴포넌트 분리 기준 3번("2곳 이상에서 재사용")에 해당해서 `components/common/Toast.jsx`로 새로 뽑음 (기존 폴더 구조엔 없던 컴포넌트라 추가)
+
+**props**: `message`(표시할 텍스트), `isShow`(boolean), `onHide`(자동으로 숨길 시점에 부모에게 알리는 콜백)
+
+**State**: 없음
+
+**useEffect**: **있음** — `isShow`가 `true`가 되면 일정 시간(1.5초) 후 `onHide()`를 호출하는 타이머를 설치. `isShow`가 `false`로 바뀌거나 컴포넌트가 사라지면 타이머를 정리(cleanup)해야 하므로 `setTimeout`의 ID를 저장해뒀다가 `return () => clearTimeout(id)`로 정리. 의존성 `[isShow, onHide]` — 타이머를 부모가 아니라 `Toast` 자신이 관리해서, 호출하는 쪽(`ProfileEditPage`/`PasswordEditPage`)은 `setTimeout` 코드를 반복해서 쓸 필요 없이 `isShow`만 `true`로 켜주면 됨
+
+**애니메이션**: 기존 `display: none` ↔ `flex` 토글은 즉시 나타났다 사라져서 부드러운 느낌이 없음 → `opacity` + `transition`으로 교체해서 서서히 사라지는 효과로 개선 (기존 동작에서 벗어나는 개선점)
+
+**의존 관계**
+```
+ProfileEditPage / PasswordEditPage
+ └─ <Toast message="..." isShow={isToastVisible} onHide={() => setIsToastVisible(false)} />
+      Toast 내부 타이머가 시간 다 되면 onHide() 호출 → 부모의 isToastVisible을 false로
+```
+
+#### ProfileEditPage
+
+**배경**: `js/profile-edit.js` 포팅. 프로필 이미지 변경 + 닉네임 수정 + 회원 탈퇴
+
+**State**: `email`(조회 전용, 수정 불가), `nickname`, `profileImageUrl`, `error`, `isToastVisible`
+
+**useEffect**: 마운트 시 `GET /user/profile`로 내 정보 조회해서 `email`/`nickname`/`profileImageUrl` 채움. 의존성 `[]`
+
+**원본 버그 수정**: 원본 `profileImageInput.addEventListener('click', ...)`는 실제로는 `'change'`여야 하는 부분(파일 선택 전 `click` 시점엔 아직 `files[0]`이 없어서 정상 동작 안 했을 가능성이 있는 원본 자체의 버그) — React 포팅 시 `onChange`로 수정
+
+**회원 탈퇴**: `showConfirmModal` → `DELETE /user` → 원본은 `localStorage.removeItem('accessToken')` 직접 호출 + `window.location.href`였는데, React에서는 `useAuth().logout()`(Context 갱신까지 됨) + `useNavigate()`로 대체 — 로그아웃 상태가 즉시 Header/AuthMenu에도 반영됨(전체 새로고침 불필요)
+
+**의존 관계**
+```
+ProfileEditPage
+ ├─ useAuth() → logout() (탈퇴 성공 시)
+ ├─ useModal(), useNavigate(), request()
+ └─ Toast (props: message="수정완료", isShow={isToastVisible}, onHide)
+```
+
+#### PasswordEditPage
+
+**배경**: `js/password-edit.js` 포팅. 현재 비밀번호 확인 + 새 비밀번호 변경, 필드 3개 모두 실시간 검증
+
+**State**: `currentPassword`, `newPassword`, `newPasswordCheck`(컨트롤드 인풋) + 필드별 에러 3개(`currentPasswordError`, `newPasswordError`, `newPasswordCheckError`) + `isToastVisible` — `LoginPage`/`SignupPage`에서 썼던 "값 state + 에러 state 쌍" 패턴 그대로 확장 적용
+
+**useEffect**: 없음 — 조회할 기존 데이터가 없는 순수 입력 폼
+
+**의존 관계**
+```
+PasswordEditPage
+ ├─ useModal(), request()
+ └─ Toast (props: message="수정 완료", isShow={isToastVisible}, onHide)
+```
+
+## 3. 상태와 데이터 흐름
+
+### 3-1. 전역 상태 (Context)
+
+- **AuthContext**: `accessToken`, `isLoggedIn`, `login()`, `logout()`
+  - 지금은 각 JS 파일(`header-menu.js`, `post-detail.js`, `profile-edit.js` 등)이 각자 `localStorage.getItem('accessToken')`을 호출하는데, React에서는 Context 하나로 통합해서 헤더/보호 라우트/댓글 소유권 판단이 전부 같은 소스를 구독하도록 함
+  - 로그인/로그아웃 시 Context 값만 바꾸면 헤더, 사이드바, 라우트 가드가 자동으로 리렌더링됨 (지금처럼 페이지 이동 후 헤더를 다시 그릴 필요 없음)
+
+### 3-2. 서버 데이터 상태 (컴포넌트 로컬)
+
+- 게시글 목록/상세/댓글 데이터는 전역으로 둘 필요가 없어서 각 페이지 컴포넌트의 `useState` + `useEffect`로 관리 (마운트 시 fetch)
+- 목록 페이지의 무한 스크롤: `posts` 배열 state + `page`/`hasNext` state를 `useInfiniteScroll` 훅으로 캡슐화
+- 게시글 상세: `post` 하나의 state 안에 좋아요 여부/댓글 배열까지 포함된 응답을 그대로 담아서 좋아요·댓글 액션 후 다시 fetch → setState (지금 구조와 동일하게 유지, "낙관적 업데이트"는 이후 개선 과제로 분리)
+
+### 3-3. 폼 상태
+
+- 로그인/회원가입/게시글 작성/비밀번호 수정 등 각 폼은 해당 페이지 컴포넌트 내부의 로컬 `useState`로 시작 (지금 수준의 유효성 검사 로직을 그대로 유지)
+- 필드가 많고 검증 로직이 반복되는 회원가입/비밀번호 수정 폼은 이후 `react-hook-form` 도입을 검토 (1차 마이그레이션 범위에는 포함하지 않음)
+
+### 3-4. 데이터 흐름 원칙
+
+- 부모→자식은 props로 단방향 전달 (예: `PostsPage` → `PostList` → `PostCard`)
+- 자식에서 발생한 이벤트(좋아요 클릭, 댓글 삭제 등)는 콜백 props로 부모에 위임하거나, 해당 도메인 훅(`usePostDetail` 등)에서 직접 API 호출 후 state 갱신
+- 전역으로 꼭 필요한 값(로그인 여부)만 Context, 나머지는 최대한 지역 상태로 유지해서 불필요한 전역 리렌더링 방지
+
+## 4. 단계별 마이그레이션 순서
+
+| 단계 | 작업 | AI 활용 |
+|---|---|---|
+| 0 | 프로젝트 세팅: React 빌드 툴(Vite 등) 도입, `react-router-dom` 설치, 폴더 구조 생성, 기존 `style.css`를 그대로 가져와 전역 스타일로 유지 | 폴더/보일러플레이트 초안 생성 |
+| 1 | 공통 인프라: `api/client.js`(기존 `js/api.js` 포팅), `AuthContext`, `useModal`(기존 `js/modal.js` 로직 승격) | 바닐라 JS → 훅/Context 패턴 변환 초안 |
+| 2 | 공통 컴포넌트: `Header`, `AuthMenu`, `Modal`, `SidebarTag`, `PrimaryButton` — 기존 HTML 마크업/클래스명을 그대로 JSX로 이식 | 기존 HTML 템플릿 문자열 → JSX 변환 (반복 작업이라 자동화 효과 큼) |
+| 3 | 인증 페이지: `LoginPage`, `SignupPage` (`ProtectedRoute` 포함) | 기존 유효성 검사 정규식/로직 그대로 포팅 |
+| 4 | 게시글 목록: `PostsPage`, `PostList`, `PostCard`, `PostSidebar`, `useInfiniteScroll` | 카드 반복 렌더링 로직 변환, IntersectionObserver → 훅화 |
+| 5 | 게시글 상세: `PostDetailPage`(좋아요/조회수 포함), `CommentForm/List/Item` | 조회수 중복 방지 로직(`PerformanceNavigationTiming`) 포팅, 댓글 소유권 분기 변환 |
+| 6 | 게시글 작성/수정: 공용 `PostForm` (`mode` prop 분기) | 작성/수정 두 페이지 코드 diff 보고 공용 컴포넌트로 병합하는 초안 작성 |
+| 7 | 회원정보/비밀번호 수정: `ProfileEditPage`, `PasswordEditPage`, 회원 탈퇴 플로우 | 폼 검증 로직 변환 |
+| 8 | 마무리: 페이지 간 라우팅 전체 연결, 전체 QA, 불필요해진 바닐라 JS/HTML 파일 정리 | 회귀 테스트 케이스 초안 작성 |
+
+### 참고
+
+- 위 순서는 의존성이 적은 것부터(공통 인프라 → 인증 → 목록 → 상세 → 작성/수정 → 마이페이지) 진행해서, 각 단계마다 실제로 동작하는 화면을 눈으로 확인하며 넘어가는 것을 원칙으로 함
+- 설계는 구현 과정에서 바뀔 수 있으며, 변경 시 사유는 회고 문서에 기록
+
+## 5. AI 협업 프로세스 (Human-in-the-Loop)
+
+이번 마이그레이션은 "AI가 코드를 생성했다"에서 끝나지 않고, 작업 단위(컴포넌트/기능)마다 아래 사이클을 반복하는 것을 원칙으로 합니다.
+
+1. **AI 분석** — 기존 바닐라 JS 파일의 로직·DOM 구조를 AI에게 분석시켜 책임 범위를 파악
+2. **AI 제안** — 컴포넌트 분리안, 상태 설계, 변환 코드 초안을 AI가 제시
+3. **사람 검토** — 제안이 실제 요구사항과 맞는지, 과설계는 아닌지, 기존 동작과 달라진 부분은 없는지 확인
+   - 예: 이 설계 문서를 쓰는 과정에서도 "컴포넌트 구조가 맞는지", "PostsPage라는 이름이 실제 역할(홈 겸용)과 맞는지"를 검토하며 여러 차례 수정함 — 이런 검토 자체가 human-in-the-loop 과정
+4. **실행 및 테스트** — 검토를 통과한 코드를 실제로 적용하고 브라우저에서 동작 확인 (기존 기능과 동일하게 동작하는지 회귀 확인)
+5. **수정 또는 채택** — 문제 있으면 AI에게 재요청하거나 직접 수정, 문제 없으면 그대로 채택하고 다음 작업으로 이동
+
+### 5-1. 기록 방법
+
+4장의 단계별 작업마다 아래 항목을 회고 문서에 남깁니다. 결과물(마이그레이션된 코드)뿐 아니라 "AI 제안을 어떻게 검증하며 썼는지"를 남기는 것이 목적입니다.
+
+| 항목 | 내용 |
+|---|---|
+| 작업 | 어떤 컴포넌트/기능을 마이그레이션했는지 |
+| AI 제안 요약 | AI가 처음 제시한 접근·코드의 핵심 |
+| 검토 포인트 | 사람이 확인한 것 (기존 동작 일치 여부, 네이밍, 과설계 여부 등) |
+| 채택/수정 여부 | 그대로 채택했는지, 어떤 부분을 왜 고쳤는지 |
+| 소요 시간 | AI 활용 전후 체감 소요 시간 (정량적이지 않아도 무방, 대략적인 기록으로 충분) |
