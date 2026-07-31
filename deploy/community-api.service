@@ -1,0 +1,13 @@
+[Unit]
+Description=community-api Spring Boot app
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/project/KTB4_Lily_Week4
+Environment="JWT_SECRET=REPLACE_WITH_GENERATED_SECRET"
+ExecStart=/usr/bin/java -jar /home/ubuntu/project/KTB4_Lily_Week4/build/libs/community-api-0.0.1-SNAPSHOT.jar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
