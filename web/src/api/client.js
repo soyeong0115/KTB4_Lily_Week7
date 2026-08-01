@@ -23,6 +23,11 @@ export async function request(path, options = {}) {
     }
 
     if (!response.ok) {
+        if (response.status === 401) {
+            localStorage.removeItem('accessToken');
+            window.location.href = '/login';
+        }
+
         const error = new Error(responseBody?.message || 'request_failed');
         error.status = response.status;
         error.body = responseBody;
