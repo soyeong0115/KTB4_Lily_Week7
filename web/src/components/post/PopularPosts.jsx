@@ -25,6 +25,16 @@ export default function PopularPosts() {
 
     }, []);
 
+    const maxIndex = popularPosts.length - 1;
+
+    function goToNext() {
+        setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }
+
+    function goToPrev() {
+        setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+    }
+
     if (popularPosts.length === 0) {
         return null;
     }
@@ -57,6 +67,27 @@ export default function PopularPosts() {
                         <span>{nickname}</span>
                     </div>
                 </div>
+
+                {maxIndex > 0 && (
+                    <>
+                        <button
+                            type="button"
+                            className="popular-posts-arrow popular-posts-arrow-left"
+                            onClick={(e) => { e.preventDefault(); goToPrev(); }}
+                            aria-label="이전 인기글"
+                        >
+                            ‹
+                        </button>
+                        <button
+                            type="button"
+                            className="popular-posts-arrow popular-posts-arrow-right"
+                            onClick={(e) => { e.preventDefault(); goToNext(); }}
+                            aria-label="다음 인기글"
+                        >
+                            ›
+                        </button>
+                    </>
+                )}
             </Link>
         </section>
     );

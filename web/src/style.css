@@ -633,6 +633,32 @@ textarea {
   object-fit: cover;
 }
 
+.popular-posts-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+
+  width: 34px;
+  height: 34px;
+
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background-color: var(--paper-card);
+
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.popular-posts-arrow-left {
+  left: 16px;
+}
+
+.popular-posts-arrow-right {
+  right: 16px;
+}
+
 /* 게시글 목록 페이지 */
 
 .posts-page .header {
