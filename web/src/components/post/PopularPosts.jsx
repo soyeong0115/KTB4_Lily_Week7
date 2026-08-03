@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { API_BASE_URL, request } from "../../api/client";
 import { getAvatarColor } from "../../utils/avatarColor.js";
 
+const SLIDE_INTERVAL_MS = 4000;
+
 export default function PopularPosts() {
     const [popularPosts, setPopularPosts] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,6 +36,14 @@ export default function PopularPosts() {
     function goToPrev() {
         setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
     }
+
+    useEffect(() => {
+        if (maxIndex <= 0) return;
+
+        const timer = setInterval(goToNext, SLIDE_INTERVAL_MS);
+
+        return () => clearInterval(timer);
+    }, [maxIndex, currentIndex]);
 
     if (popularPosts.length === 0) {
         return null;
