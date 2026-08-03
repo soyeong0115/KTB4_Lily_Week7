@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import Header from "../components/layout/Header";
 import PostSidebar from "../components/post/PostSidebar";
 import PostList from "../components/post/PostList";
+import PopularPosts from "../components/post/PopularPosts";
 
 export default function PostsPage() {
     const [ contributors, setContributors ] = useState([]);
@@ -25,16 +26,17 @@ export default function PostsPage() {
     }
 
     return (
-        <>
+        <div className="posts-page">
             <Header />
             <main className="posts-main">
                 <div className="posts-layout">
                     <PostSidebar contributors={contributors} />
                     <section className="post-list">
+                        <PopularPosts />
                         <PostList onPostsFetched={handlePostsFetched} />
                     </section>
                 </div>
             </main>
-        </>
+        </div>
     );
 }

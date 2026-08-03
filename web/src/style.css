@@ -508,6 +508,42 @@ textarea {
   font-weight: 400;
 }
 
+/* 인기글 랭킹 */
+
+.popular-posts {
+  column-span: all;
+  margin-bottom: 32px;
+}
+
+.popular-posts-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 0 0 14px;
+
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.popular-posts-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.popular-posts-list {
+  display: flex;
+  gap: 20px;
+
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.popular-posts-item {
+  flex: 0 0 auto;
+  width: 260px;
+}
+
 /* 게시글 목록 페이지 */
 
 .posts-main {
