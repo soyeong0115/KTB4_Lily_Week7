@@ -28,6 +28,13 @@ body {
   width: 100%;
   min-height: 100%;
   background-color: var(--paper);
+
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 body {
