@@ -659,6 +659,29 @@ textarea {
   right: 16px;
 }
 
+.popular-posts-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+.popular-posts-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background-color: var(--paper-card);
+  cursor: pointer;
+}
+
+.popular-posts-dot.active {
+  background-color: var(--tag-yellow);
+}
+
 /* 게시글 목록 페이지 */
 
 .posts-page .header {

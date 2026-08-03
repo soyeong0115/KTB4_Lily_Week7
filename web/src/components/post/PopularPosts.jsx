@@ -89,6 +89,20 @@ export default function PopularPosts() {
                     </>
                 )}
             </Link>
+
+            {maxIndex > 0 && (
+                <div className="popular-posts-dots">
+                    {popularPosts.map((p, index) => (
+                        <button
+                            type="button"
+                            key={p.postId}
+                            className={`popular-posts-dot ${index === currentIndex ? 'active' : ''}`}
+                            onClick={() => setCurrentIndex(index)}
+                            aria-label={`${index + 1}번째로 이동`}
+                        />
+                    ))}
+                </div>
+            )}
         </section>
     );
 }
