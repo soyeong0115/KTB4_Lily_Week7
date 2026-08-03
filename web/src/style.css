@@ -524,33 +524,113 @@ textarea {
   margin-bottom: 32px;
 }
 
-.popular-posts-title {
+.popular-posts-banner {
+  position: relative;
+  display: block;
+
+  height: 280px;
+  overflow: hidden;
+
+  border: 1.5px solid var(--line);
+  box-shadow: 4px 4px 0 0 rgba(28, 26, 21, 0.12);
+
+  background-size: cover;
+  background-position: center;
+
+  color: #fff;
+  text-decoration: none;
+}
+
+.popular-posts-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+.popular-posts-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 12px;
+
+  background-color: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.popular-posts-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.popular-posts-content {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 20px;
+  z-index: 1;
+}
+
+.popular-posts-post-title {
+  margin: 0 0 12px;
+
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.35;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.popular-posts-author {
   display: flex;
   align-items: center;
   gap: 8px;
 
-  margin: 0 0 14px;
-
-  font-family: var(--font-display);
-  font-size: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
 }
 
-.popular-posts-icon {
-  width: 18px;
-  height: 18px;
-}
+.popular-posts-avatar {
+  width: 26px;
+  height: 26px;
 
-.popular-posts-list {
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background-color: var(--avatar-color, var(--tag-blue));
+  color: var(--ink);
+
   display: flex;
-  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 
-  overflow-x: auto;
-  padding-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.popular-posts-item {
-  flex: 0 0 auto;
-  width: 260px;
+.popular-posts-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* 게시글 목록 페이지 */
