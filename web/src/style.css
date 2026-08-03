@@ -65,7 +65,9 @@ textarea {
   align-items: center;
   justify-content: center;
 
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 20;
   background-color: var(--paper);
 }
 
@@ -546,12 +548,33 @@ textarea {
 
 /* 게시글 목록 페이지 */
 
+.posts-page .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
 .posts-main {
   width: 100%;
   min-height: calc(100vh - 92px);
 
   padding-top: 40px;
   padding-bottom: 80px;
+}
+
+.posts-page .posts-main {
+  margin-top: 92px;
+}
+
+.posts-page .posts-sidebar {
+  position: fixed;
+  top: 140px;
+  left: max(32px, calc(50% - 558px));
+}
+
+.posts-page .post-list {
+  margin-left: 252px;
 }
 
 .posts-layout {
@@ -571,7 +594,7 @@ textarea {
   flex-shrink: 0;
 
   position: sticky;
-  top: 20px;
+  top: 112px;
 
   display: flex;
   flex-direction: column;
@@ -961,11 +984,17 @@ textarea {
     flex-direction: column;
   }
 
-  .posts-sidebar {
+  .posts-sidebar,
+  .posts-page .posts-sidebar {
     width: 100%;
     position: static;
+    left: auto;
     flex-direction: row;
     flex-wrap: wrap;
+  }
+
+  .posts-page .post-list {
+    margin-left: 0;
   }
 
   .sidebar-box,
