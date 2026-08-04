@@ -495,7 +495,7 @@ PasswordEditPage
 | 단계 | 작업 | AI 활용 |
 |---|---|---|
 | 0 | 프로젝트 세팅: React 빌드 툴(Vite 등) 도입, `react-router-dom` 설치, 폴더 구조 생성, 기존 `style.css`를 그대로 가져와 전역 스타일로 유지 | 폴더/보일러플레이트 초안 생성 |
-| 1 | 공통 인프라: `api/client.js`(기존 `js/api.js` 포팅), `AuthContext`, `useModal`(기존 `js/modal.js` 로직 승격) | 바닐라 JS → 훅/Context 패턴 변환 초안 |
+| 1 | 공통 인프라: `api/client.js`(기존 `js/api.js` 포팅), `AuthContext`, `useModal`(기존 `js/modal.js` 로직 승격), 도메인별 `authApi`/`postApi`/`commentApi`/`userApi` (`request()` 직접 호출을 도메인별 함수로 분리) | 바닐라 JS → 훅/Context 패턴 변환 초안 |
 | 2 | 공통 컴포넌트: `Header`, `AuthMenu`, `Modal`, `SidebarTag`, `PrimaryButton` — 기존 HTML 마크업/클래스명을 그대로 JSX로 이식 | 기존 HTML 템플릿 문자열 → JSX 변환 (반복 작업이라 자동화 효과 큼) |
 | 3 | 인증 페이지: `LoginPage`, `SignupPage` (`ProtectedRoute` 포함) | 기존 유효성 검사 정규식/로직 그대로 포팅 |
 | 4 | 게시글 목록: `PostsPage`, `PostList`, `PostCard`, `PostSidebar`, `useInfiniteScroll` | 카드 반복 렌더링 로직 변환, IntersectionObserver → 훅화 |
@@ -508,6 +508,7 @@ PasswordEditPage
 
 - 위 순서는 의존성이 적은 것부터(공통 인프라 → 인증 → 목록 → 상세 → 작성/수정 → 마이페이지) 진행해서, 각 단계마다 실제로 동작하는 화면을 눈으로 확인하며 넘어가는 것을 원칙으로 함
 - 설계는 구현 과정에서 바뀔 수 있으며, 변경 시 사유는 회고 문서에 기록
+- `authApi`/`postApi`/`commentApi`/`userApi`는 0단계에서 빈 stub 파일로만 먼저 만들어두고, 이후 각 단계에서는 `api/client.js`의 `request()`를 페이지/컴포넌트가 직접 호출하는 방식으로 진행됨 — 8단계 마무리 이후에야 이 누락을 발견해 뒤늦게 도메인별 함수로 분리 완료 (자세한 경위는 회고 문서 참고)
 
 ## 5. AI 협업 프로세스 (Human-in-the-Loop)
 
