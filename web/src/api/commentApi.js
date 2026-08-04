@@ -1,5 +1,6 @@
 import { request } from './client.js';
 
+// 댓글 작성
 export function createComment(postId, content) {
     return request(`/posts/${postId}/comments`, {
         method: 'POST',
@@ -7,6 +8,7 @@ export function createComment(postId, content) {
     });
 }
 
+// 댓글 수정
 export function updateComment(postId, commentId, content) {
     return request(`/posts/${postId}/comments/${commentId}`, {
         method: 'PATCH',
@@ -14,6 +16,7 @@ export function updateComment(postId, commentId, content) {
     });
 }
 
+// 댓글 삭제
 export function deleteComment(postId, commentId) {
     return request(`/posts/${postId}/comments/${commentId}`, {
         method: 'DELETE',

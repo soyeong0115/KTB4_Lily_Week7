@@ -1,5 +1,6 @@
 import { request } from './client.js';
 
+// 로그인
 export function login({ email, password }) {
     return request('/auth/login', {
         method: 'POST',
@@ -7,6 +8,7 @@ export function login({ email, password }) {
     });
 }
 
+// 회원가입
 export function signup({ email, password, nickname, profileImage }) {
     return request('/auth/signup', {
         method: 'POST',

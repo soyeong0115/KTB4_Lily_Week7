@@ -37,6 +37,7 @@ export async function request(path, options = {}) {
     return responseBody?.data ?? responseBody;
 }
 
+// 이미지 업로드
 export async function uploadImage(file) {
     const formData = new FormData();
     formData.append('image', file);
