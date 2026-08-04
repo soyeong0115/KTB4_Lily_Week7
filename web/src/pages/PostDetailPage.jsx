@@ -4,7 +4,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/layout/Header.jsx';
 import CommentForm from '../components/comment/CommentForm.jsx';
 import CommentList from '../components/comment/CommentList.jsx';
-import { API_BASE_URL, request } from '../api/client.js';
+import { API_BASE_URL } from '../api/client.js';
+import { getPost, deletePost, likePost, unlikePost } from '../api/postApi.js';
 import { useModal } from '../hooks/useModal.js';
 import { getAvatarColor } from '../utils/avatarColor.js';
 
@@ -21,14 +22,8 @@ export default function PostDetailPage() {
     const shouldCountViewRef = useRef(navigationEntry?.type !== 'reload'); // 새로고침이 아니면 true (조회수 세기)
 
     async function fetchPostDetail() {
-        const countParam = shouldCountViewRef.current
-            ? ''
-            : '?countView=false';
-
         try {
-            const data = await request(`/posts/${postId}${countParam}`, {
-                method: 'GET'
-            });
+            const data = await getPost(postId, { countView: shouldCountViewRef.current });
 
             setPost(data);
             shouldCountViewRef.current = false;
@@ -54,9 +49,7 @@ export default function PostDetailPage() {
         }
 
         try {
-            await request(`/posts/${postId}`, {
-                method: 'DELETE'
-            });
+            await deletePost(postId);
             navigate('/');
         } catch (error) {
             if (isAuthError(error)) {
@@ -73,9 +66,7 @@ export default function PostDetailPage() {
         setIsLiking(true);
 
         try {
-            await request(`/posts/${postId}/likes`, {
-                method: post.liked ? 'DELETE' : 'POST'
-            });
+            await (post.liked ? unlikePost(postId) : likePost(postId));
 
             fetchPostDetail()
         } catch (error) {

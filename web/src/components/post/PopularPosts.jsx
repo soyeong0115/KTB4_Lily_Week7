@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { API_BASE_URL, request } from "../../api/client";
+import { API_BASE_URL } from "../../api/client";
+import { getPopularPosts } from "../../api/postApi";
 import { getAvatarColor } from "../../utils/avatarColor.js";
 
 const SLIDE_INTERVAL_MS = 4000;
@@ -12,9 +13,7 @@ export default function PopularPosts() {
     useEffect(() => {
         async function fetchPopularPosts() {
             try {
-                const data = await request('/posts/popular?limit=5', {
-                    method: "GET"
-                })
+                const data = await getPopularPosts(5)
 
                 setPopularPosts(data)
 

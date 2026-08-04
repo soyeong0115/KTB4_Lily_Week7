@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { request } from "../../api/client";
+import { getPosts } from "../../api/postApi";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import PostCard from "./PostCard.jsx";
 
@@ -18,10 +18,10 @@ export default function PostList({ onPostsFetched }) {
         isLoadingRef.current = true;
 
         try {
-            const { posts: newPosts, hasNext } = await request(
-                `/posts?page=${pageRef.current}&size=${POST_PAGE_SIZE}`,
-                { method: 'GET' }
-            );
+            const { posts: newPosts, hasNext } = await getPosts({
+                page: pageRef.current,
+                size: POST_PAGE_SIZE,
+            });
 
             setPosts((prev) => [...prev, ...newPosts]); // 기존 목록 뒤에 새로 받아온 post 이어 붙임
             setHasLoadedOnce(true);

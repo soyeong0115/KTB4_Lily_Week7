@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import SidebarTag from '../common/SidebarTag.jsx';
-import { request } from '../../api/client.js';
+import { uploadImage } from '../../api/client.js';
+import { getPost, createPost, updatePost } from '../../api/postApi.js';
 import { useModal } from '../../hooks/useModal.js';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,16 +20,11 @@ export default function PostForm({ mode, postId }) {
 
     async function handleImageChange(e) {
         const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append('image', file);
-        
+
         try {
-            const data = await request('/images', {
-                method: 'POST',
-                body: formData,
-            });
-        
-            setImageUrl(data.imageUrl);
+            const imageUrl = await uploadImage(file);
+
+            setImageUrl(imageUrl);
             setFilename(file.name);
         
         } catch (error) {
@@ -42,9 +38,7 @@ export default function PostForm({ mode, postId }) {
 
         async function fetchPost() {
             try {
-                const data = await request(`/posts/${postId}`, {
-                    method: 'GET'
-                });
+                const data = await getPost(postId);
 
                 setTitle(data.title);
                 setContent(data.content);
@@ -68,18 +62,12 @@ export default function PostForm({ mode, postId }) {
             return;
         }
 
-        const url = isEditMode ? `/posts/${postId}` : '/posts';
-        const method = isEditMode ? 'PATCH' : 'POST';
-
         try {
-            await request(url, {
-                method,
-                body: JSON.stringify({
-                    title,
-                    content,
-                    postImage: imageUrl
-                })
-            });
+            if (isEditMode) {
+                await updatePost(postId, { title, content, postImage: imageUrl });
+            } else {
+                await createPost({ title, content, postImage: imageUrl });
+            }
 
             navigate(isEditMode ? `/posts/${postId}` : '/');
 
