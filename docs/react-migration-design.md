@@ -76,7 +76,8 @@ src/
 │   │   ├── PostList.jsx         # 무한 스크롤 컨테이너
 │   │   ├── PostCard.jsx         # 목록 카드 1개
 │   │   ├── PostForm.jsx         # 작성/수정 공용 폼
-│   │   └── PostSidebar.jsx      # Info/Auth/Contributors/글쓰기 버튼
+│   │   ├── PostSidebar.jsx      # Info/Auth/Contributors/글쓰기 버튼
+│   │   └── PopularPosts.jsx     # 인기글 랭킹 캐러셀 (추가 기능)
 │   ├── comment/
 │   │   ├── CommentForm.jsx
 │   │   ├── CommentList.jsx
@@ -131,6 +132,7 @@ src/
 - **CommentItem**: `myComment`(서버 응답)를 기준으로 수정/삭제 버튼 노출 여부만 결정, 실제 삭제 확인은 `useModal` 훅 통해 처리
 - **Modal**: `ConfirmModal`/`AlertModal`이 하나의 `Modal` 베이스 위에서 버튼 구성만 다르게 가져가는 구조. 현재 바닐라 JS의 Promise 기반 `showConfirmModal`/`showAlertModal`(`js/modal.js`)을 `useModal` 훅으로 그대로 승격
 - **ProtectedRoute**: `js/profile-edit.js`에 있던 "로그인 안 되어 있으면 index로 리다이렉트" 로직을 라우트 가드로 승격
+- **PopularPosts**: 원본에 없던 추가 기능. 인기글 상위 5개를 자동 슬라이드 캐러셀로 보여줌, `PostsPage` 상단에 배치
 
 ### 2-5. 컴포넌트 상세 설계
 
@@ -315,6 +317,25 @@ PostsPage
       useAuth().isLoggedIn=false → 로그인/회원가입 링크
       useAuth().isLoggedIn=true  → 글쓰기 버튼
       contributors.map(...) → 기여자 아바타 목록
+```
+
+#### PopularPosts (추가 기능 — 인기글 랭킹 캐러셀)
+
+**배경**: 원본 바닐라 앱에는 없던 추가 기능. 마이그레이션 완료 후 `GET /posts/popular?limit=5`로 인기글 상위 5개를 받아와, `PostsPage` 상단에 자동 슬라이드 캐러셀로 보여줌 (좌우 화살표/dot으로 수동 이동도 가능)
+
+**State**: `popularPosts`(배열, fetch 결과) — `currentIndex`(number, 현재 보여주는 슬라이드 인덱스)
+
+**useEffect**: 두 개
+- 마운트 시 1회(`[]`) — `getPopularPosts(5)` 호출해 `popularPosts` 설정
+- 자동 슬라이드용(`[maxIndex, currentIndex]`) — `setInterval`로 4초마다 `goToNext` 실행, cleanup에서 `clearInterval`. 인기글이 1개뿐이면(`maxIndex <= 0`) 타이머를 아예 걸지 않음
+
+**의존 관계**
+```
+PostsPage
+ └─ PopularPosts
+      마운트 시 getPopularPosts(5) → popularPosts 설정
+      4초마다 currentIndex 자동 증가(goToNext) — 화살표/dot 클릭 시 수동으로도 이동
+      클릭 시 → /posts/:postId 로 이동
 ```
 
 #### PostsPage — 상태 끌어올리기(Lifting State Up)
@@ -503,12 +524,13 @@ PasswordEditPage
 | 6 | 게시글 작성/수정: 공용 `PostForm` (`mode` prop 분기) | 작성/수정 두 페이지 코드 diff 보고 공용 컴포넌트로 병합하는 초안 작성 |
 | 7 | 회원정보/비밀번호 수정: `ProfileEditPage`, `PasswordEditPage`, 회원 탈퇴 플로우 | 폼 검증 로직 변환 |
 | 8 | 마무리: 페이지 간 라우팅 전체 연결, 전체 QA, 불필요해진 바닐라 JS/HTML 파일 정리 | 회귀 테스트 케이스 초안 작성 |
+| 9 | 추가 기능: `PopularPosts`(인기글 랭킹 캐러셀) — 원본 바닐라 앱에는 없던 기능, 마이그레이션 완료 후 신규로 구현 | UI 마크업/캐러셀 로직 초안 작성, `postApi.getPopularPosts` 연결 |
 
 ### 참고
 
 - 위 순서는 의존성이 적은 것부터(공통 인프라 → 인증 → 목록 → 상세 → 작성/수정 → 마이페이지) 진행해서, 각 단계마다 실제로 동작하는 화면을 눈으로 확인하며 넘어가는 것을 원칙으로 함
 - 설계는 구현 과정에서 바뀔 수 있으며, 변경 시 사유는 회고 문서에 기록
-- `authApi`/`postApi`/`commentApi`/`userApi`는 0단계에서 빈 stub 파일로만 먼저 만들어두고, 이후 각 단계에서는 `api/client.js`의 `request()`를 페이지/컴포넌트가 직접 호출하는 방식으로 진행됨 — 8단계 마무리 이후에야 이 누락을 발견해 뒤늦게 도메인별 함수로 분리 완료 (자세한 경위는 회고 문서 참고)
+- `authApi`/`postApi`/`commentApi`/`userApi`는 0단계에서 빈 stub 파일로만 먼저 만들어두고, 이후 각 단계에서는 `api/client.js`의 `request()`를 페이지/컴포넌트가 직접 호출하는 방식으로 진행됨 — 8단계 마무리 이후에 이 누락을 발견한 후, 도메인별 함수로 분리 완료
 
 ## 5. AI 협업 프로세스 (Human-in-the-Loop)
 
