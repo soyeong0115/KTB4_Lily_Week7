@@ -1,7 +1,8 @@
 import Header from '../components/layout/Header.jsx';
 import SidebarTag from '../components/common/SidebarTag.jsx';
 import Toast from '../components/common/Toast.jsx';
-import { API_BASE_URL, request } from '../api/client.js';
+import { API_BASE_URL, uploadImage } from '../api/client.js';
+import { getProfile, updateProfile, deleteUser } from '../api/userApi.js';
 import { useEffect, useState } from 'react';
 import { useModal } from '../hooks/useModal.js';
 import { useAuth } from '../hooks/useAuth.js';
@@ -20,9 +21,7 @@ export default function ProfileEditPage() {
     useEffect(() => {
         async function fetchProfile() {
             try {
-                const data = await request('/user/profile', {
-                    method: 'GET'
-                });
+                const data = await getProfile();
 
                 setEmail(data.email);
                 setNickname(data.nickname);
@@ -44,16 +43,11 @@ export default function ProfileEditPage() {
 
     async function handleImageChange(e) {
         const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append('image', file);
 
         try {
-            const data = await request('/images', {
-                method: 'POST',
-                body: formData
-            });
+            const imageUrl = await uploadImage(file);
 
-            setProfileImageUrl(data.imageUrl);
+            setProfileImageUrl(imageUrl);
 
         } catch(error) {
             if (isAuthError(error)) {
@@ -78,13 +72,7 @@ export default function ProfileEditPage() {
         }
 
         try {
-            await request('/user/profile', {
-                method: 'PATCH',
-                body: JSON.stringify({
-                    nickname: nickname,
-                    profileImage: profileImageUrl,
-                })
-            });
+            await updateProfile({ nickname, profileImage: profileImageUrl });
 
             setError('');
             setIsToastVisible(true);
@@ -115,9 +103,7 @@ export default function ProfileEditPage() {
         }
 
         try {
-            await request('/user', {
-                method: 'DELETE'
-            });
+            await deleteUser();
 
             logout();
             navigate('/login');

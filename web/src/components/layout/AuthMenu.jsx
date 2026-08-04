@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../hooks/useAuth.js';
-import { API_BASE_URL, request } from '../../api/client.js';
+import { API_BASE_URL } from '../../api/client.js';
+import { getProfile } from '../../api/userApi.js';
 import { getAvatarColor } from '../../utils/avatarColor.js';
 
 export default function AuthMenu() {
@@ -17,7 +18,7 @@ export default function AuthMenu() {
 
         async function fetchProfile() {
             try {
-                const data = await request('/user/profile', { method: 'GET' });
+                const data = await getProfile();
                 setProfile(data);
             } catch (error) {
                 console.error(error);

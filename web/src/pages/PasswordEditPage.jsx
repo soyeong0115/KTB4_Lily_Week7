@@ -3,7 +3,7 @@ import SidebarTag from '../components/common/SidebarTag.jsx';
 import PrimaryButton from '../components/common/PrimaryButton.jsx';
 import Toast from '../components/common/Toast.jsx';
 import { useEffect, useState } from 'react';
-import { request } from '../api/client.js';
+import { updatePassword } from '../api/userApi.js';
 import { useModal } from '../hooks/useModal.js';
 
 export default function PasswordEditPage() {
@@ -61,13 +61,7 @@ export default function PasswordEditPage() {
         }
 
         try {
-            await request('/user/password', {
-                method: 'PATCH',
-                body: JSON.stringify({
-                    password: currentPassword,
-                    newPassword,
-                }),
-            });
+            await updatePassword({ password: currentPassword, newPassword });
 
             setCurrentPassword('');
             setNewPassword('');
