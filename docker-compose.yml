@@ -1,13 +1,42 @@
 services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-babble}
+      MYSQL_USER: ${DB_USERNAME:-babble}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    command: --innodb-buffer-pool-size=128M --performance-schema=OFF
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
   backend:
+    image: ghcr.io/soyeong0115/community-api:latest
     build: ../KTB4_Lily_Week4
     environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-babble}
+      DB_USERNAME: ${DB_USERNAME:-babble}
+      DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      JAVA_TOOL_OPTIONS: -Xmx256m
+    depends_on:
+      mysql:
+        condition: service_healthy
     volumes:
       - uploads_data:/app/uploads
     restart: unless-stopped
 
   web:
+    image: ghcr.io/soyeong0115/babble-web:latest
     build: ./web
     ports:
       - "80:80"
@@ -17,3 +46,4 @@ services:
 
 volumes:
   uploads_data:
+  mysql_data:
