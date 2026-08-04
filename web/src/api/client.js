@@ -36,3 +36,15 @@ export async function request(path, options = {}) {
 
     return responseBody?.data ?? responseBody;
 }
+
+export async function uploadImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const data = await request('/images', {
+        method: 'POST',
+        body: formData,
+    });
+
+    return data.imageUrl;
+}
