@@ -4,7 +4,7 @@ import Header from '../components/layout/Header.jsx';
 import SidebarTag from '../components/common/SidebarTag.jsx';
 import PrimaryButton from '../components/common/PrimaryButton.jsx';
 import { useState } from 'react';
-import { request } from '../api/client.js';
+import { login as loginRequest } from '../api/authApi.js';
 import { useAuth } from '../hooks/useAuth.js';
 
 export default function LoginPage() {
@@ -51,10 +51,7 @@ export default function LoginPage() {
 
     async function  handleLogin() {
         try {
-            const data = await request('/auth/login', {
-                method: 'POST',
-                body: JSON.stringify({ email, password }),
-            });
+            const data = await loginRequest({ email, password });
 
             login(data.accessToken);
             navigate('/');

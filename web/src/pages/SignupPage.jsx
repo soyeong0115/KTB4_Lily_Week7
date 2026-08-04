@@ -4,7 +4,8 @@ import Header from '../components/layout/Header.jsx';
 import SidebarTag from '../components/common/SidebarTag.jsx';
 import PrimaryButton from '../components/common/PrimaryButton.jsx';
 import { useState } from 'react';
-import { API_BASE_URL, request } from '../api/client.js';
+import { API_BASE_URL, uploadImage } from '../api/client.js';
+import { signup } from '../api/authApi.js';
 import { useModal } from '../hooks/useModal.js';
 
 export default function SignupPage() {
@@ -95,10 +96,7 @@ export default function SignupPage() {
 
     async function handleSignup() {
         try {
-            const data = await request('/auth/signup', {
-                method: 'POST',
-                body: JSON.stringify({ email, password, nickname, profileImage: profileImageUrl }),
-            });
+            await signup({ email, password, nickname, profileImage: profileImageUrl });
 
             navigate('/login');
 
@@ -123,16 +121,11 @@ export default function SignupPage() {
 
     async function handleImageChange(e) {
         const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append('image', file);
 
         try {
-            const data = await request('/images', {
-                method: 'POST',
-                body: formData,
-            });
+            const imageUrl = await uploadImage(file);
 
-            setProfileImageUrl(data.imageUrl);
+            setProfileImageUrl(imageUrl);
 
         } catch (error) {
             await showAlertModal({ message: '이미지 업로드에 실패했습니다.' });
