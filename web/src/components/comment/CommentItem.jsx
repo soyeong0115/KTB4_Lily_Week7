@@ -1,4 +1,5 @@
-import { API_BASE_URL, request } from '../../api/client.js';
+import { API_BASE_URL } from '../../api/client.js';
+import { deleteComment } from '../../api/commentApi.js';
 import { useModal } from '../../hooks/useModal.js';
 import { getAvatarColor } from '../../utils/avatarColor.js';
 
@@ -22,9 +23,7 @@ export default function CommentItem({ comment, postId, onEditRequest, onChanged 
         }
 
         try {
-            await request(`/posts/${postId}/comments/${comment.commentId}`, {
-                method: 'DELETE',
-            });
+            await deleteComment(postId, comment.commentId);
 
             onChanged();
         } catch (error) {

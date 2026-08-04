@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { request } from "../../api/client";
+import { createComment, updateComment } from "../../api/commentApi";
 import { useModal } from "../../hooks/useModal";
 
 export default function CommentForm({ postId, editingComment, onSuccess }) {
@@ -13,17 +13,12 @@ export default function CommentForm({ postId, editingComment, onSuccess }) {
     async function handleSumbmit() {
         const isEditing = editingComment !== null;
 
-        const url = isEditing
-            ? `/posts/${postId}/comments/${editingComment.commentId}`
-            : `/posts/${postId}/comments`;
-
-        const method = isEditing ? 'PATCH' : 'POST';
-
         try {
-            await request(url, {
-                method,
-                body: JSON.stringify({ content }),
-            });
+            if (isEditing) {
+                await updateComment(postId, editingComment.commentId, content);
+            } else {
+                await createComment(postId, content);
+            }
 
             setContent('');
             onSuccess();
