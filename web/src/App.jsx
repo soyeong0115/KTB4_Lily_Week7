@@ -11,11 +11,12 @@ import PasswordEditPage from './pages/PasswordEditPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { ModalProvider } from './contexts/ModalContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import { useNotificationSocket } from './hooks/useNotificationSocket.js';
 
-export default function App() {
+function AppRoutes() {
+    useNotificationSocket();
+
     return (
-    <AuthProvider>
-      <ModalProvider>
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<PostsPage />} />
@@ -56,6 +57,14 @@ export default function App() {
                 />
             </Routes>
         </BrowserRouter>
+    );
+}
+
+export default function App() {
+    return (
+    <AuthProvider>
+      <ModalProvider>
+        <AppRoutes />
       </ModalProvider>
     </AuthProvider>
     );
