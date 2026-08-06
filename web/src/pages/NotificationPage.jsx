@@ -1,33 +1,20 @@
-import { useEffect, useState } from "react";
-import { deleteAllNotifications, getNotifications, markAllAsRead } from "../api/notificationApi";
+import { useState } from "react";
+import { deleteAllNotifications, markAllAsRead } from "../api/notificationApi";
 import Header from "../components/layout/Header";
+import SidebarTag from "../components/common/SidebarTag.jsx";
 import { useModal } from "../hooks/useModal";
+import { useNotification } from "../hooks/useNotification.js";
 import NotificationList from "../components/notification/NotificationList";
 
 export default function NotificationPage() {
-    const [notifications, setNotifications] = useState([]);
     const [activeTab, setActiveTab] = useState('all');
+    const { notifications, refetch } = useNotification();
     const { isAuthError, showAlertModal, showLoginRequiredModal, showConfirmModal } = useModal();
-
-    async function fetchNotifications() {
-        try {
-            const data = await getNotifications();
-            setNotifications(data);
-        } catch (error) {
-            if (isAuthError(error)) {
-                await showLoginRequiredModal();
-                return;
-            }
-
-            await showAlertModal({ message: '알림을 불러오지 못했습니다.' })
-            console.error(error);
-        }
-    }
 
     async function handleMarkAllAsRead() {
         try {
             await markAllAsRead();
-            fetchNotifications();
+            refetch();
         } catch(error) {
             if (isAuthError(error)) {
                 await showLoginRequiredModal();
@@ -51,7 +38,7 @@ export default function NotificationPage() {
 
         try {
             await deleteAllNotifications();
-            fetchNotifications();
+            refetch();
         } catch(error) {
             if (isAuthError(error)) {
                 await showLoginRequiredModal();
@@ -63,10 +50,6 @@ export default function NotificationPage() {
         }
     }
 
-    useEffect(() => {
-        fetchNotifications();
-    }, []);
-
     const visibleNotifications = activeTab === 'unread'
         ? notifications.filter((n) => !n.isRead)
         : notifications;
@@ -74,14 +57,35 @@ export default function NotificationPage() {
     return (
         <>
             <Header backTo="/" />
-            <main>
-                <button onClick={() => setActiveTab('all')}>전체</button>
-                <button onClick={() => setActiveTab('unread')}>읽지 않음</button>
+            <main className="notification-main">
+                <div className="post-create-heading">
+                    <SidebarTag color="tag-mint">✎ Alerts</SidebarTag>
+                    <h2 className="post-create-title">알림</h2>
+                </div>
 
-                <button onClick={handleMarkAllAsRead}>모두 읽음</button>
-                <button onClick={handleDeleteAll}>모두 삭제</button>
+                <div className="notification-toolbar">
+                    <div className="notification-tabs">
+                        <button
+                            className={`notification-tab${activeTab === 'all' ? ' is-active' : ''}`}
+                            onClick={() => setActiveTab('all')}
+                        >
+                            전체
+                        </button>
+                        <button
+                            className={`notification-tab${activeTab === 'unread' ? ' is-active' : ''}`}
+                            onClick={() => setActiveTab('unread')}
+                        >
+                            읽지 않음
+                        </button>
+                    </div>
 
-                <NotificationList notifications={visibleNotifications} onChanged={fetchNotifications} />
+                    <div className="notification-actions">
+                        <button className="notification-action-link" onClick={handleMarkAllAsRead}>모두 읽음</button>
+                        <button className="notification-action-link" onClick={handleDeleteAll}>모두 삭제</button>
+                    </div>
+                </div>
+
+                <NotificationList notifications={visibleNotifications} onChanged={refetch} />
             </main>
         </>
     );

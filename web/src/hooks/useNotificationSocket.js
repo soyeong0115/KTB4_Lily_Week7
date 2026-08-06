@@ -1,15 +1,32 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 import { API_BASE_URL } from "../api/client";
+import { getNotifications } from "../api/notificationApi.js";
 
 export function useNotificationSocket() {
     const { isLoggedIn } = useAuth();
     const [notifications, setNotifications] = useState([]);
 
-    useEffect(() => {
+    const refetch = useCallback(async () => {
         if (!isLoggedIn) {
             return;
         }
+
+        try {
+            const data = await getNotifications();
+            setNotifications(data);
+        } catch (error) {
+            console.error(error);
+        }
+    }, [isLoggedIn]);
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            setNotifications([]);
+            return;
+        }
+
+        refetch();
 
         const accessToken = localStorage.getItem('accessToken');
         const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
@@ -34,5 +51,5 @@ export function useNotificationSocket() {
     }, [isLoggedIn])
 
 
-    return { notifications };
+    return { notifications, refetch };
 }
