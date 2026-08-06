@@ -88,7 +88,7 @@ export default function PostDetailPage() {
 
     return (
         <>
-            <Header backTo="/" />
+            <Header backToPrevious />
             <main className="detail">
                 <section className="detail-top">
                     <div className="detail-info">

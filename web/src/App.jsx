@@ -8,14 +8,14 @@ import PostCreatePage from './pages/PostCreatePage.jsx';
 import PostEditPage from './pages/PostEditPage.jsx';
 import ProfileEditPage from './pages/ProfileEditPage.jsx';
 import PasswordEditPage from './pages/PasswordEditPage.jsx';
+import NotificationPage from './pages/NotificationPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { ModalProvider } from './contexts/ModalContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import { NotificationProvider } from './contexts/NotificationContext.jsx';
 
-export default function App() {
+function AppRoutes() {
     return (
-    <AuthProvider>
-      <ModalProvider>
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<PostsPage />} />
@@ -54,8 +54,26 @@ export default function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path="/notifications"
+                    element={
+                        <ProtectedRoute>
+                            <NotificationPage />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </BrowserRouter>
+    );
+}
+
+export default function App() {
+    return (
+    <AuthProvider>
+      <ModalProvider>
+        <NotificationProvider>
+          <AppRoutes />
+        </NotificationProvider>
       </ModalProvider>
     </AuthProvider>
     );
