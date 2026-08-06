@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { getNotifications } from "../api/notificationApi";
 import Header from "../components/layout/Header";
 import { useModal } from "../hooks/useModal";
+import NotificationList from "../components/notification/NotificationList";
 
 export default function NotificationPage() {
     const [notifications, setNotifications] = useState([]);
+    const [activeTab, setActiveTab] = useState('all');
     const { isAuthError, showAlertModal, showLoginRequiredModal } = useModal();
 
     useEffect(() => {
@@ -26,11 +28,18 @@ export default function NotificationPage() {
         fetchNotifications();
     }, []);
 
+    const visibleNotifications = activeTab === 'unread'
+        ? notifications.filter((n) => !n.isRead)
+        : notifications;
+
     return (
         <>
             <Header backTo="/" />
             <main>
+                <button onClick={() => setActiveTab('all')}>전체</button>
+                <button onClick={() => setActiveTab('unread')}>읽지 않음</button>
 
+                <NotificationList notifications={visibleNotifications} />
             </main>
         </>
     );
