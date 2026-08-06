@@ -1,6 +1,6 @@
 import NotificationItem from "./NotificationItem";
 
-export default function NotificationList({ notifications }) {
+export default function NotificationList({ notifications, onChanged }) {
     if (notifications.length === 0) {
         return (
             <div className="notification-empty">
@@ -16,6 +16,7 @@ export default function NotificationList({ notifications }) {
                 <NotificationItem
                     notification={notification}
                     key={notification.notificationId}
+                    onChanged={onChanged}
                 />
             ))}
         </section>

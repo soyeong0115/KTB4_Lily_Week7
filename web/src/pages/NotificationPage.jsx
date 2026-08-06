@@ -9,22 +9,22 @@ export default function NotificationPage() {
     const [activeTab, setActiveTab] = useState('all');
     const { isAuthError, showAlertModal, showLoginRequiredModal } = useModal();
 
-    useEffect(() => {
-        async function fetchNotifications() {
-            try {
-                const data = await getNotifications();
-                setNotifications(data);
-            } catch (error) {
-                if (isAuthError(error)) {
-                    await showLoginRequiredModal();
-                    return;
-                }
-
-                await showAlertModal({ message: '알림을 불러오지 못했습니다.' })
-                console.error(error);
+    async function fetchNotifications() {
+        try {
+            const data = await getNotifications();
+            setNotifications(data);
+        } catch (error) {
+            if (isAuthError(error)) {
+                await showLoginRequiredModal();
+                return;
             }
-        }
 
+            await showAlertModal({ message: '알림을 불러오지 못했습니다.' })
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
         fetchNotifications();
     }, []);
 
@@ -39,7 +39,7 @@ export default function NotificationPage() {
                 <button onClick={() => setActiveTab('all')}>전체</button>
                 <button onClick={() => setActiveTab('unread')}>읽지 않음</button>
 
-                <NotificationList notifications={visibleNotifications} />
+                <NotificationList notifications={visibleNotifications} onChanged={fetchNotifications} />
             </main>
         </>
     );
