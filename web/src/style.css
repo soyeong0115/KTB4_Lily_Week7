@@ -2260,8 +2260,8 @@ textarea {
 }
 
 .notification-bell-icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 .notification-badge {
@@ -2279,12 +2279,12 @@ textarea {
 
   border: 1px solid var(--line);
   border-radius: 50%;
-  background-color: var(--tag-red);
+  background-color: #e0453c;
 
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ink);
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
 }
 
 /* 알림 페이지 */
