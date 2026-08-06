@@ -8,6 +8,7 @@ import PostCreatePage from './pages/PostCreatePage.jsx';
 import PostEditPage from './pages/PostEditPage.jsx';
 import ProfileEditPage from './pages/ProfileEditPage.jsx';
 import PasswordEditPage from './pages/PasswordEditPage.jsx';
+import NotificationPage from './pages/NotificationPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { ModalProvider } from './contexts/ModalContext.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
