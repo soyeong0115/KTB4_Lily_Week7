@@ -2360,7 +2360,7 @@ textarea {
   font-size: 12px;
   font-weight: 700;
   color: var(--ink-soft);
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
 }
 

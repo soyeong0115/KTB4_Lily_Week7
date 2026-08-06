@@ -59,7 +59,7 @@ export default function NotificationPage() {
             <Header backTo="/" />
             <main className="notification-main">
                 <div className="post-create-heading">
-                    <SidebarTag color="tag-mint">✎ Alerts</SidebarTag>
+                    <SidebarTag color="tag-mint">✎ Notification</SidebarTag>
                     <h2 className="post-create-title">알림</h2>
                 </div>
 
