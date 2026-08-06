@@ -5,10 +5,13 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { API_BASE_URL } from '../../api/client.js';
 import { getProfile } from '../../api/userApi.js';
 import { getAvatarColor } from '../../utils/avatarColor.js';
+import { useNotification } from '../../hooks/useNotification.js';
 
 export default function AuthMenu() {
     const { isLoggedIn, logout } = useAuth();
     const [profile, setProfile] = useState(null);
+    const { notifications } = useNotification();
+    const unreadCount = notifications.filter((n) => !n.isRead).length;
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -44,15 +47,21 @@ export default function AuthMenu() {
     }
 
     return (
-        <details className="header-right">
-            <summary className="profile-avatar" style={{ '--avatar-color': avatarColor }}>
-                {avatarContent}
-            </summary>
-            <nav className="brand-dropdown">
-                <a href="#" onClick={handleLogout}>로그아웃</a>
-                <Link to="/profile/edit">회원정보수정</Link>
-                <Link to="/password/edit">비밀번호수정</Link>
-            </nav>
-        </details>
+        <>
+            <Link to="/notifications" className="notification-bell">
+                <img className="notification-bell-icon" src="/svg/bell.svg" alt="알림" />
+                {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+            </Link>
+            <details className="header-right">
+                <summary className="profile-avatar" style={{ '--avatar-color': avatarColor }}>
+                    {avatarContent}
+                </summary>
+                <nav className="brand-dropdown">
+                    <a href="#" onClick={handleLogout}>로그아웃</a>
+                    <Link to="/profile/edit">회원정보수정</Link>
+                    <Link to="/password/edit">비밀번호수정</Link>
+                </nav>
+            </details>
+        </>
     );
 }
