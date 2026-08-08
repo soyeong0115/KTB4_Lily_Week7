@@ -23,11 +23,12 @@ export default function PostDetailPage() {
 
     async function fetchPostDetail() {
         try {
-            const data = await getPost(postId, { countView: shouldCountViewRef.current });
-
-            setPost(data);
+            const countView = shouldCountViewRef.current;
             shouldCountViewRef.current = false;
 
+            const data = await getPost(postId, { countView });
+
+            setPost(data);
         } catch (error) {
             await showAlertModal({ message: '게시글 상세 조회에 실패했습니다.' });
             console.error(error);
