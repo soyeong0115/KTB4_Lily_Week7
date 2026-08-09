@@ -34,6 +34,51 @@ Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 
 ## ✨ 주요 기능
 
+### 1. 로그인 / 회원가입
+
+| 로그인 | 회원가입 |
+|:--:|:--:|
+| ![로그인](docs/images/feature-login.gif) | ![회원가입](docs/images/feature-signup.gif) |
+
+### 2. 홈
+
+인기글 Top 5를 자동 슬라이드 캐러셀로, 게시글 목록은 매거진 스타일 카드로 둘러볼 수 있어요.<br>
+Contributors로 BABBLE에 기여한 사람들을 확인하고, 프로필 드롭다운으로 어느 페이지에서든 회원정보 수정이나 로그아웃을 바로 할 수 있어요.
+
+| 인기글 랭킹 (자동 슬라이드) | Contributors | 게시글 목록 (매거진 스타일) |
+|:--:|:--:|:--:|
+| ![인기글 랭킹](docs/images/feature-popular-posts.gif) | ![Contributors](docs/images/feature-contributors.gif) | ![게시글 목록](docs/images/feature-post-list.gif) |
+
+### 3. 게시글 · 댓글 달기
+
+게시글에 댓글을 달고, 내가 쓴 글/댓글은 자유롭게 수정·삭제할 수 있어요. 삭제할 때는 실수로 지우지 않도록 확인 모달이 뜨고, 댓글은 작성자마다 아바타 색이 달라서 누가 남겼는지 한눈에 구분돼요.
+
+**게시글**
+
+| 작성 | 수정 | 삭제 |
+|:--:|:--:|:--:|
+| ![게시글 작성](docs/images/feature-post-create.gif) | ![게시글 수정](docs/images/feature-post-edit.gif) | ![게시글 삭제](docs/images/feature-post-delete.gif) |
+
+**댓글**
+
+| 작성 | 수정 | 삭제 |
+|:--:|:--:|:--:|
+| ![댓글 작성](docs/images/feature-comment-create.gif) | ![댓글 수정](docs/images/feature-comment-edit.gif) | ![댓글 삭제](docs/images/feature-comment-delete.gif) |
+
+### 4. 회원 정보 수정 / 탈퇴
+
+| 회원 정보 수정 | 회원 탈퇴 |
+|:--:|:--:|
+| ![회원 정보 수정](docs/images/feature-profile-edit.gif) | ![회원 탈퇴](docs/images/feature-withdraw.gif) |
+
+### 5. 실시간 알림
+
+안 읽은 알림만 따로 보는 탭, 전체 읽음 처리, 알림 삭제까지 지원해요.
+
+| 안읽은 알림 탭 | 전체 읽음 처리 | 알림 삭제 |
+|:--:|:--:|:--:|
+| ![안읽은 알림](docs/images/feature-notification-unread.gif) | ![전체 읽음](docs/images/feature-notification-readall.gif) | ![알림 삭제](docs/images/feature-notification-delete.gif) |
+
 <br>
 
 ## ⚙️ Tech Stack
