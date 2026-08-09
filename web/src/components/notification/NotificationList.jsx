@@ -21,9 +21,10 @@ export default function NotificationList({ notifications, onChanged }) {
         setScrollTop(nextScrollTop);
     }
 
-    const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - OVERSCAN);
+    const rawStartIndex = Math.floor(scrollTop / ITEM_HEIGHT); // clamp 전 원본
+    const startIndex = Math.max(0, rawStartIndex - OVERSCAN);   // 렌더링용
     const visibleCount = Math.ceil(CONTAINER_HEIGHT / ITEM_HEIGHT);
-    const endIndex = startIndex + visibleCount + OVERSCAN * 2;
+    const endIndex = rawStartIndex + visibleCount + OVERSCAN;   // 원본 기준으로 계산
     const visibleNotifications = notifications.slice(startIndex, endIndex);
 
     return (
