@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 import { API_BASE_URL } from "../api/client";
 import { getNotifications } from "../api/notificationApi.js";
+import { MOCK_COUNT, generateMockNotifications } from "../utils/mockData.js";
 
 export function useNotificationSocket() {
     const { isLoggedIn } = useAuth();
@@ -9,6 +10,11 @@ export function useNotificationSocket() {
 
     const refetch = useCallback(async () => {
         if (!isLoggedIn) {
+            return;
+        }
+
+        if (MOCK_COUNT > 0) {
+            setNotifications(generateMockNotifications(MOCK_COUNT));
             return;
         }
 
@@ -27,6 +33,10 @@ export function useNotificationSocket() {
         }
 
         refetch();
+
+        if (MOCK_COUNT > 0) {
+            return; // mock 측정 중엔 웹소켓 연결 스킵
+        }
 
         const accessToken = localStorage.getItem('accessToken');
         const wsUrl = API_BASE_URL.replace(/^http/, 'ws');

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getPosts } from "../../api/postApi";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
+import { MOCK_COUNT, generateMockPosts } from "../../utils/mockData.js";
 import PostCard from "./PostCard.jsx";
 
 export default function PostList({ onPostsFetched }) {
@@ -16,6 +17,16 @@ export default function PostList({ onPostsFetched }) {
     const fetchPosts = useCallback(async() => {
         if (isLoadingRef.current || !hasNextRef.current) return;
         isLoadingRef.current = true;
+
+        if (MOCK_COUNT > 0) {
+            const mockPosts = generateMockPosts(MOCK_COUNT);
+            setPosts(mockPosts);
+            setHasLoadedOnce(true);
+            onPostsFetched(mockPosts);
+            hasNextRef.current = false;
+            isLoadingRef.current = false;
+            return;
+        }
 
         try {
             const { posts: newPosts, hasNext } = await getPosts({
