@@ -45,7 +45,7 @@ Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 인기글 Top 5를 자동 슬라이드 캐러셀로, 게시글 목록은 매거진 스타일 카드로 둘러볼 수 있어요.<br>
 Contributors로 BABBLE에 기여한 사람들을 확인하고, 프로필 드롭다운으로 어느 페이지에서든 회원정보 수정이나 로그아웃을 바로 할 수 있어요.
 
-![홈](docs/images/home.gif)
+<img alt="홈" src="docs/images/home.gif" width="700" />
 
 <br>
 
