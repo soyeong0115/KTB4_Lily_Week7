@@ -15,14 +15,28 @@
 인기글 랭킹으로 지금 사람들이 몰리는 이야기를,<br>
 Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 
+<br>
+
 ## 🚀 Deployment URL
 
 [BABBLE. 바로가기](http://43.201.26.105/)
 
+<br>
+
+## 👤 개발 인원 및 기간
+
+| 항목 | 내용 |
+|:--|:--|
+| 개발 기간 | 2026.06 ~ 2026.08 |
+| 개발 인원 | 1인 (Frontend/Backend 전체 개발) |
+
+<br>
+
 ## ✨ 주요 기능
 
+<br>
 
-## ⚙️ Tech Stacks
+## ⚙️ Tech Stack
 
 <img alt="기술 스택" src="./docs/images/tech-stack.png" />
 
@@ -30,6 +44,8 @@ Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 - REST API (`fetch` 기반 공용 `request()` 래퍼)
 - WebSocket (실시간 알림, 별도 라이브러리 없이 네이티브 API 사용)
 - GitHub Actions (CI/CD) → GHCR → EC2
+
+<br>
 
 ## 🗂️ Project Structure
 
@@ -84,7 +100,7 @@ KTB4_Lily_Week7/
 
 </details>
 
-
+<br>
 
 ## Architecture
 
@@ -112,6 +128,8 @@ flowchart LR
 
 프론트/백엔드/DB를 각각 별도 컨테이너(Docker Compose)로 구성하고, `main` 브랜치 푸시 시 GitHub Actions가 이미지를 빌드해 GHCR에 올린 뒤 EC2에 SSH로 접속해 `docker compose pull && up -d`로 배포합니다.
 
+<br>
+
 ## Vanilla JS → React 마이그레이션
 
 기존 HTML/CSS/Vanilla JS로 구현된 8개 페이지의 게시판을 React 기반의 컴포넌트·훅·Context 구조로 전환
@@ -127,11 +145,16 @@ flowchart LR
 - [작업 로그](docs/migration-log.md) : 마이그레이션 단계별 기록과 판단 근거
 - [전환기 블로그](https://velog.io/@soyeong/Vanilla-JS-React-Migration-%EC%A0%84%ED%99%98%EA%B8%B0) Vanilla JS → React Migration 전환기 — 비로소 AI를 "도구"로써 사용하다
 
+<br>
+
 ## 성능 개선
 
 알림/게시글 목록처럼 항목 수가 많아질 수 있는 리스트에서 가상화 스크롤(windowing)을 적용하는 작업을 진행 중입니다. 데이터 개수(1,000/5,000/10,000)별로 DOM 노드 수·React 렌더 시간·스크롤 시 메인 스레드 점유를 측정해 적용 전후를 비교하는 방식으로 접근하고 있으며, 자세한 측정 과정과 수치는 별도 브랜치(`notification-virtual-scroll`)에서 정리 중입니다. 안정화되는 대로 이 섹션에 결과를 반영할 예정입니다.
 
+<br>
+
 ## 트러블슈팅
 
+<br>
 
 ## 프로젝트 회고
