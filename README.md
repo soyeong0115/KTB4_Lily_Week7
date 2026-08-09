@@ -45,9 +45,9 @@ Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 인기글 Top 5를 자동 슬라이드 캐러셀로, 게시글 목록은 매거진 스타일 카드로 둘러볼 수 있어요.<br>
 Contributors로 BABBLE에 기여한 사람들을 확인하고, 프로필 드롭다운으로 어느 페이지에서든 회원정보 수정이나 로그아웃을 바로 할 수 있어요.
 
-| 인기글 랭킹 (자동 슬라이드) | Contributors | 게시글 목록 (매거진 스타일) |
-|:--:|:--:|:--:|
-| ![인기글 랭킹](docs/images/feature-popular-posts.gif) | ![Contributors](docs/images/feature-contributors.gif) | ![게시글 목록](docs/images/feature-post-list.gif) |
+![홈](docs/images/home.gif)
+
+<br>
 
 ### 3. 게시글 · 댓글 달기
 
