@@ -53,15 +53,13 @@ Contributors로 BABBLE에 기여한 사람들을 확인하고, 프로필 드롭�
 
 게시글에 댓글을 달고, 내가 쓴 글/댓글은 자유롭게 수정·삭제할 수 있어요. 삭제할 때는 실수로 지우지 않도록 확인 모달이 뜨고, 댓글은 작성자마다 아바타 색이 달라서 누가 남겼는지 한눈에 구분돼요.
 
-**게시글**
 
-| 작성 | 수정 | 삭제 |
+| 게시글 작성 | 게시글 수정 | 게시글 삭제 |
 |:--:|:--:|:--:|
 | ![게시글 작성](docs/images/feature-post-create.gif) | ![게시글 수정](docs/images/feature-post-edit.gif) | ![게시글 삭제](docs/images/feature-post-delete.gif) |
 
-**댓글**
 
-| 작성 | 수정 | 삭제 |
+| 댓글 작성 | 댓글 수정 | 댓글 삭제 |
 |:--:|:--:|:--:|
 | ![댓글 작성](docs/images/feature-comment-create.gif) | ![댓글 수정](docs/images/feature-comment-edit.gif) | ![댓글 삭제](docs/images/feature-comment-delete.gif) |
 
