@@ -1,6 +1,17 @@
 # BABBLE.
 
-머릿속에 떠오른 아무 말이나 편하게 남기는 게시판 서비스입니다. KTB 부트캠프 개인 과제로, 바닐라 JS/HTML/CSS로 만든 기존 프로젝트를 React로 마이그레이션하고 실시간 알림·성능 개선 기능을 추가하는 과정을 담고 있습니다.
+> 꾸미지 않아도 괜찮아요, 그냥 재잘거리세요.
+
+`BABBLE.`은 이름 그대로`(babble: 재잘거리다)` 잘 다듬은 글이 아니어도 떠오르는 대로 편하게 남기고, 가볍게 반응을 주고받는 커뮤니티 게시판이에요.
+
+**끄적여요**
+글감을 고민할 필요 없어요. 머릿속에 떠오른 아무 말이나, 사진 한 장과 함께 편하게 게시글로 남겨보세요.
+
+**반응해요**
+좋아요와 댓글로 가볍게 반응을 주고받고, 실시간 알림으로 내 글에 달린 반응을 바로바로 확인해요.
+
+**발견해요**
+인기글 랭킹으로 지금 사람들이 몰리는 이야기를, Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 
 ## 🚀 Deployment URL
 
@@ -120,48 +131,26 @@ flowchart LR
 
 프론트/백엔드/DB를 각각 별도 컨테이너(Docker Compose)로 구성하고, `main` 브랜치 푸시 시 GitHub Actions가 이미지를 빌드해 GHCR에 올린 뒤 EC2에 SSH로 접속해 `docker compose pull && up -d`로 배포합니다.
 
-## 문서
+## Vanilla JS → React 마이그레이션
 
-- [React 마이그레이션 설계 문서](docs/react-migration-design.md) — 기존 바닐라 JS 구조 분석, 컴포넌트/상태 설계, 단계별 마이그레이션 계획
-- [React 마이그레이션 작업 로그](docs/migration-log.md) — 단계별 AI 협업 기록과 판단 근거
+기존 HTML/CSS/Vanilla JS로 구현된 8개 페이지의 게시판을 React 기반의 컴포넌트·훅·Context 구조로 전환
 
-## 성능 개선 포인트
+| 기존 구조 | React 전환 |
+|---|---|
+| DOM 직접 조작 (`querySelector` + `innerHTML`) | 선언적 UI + 컴포넌트 기반 렌더링 |
+| 페이지별 상태 관리 | `AuthContext` / `ModalContext`를 통한 전역 상태 관리 |
+| 반복되는 목록 UI | `PostCard` / `CommentItem` 등 재사용 컴포넌트로 분리 |
+| 페이지마다 중복되는 로직 | `useAuth` / `useModal` / `useInfiniteScroll` 등 커스텀 훅으로 분리 |
+
+- [설계 문서](docs/react-migration-design.md) — 기존 구조 분석, 컴포넌트/상태 설계, 단계별 마이그레이션 계획
+- [작업 로그](docs/migration-log.md) — 마이그레이션 단계별 기록과 판단 근거
+- [전환기 블로그: Vanilla JS → React Migration 전환기 — 비로소 AI를 "도구"로써 사용하다](https://velog.io/@soyeong/Vanilla-JS-React-Migration-%EC%A0%84%ED%99%98%EA%B8%B0)
+
+## 성능 개선
 
 알림/게시글 목록처럼 항목 수가 많아질 수 있는 리스트에서 가상화 스크롤(windowing)을 적용하는 작업을 진행 중입니다. 데이터 개수(1,000/5,000/10,000)별로 DOM 노드 수·React 렌더 시간·스크롤 시 메인 스레드 점유를 측정해 적용 전후를 비교하는 방식으로 접근하고 있으며, 자세한 측정 과정과 수치는 별도 브랜치(`notification-virtual-scroll`)에서 정리 중입니다. 안정화되는 대로 이 섹션에 결과를 반영할 예정입니다.
 
 ## 트러블슈팅
 
-### 1. `useModal` 훅에서 존재하지 않는 함수를 호출하던 버그
-
-**문제**: 여러 컴포넌트가 `useModal()`에서 `showConfirmModal`/`showAlertModal`/`isAuthError`를 꺼내 쓰는데, 실제 `ModalContext`가 반환하던 값은 이름이 다른 `showConfirm`/`showAlert`뿐이었고 `isAuthError`는 구현조차 되어 있지 않았습니다.
-
-**원인**: 설계 단계에서 정한 공개 API 이름(기존 바닐라 `js/modal.js`와 맞춘 이름)과 `ModalContext` 내부 구현 함수 이름이 어긋난 상태로 초기 구현이 끝났고, 실제로 해당 경로(로그인 필요 안내, 인증 에러 처리)를 브라우저에서 타보기 전까지는 드러나지 않았습니다.
-
-**해결**: `useModal.js`에서 `ModalContext`가 반환하는 함수를 원하는 이름으로 다시 매핑해서 내보내고(`showConfirmModal: context.showConfirm` 형태), 빠져 있던 `isAuthError`를 훅 안에서 직접 구현했습니다.
-
-### 2. StrictMode 이중 마운트로 조회수가 중복 카운트되던 버그
-
-**문제**: 개발 모드(`StrictMode`)에서 게시글 상세 페이지 진입 시 조회수가 2씩 올라갔습니다.
-
-**원인**: 조회수 중복 방지 플래그(`shouldCountViewRef.current`)를 `await getPost(...)` 이후에 `false`로 바꾸고 있었는데, `StrictMode`가 effect를 두 번 연달아 실행하면서 두 번째 호출이 첫 번째 호출의 `await`가 끝나기 전에 시작돼 버렸습니다. 그 결과 두 호출 모두 플래그가 아직 `true`인 상태로 `countView: true`를 서버에 보냈습니다.
-
-**해결**: 플래그를 `await` 이전, 요청을 보내기 직전에 동기적으로 `false`로 바꾸도록 순서를 변경했습니다.
-
-```jsx
-// before
-const data = await getPost(postId, { countView: shouldCountViewRef.current });
-setPost(data);
-shouldCountViewRef.current = false; // await 이후라 두 번째 마운트가 값을 읽은 뒤에 바뀜
-
-// after
-const countView = shouldCountViewRef.current;
-shouldCountViewRef.current = false; // await 이전에 동기적으로 먼저 반영
-const data = await getPost(postId, { countView });
-setPost(data);
-```
-
-### 3. 프로필 이미지 변경이 반응하지 않던 버그
-
-**문제**: 원본 바닐라 JS(`profile-edit.js`)의 이벤트 리스너가 파일 input에 `'click'`으로 등록되어 있어서, 파일을 선택해도 `files[0]`이 아직 비어 있는 시점에 로직이 실행되는 문제가 있었습니다. React로 포팅하며 발견해 `onChange`로 수정했습니다.
 
 ## 프로젝트 회고
