@@ -33,9 +33,9 @@ DOM 노드 수(원인) → React 렌더 비용(Profiler, 중간 과정) → 사�
 
 | 개수 | DOM 노드 수 | Profiler 렌더 시간 | 스크롤 FPS / Long Task | 스크린샷 |
 |---|---|---|---|---|
-| 1000 | | | | |
+| 1000 | 12 | 6.9ms | Main thread 1252ms 점유 (4.13s 중, Scripting 1039ms) — onScroll이 스크롤 픽셀마다 리렌더를 발생시켜 누적된 것으로 추정 | |
 | 5000 | | | | |
-| 10000 | 9 | | | |
+| 10000 | 12 (overscan 적용 전 측정한 9에서 갱신) | | | |
 
 ### 구현 과정 기록 — overscan 버그 디버깅
 
@@ -55,7 +55,7 @@ const endIndex = startIndex + visibleCount + OVERSCAN;
 - `startIndex = Math.max(0, 10 - 3) = 7` — 위쪽 여유분은 정상 반영
 - `endIndex = startIndex + visibleCount + OVERSCAN = 7 + 9 + 3 = 19`
 
-그런데 overscan을 아예 적용하지 않았을 때의 `endIndex`도 `10 + 9 = 19`로 **정확히 같은 값**이었다. `startIndex`를 구할 때 이미 `-OVERSCAN`을 반영해놓고, `endIndex`를 그 `startIndex`에 다시 `+OVERSCAN`을 더해서 구하다 보니 `-OVERSCAN`과 `+OVERSCAN`이 대수적으로 상쇄돼버린 것이다. 그 결과 뒤쪽(스크롤 진행 방향)에는 overscan이 사실상 전혀 적용되지 않고 있었다 — 위쪽 근처에서만 `Math.max(0, ...)`의 clamp 때문에 우연히 효과가 있어 보였을 뿐이다.
+그런데 overscan을 아예 적용하지 않았을 때의 `endIndex`도 `10 + 9 = 19`로 **정확히 같은 값**이었다. `startIndex`를 구할 때 이미 `-OVERSCAN`을 반영해놓고, `endIndex`를 그 `startIndex`에 다시 `+OVERSCAN`을 더해서 구하다 보니 `-OVERSCAN`과 `+OVERSCAN`이 대수적으로 상쇄돼버린 것이다. 그 결과 뒤쪽(스크롤 진행 방향)에는 overscan이 사실상 전혀 적용되지 않고 있었다 — 위쪽 근처에서만 `Math.max(0, ...)`의 clamp 때문에 우연히 효과가 있어 보였을 뿐
 
 **2차 시도 — `OVERSCAN * 2`**
 
@@ -63,20 +63,53 @@ const endIndex = startIndex + visibleCount + OVERSCAN;
 const endIndex = startIndex + visibleCount + OVERSCAN * 2;
 ```
 
-상쇄되는 `OVERSCAN` 한 몫을 미리 계산에 넣어 대입하면(`(rawStart - OVERSCAN) + visibleCount + OVERSCAN*2 = rawStart + visibleCount + OVERSCAN`), 원하던 결과가 나온다는 걸 대수적으로 확인하고 적용했다. 실제로 리스트 중간에서의 흰 화면 문제는 해결됐다. 다만 리스트 맨 위 근처에서는 `startIndex`가 `Math.max(0, ...)`에 의해 clamp되면서 상쇄가 깨지고, 그만큼 `endIndex`가 필요한 것보다 더 커져서 항목을 몇 개 더 그리는 부작용이 남았다 — 버그는 아니지만 clamp 여부에 따라 계산의 의미가 달라지는 결합된 구조였다.
+상쇄되는 `OVERSCAN` 한 몫을 미리 계산에 넣어 대입하면(`(rawStart - OVERSCAN) + visibleCount + OVERSCAN*2 = rawStart + visibleCount + OVERSCAN`), 원하던 결과가 나온다는 걸 대수적으로 확인하고 적용했다. 실제로 리스트 중간에서의 흰 화면 문제는 해결됐다. 다만 리스트 맨 위 근처에서는 `startIndex`가 `Math.max(0, ...)`에 의해 clamp되면서 상쇄가 깨지고, 그만큼 `endIndex`가 필요한 것보다 더 커져서 항목을 몇 개 더 그리는 부작용이 남았다 — 버그는 아니지만 clamp 여부에 따라 계산의 의미가 달라지는 결합된 구조였음
 
 **최종 — `rawStartIndex` 분리**
 
 ```jsx
 const rawStartIndex = Math.floor(scrollTop / ITEM_HEIGHT); // clamp 전 원본
-const startIndex = Math.max(0, rawStartIndex - OVERSCAN);   // 렌더링용 (0 밑으로 안 내려감)
+const startIndex = Math.max(0, rawStartIndex - OVERSCAN);   // 렌더링용
 const visibleCount = Math.ceil(CONTAINER_HEIGHT / ITEM_HEIGHT);
-const endIndex = rawStartIndex + visibleCount + OVERSCAN;   // "원본" 기준으로 계산
+const endIndex = rawStartIndex + visibleCount + OVERSCAN;   // 원본 기준으로 계산
 ```
 
 `endIndex`를 clamp된 `startIndex`가 아니라 clamp 전의 `rawStartIndex`를 기준으로 계산하도록 분리했다. 이렇게 하면 `startIndex`가 clamp되든 안 되든 `endIndex`는 항상 "원래 보여야 할 위치 + OVERSCAN"이라는 동일한 의미를 유지한다. 즉 렌더링 범위 계산과 clamp 처리가 서로 영향을 주지 않도록 완전히 분리된 것이 핵심이다.
 
 이 과정에서 배운 것: 한쪽 값을 다른 쪽 값 계산에 재사용할 때는, 그 값에 이미 어떤 보정(clamp, 오프셋 등)이 들어가 있는지 항상 확인해야 한다. 특히 "빼고 - 더하고"처럼 대수적으로 상쇄될 수 있는 연산은 코드만 봐서는 버그가 잘 안 보이고, 실제 숫자를 대입해봐야 드러난다.
+
+### 구현 과정 기록 — onScroll 리렌더 최적화 시도
+
+overscan까지 반영한 뒤 mock 1000개 기준으로 적용 후 성능을 측정했는데, Profiler 렌더 시간은 6.9ms로 크게 줄었지만(적용 전 171.7ms) Chrome Performance 탭의 Scripting 시간은 오히려 1039ms(4.13s 녹화 중)로 적용 전(188.2ms)보다 커 보이는 수치가 나왔다.
+
+**원인 추정**: 지금 구현은 `onScroll` 이벤트가 발생할 때마다(스크롤 픽셀 단위로, 초당 수십~수백 번) `setScrollTop`을 호출해서 리렌더를 트리거하고 있었다. 개별 렌더 자체는 가볍지만(DOM 노드가 12개뿐이라 6~8ms 수준), 스크롤 몇 초 동안 이 가벼운 렌더가 수백 번 누적되면 총 Scripting 시간이 커질 수 있다.
+
+**1차 최적화 — index가 실제로 바뀔 때만 상태 업데이트**
+
+```jsx
+function handleOnScroll(nextScrollTop) {
+    const nextRawIndex = Math.floor(nextScrollTop / ITEM_HEIGHT);
+    const currentRawIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+
+    if (nextRawIndex !== currentRawIndex) {
+        setScrollTop(nextScrollTop);
+    }
+}
+```
+
+아이템이 절대 위치(`top: index * ITEM_HEIGHT`)로 고정돼 있고 실제 스크롤은 브라우저 네이티브 스크롤바가 처리하므로, "화면에 보여줄 아이템 구간(index)"이 바뀔 때만 리렌더하면 충분하다는 논리로 적용했다.
+
+**결과— 뚜렷한 개선을 확인하지 못함**: 같은 방식(3~4초 스크롤)으로 다시 측정했지만 Scripting 시간은 1215~1259ms 선으로 비슷했다. 원인을 다시 짚어보면:
+
+- `onScroll` 핸들러 자체(state를 갱신하지 않더라도 `Math.floor` 비교 로직)는 상태 업데이트 여부와 무관하게 **모든 스크롤 이벤트마다 계속 호출**된다. 즉 이 최적화는 "리렌더 횟수"는 줄여주지만 "핸들러 호출 횟수"는 줄여주지 못한다.
+- 손으로 스크롤을 재현하다 보니 매 측정마다 스크롤 시간/속도가 미묘하게 달라져서(4.13s, 4.45s, 5.51s...), Chrome Performance 탭의 총합 수치만으로는 정확한 before/after 비교가 어려웠다. React Profiler로 커밋(리렌더) 횟수를 직접 세는 방식이 더 신뢰할 수 있는 지표였다.
+
+**결론적으로 남은 최적화 여지**: 이 구현이 근본적으로 못하는 건 아니고, 아직 두 가지를 안 넣은 상태였다.
+
+1. **`requestAnimationFrame` 쓰로틀링** — 지금처럼 브라우저가 쏘는 모든 스크롤 이벤트에 반응하는 대신, 프레임당(최대 초당 60번) 한 번만 스크롤 위치를 확인하도록 제한하는 것. `onScroll` 핸들러 실행 횟수 자체를 줄인다.
+2. **`React.memo`** — 리렌더가 발생해도 props가 바뀌지 않은 `NotificationItem`은 다시 그리지 않도록 방지하는 것.
+
+react-window 같은 라이브러리가 "빠르다"고 느껴지는 이유는 마법이 아니라, 이런 세부 최적화들을 이미 내장하고 있기 때문이라는 걸 이번 시도로 확인했다. 직접 구현에서는 이런 기법들을 하나하나 별도로 적용해야 하고, 그 격차 자체가 "왜 라이브러리를 쓰는가"에 대한 실증적인 답이 된다.
 
 ## 게시글 목록 (react-window 예정)
 
