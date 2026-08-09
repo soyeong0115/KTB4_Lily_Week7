@@ -85,10 +85,6 @@ Contributors로 BABBLE에 기여한 사람들을 확인하고, 프로필 드롭�
 
 <img alt="기술 스택" src="./docs/images/tech-stack.png" />
 
-**통신**
-- REST API (`fetch` 기반 공용 `request()` 래퍼)
-- WebSocket (실시간 알림, 별도 라이브러리 없이 네이티브 API 사용)
-- GitHub Actions (CI/CD) → GHCR → EC2
 
 <br>
 
