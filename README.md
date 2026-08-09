@@ -71,11 +71,11 @@ Contributors로 BABBLE에 기여한 사람들을 확인하고, 프로필 드롭�
 
 ### 5. 실시간 알림
 
-전체 알림과 읽지 않은 알림을 탭으로 나눠 보고, 한 번에 전체 읽음 처리하거나 알림을 삭제할 수 있어요.
+전체 알림과 읽지 않은 알림을 탭으로 나눠 보고, 한 번에 전체 읽음 처리하거나 모든 알림을 삭제할 수 있어요.
 
-| 전체 알림 / 읽지 않음 탭 | 전체 읽음 처리 | 알림 삭제 |
+| 전체 알림 / 읽지 않음 탭 | 전체 읽음 처리 | 모든 알림 삭제 |
 |:--:|:--:|:--:|
-| ![전체 알림 / 읽지 않음 탭](docs/images/feature-notification-tab.gif) | ![전체 읽음](docs/images/feature-notification-readall.gif) | ![알림 삭제](docs/images/feature-notification-delete.gif) |
+| ![전체 알림 / 읽지 않음 탭](docs/images/feature-notification-tab.gif) | ![전체 읽음](docs/images/feature-notification-readall.gif) | ![모든 알림 삭제](docs/images/feature-notification-delete.gif) |
 
 <br>
 
