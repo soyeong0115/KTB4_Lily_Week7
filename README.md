@@ -38,7 +38,7 @@ Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 
 | 로그인 | 회원가입 |
 |:--:|:--:|
-| <img alt="로그인" src="docs/images/feature-login.gif" width="380" /> | <img alt="회원가입" src="docs/images/feature-signup.gif" width="380" /> |
+| <img alt="로그인" src="docs/images/feature-login.gif" width="100%" /> | <img alt="회원가입" src="docs/images/feature-signup.gif" width="100%" /> |
 
 ### 2. 홈
 
