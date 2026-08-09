@@ -23,7 +23,7 @@ export default function NotificationList({ notifications, onChanged }) {
 
     const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - OVERSCAN);
     const visibleCount = Math.ceil(CONTAINER_HEIGHT / ITEM_HEIGHT);
-    const endIndex = startIndex + visibleCount + OVERSCAN;
+    const endIndex = startIndex + visibleCount + OVERSCAN * 2;
     const visibleNotifications = notifications.slice(startIndex, endIndex);
 
     return (
