@@ -20,6 +20,11 @@ export default function NotificationList({ notifications, onChanged }) {
         setScrollTop(nextScrollTop);
     }
 
+    const startIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+    const visibleCount = Math.ceil(CONTAINER_HEIGHT / ITEM_HEIGHT);
+    const endIndex = startIndex + visibleCount;
+    const visibleNotifications = notifications.slice(startIndex, endIndex);
+
     return (
         <section
             className="notification-list"
@@ -27,10 +32,10 @@ export default function NotificationList({ notifications, onChanged }) {
             onScroll={(e) => handleOnScroll(e.target.scrollTop)}
         >
             <div style={{ height: notifications.length * ITEM_HEIGHT, position: 'relative' }}>
-                {notifications.map((notification, index) => (
+                {visibleNotifications.map((notification, i) => (
                     <div
                         key={notification.notificationId}
-                        style={{ position: 'absolute', top: index * ITEM_HEIGHT, left: 0, right: 0 }}
+                        style={{ position: 'absolute', top: (startIndex + i) * ITEM_HEIGHT, left: 0, right: 0 }}
                     >
                         <NotificationItem
                             notification={notification}
