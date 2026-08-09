@@ -3,6 +3,7 @@ import NotificationItem from "./NotificationItem";
 
 const ITEM_HEIGHT = 73; // NotificationItem 한 개의 실제 측정 높이
 const CONTAINER_HEIGHT = 600; // 리스트 스크롤 박스 높이
+const OVERSCAN = 3;
 
 export default function NotificationList({ notifications, onChanged }) {
     const [scrollTop, setScrollTop] = useState(0);
@@ -20,9 +21,9 @@ export default function NotificationList({ notifications, onChanged }) {
         setScrollTop(nextScrollTop);
     }
 
-    const startIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+    const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - OVERSCAN);
     const visibleCount = Math.ceil(CONTAINER_HEIGHT / ITEM_HEIGHT);
-    const endIndex = startIndex + visibleCount;
+    const endIndex = startIndex + visibleCount + OVERSCAN;
     const visibleNotifications = notifications.slice(startIndex, endIndex);
 
     return (
