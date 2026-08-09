@@ -30,6 +30,8 @@ Contributors로 이 게시판을 함께 채워가는 사람들을 확인해요.
 | 개발 기간 | 2026.06 ~ 2026.08 |
 | 개발 인원 | 1인 (Frontend/Backend 전체 개발) |
 
+> [Backend 저장소](https://github.com/soyeong0115/KTB4_Lily_Week4)
+
 <br>
 
 ## ✨ 기능 소개
