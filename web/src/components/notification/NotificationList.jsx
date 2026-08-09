@@ -1,9 +1,12 @@
+import { useState } from "react";
 import NotificationItem from "./NotificationItem";
 
-const ITEM_HEIGHT = 73; // NotificationItem 한 개의 실측 높이(px)
-const CONTAINER_HEIGHT = 600; // 리스트 스크롤 박스 높이(px)
+const ITEM_HEIGHT = 73; // NotificationItem 한 개의 실제 측정 높이
+const CONTAINER_HEIGHT = 600; // 리스트 스크롤 박스 높이
 
 export default function NotificationList({ notifications, onChanged }) {
+    const [scrollTop, setScrollTop] = useState(0);
+
     if (notifications.length === 0) {
         return (
             <div className="notification-empty">
@@ -13,8 +16,16 @@ export default function NotificationList({ notifications, onChanged }) {
         )
     }
 
+    function handleOnScroll(nextScrollTop) {
+        setScrollTop(nextScrollTop);
+    }
+
     return (
-        <section className="notification-list" style={{ height: CONTAINER_HEIGHT, overflowY: 'auto' }}>
+        <section
+            className="notification-list"
+            style={{ height: CONTAINER_HEIGHT, overflowY: 'auto' }}
+            onScroll={(e) => handleOnScroll(e.target.scrollTop)}
+        >
             <div style={{ height: notifications.length * ITEM_HEIGHT, position: 'relative' }}>
                 {notifications.map((notification, index) => (
                     <div
