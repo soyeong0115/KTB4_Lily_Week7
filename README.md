@@ -142,9 +142,9 @@ flowchart LR
 | 반복되는 목록 UI | `PostCard` / `CommentItem` 등 재사용 컴포넌트로 분리 |
 | 페이지마다 중복되는 로직 | `useAuth` / `useModal` / `useInfiniteScroll` 등 커스텀 훅으로 분리 |
 
-- [설계 문서](docs/react-migration-design.md) — 기존 구조 분석, 컴포넌트/상태 설계, 단계별 마이그레이션 계획
-- [작업 로그](docs/migration-log.md) — 마이그레이션 단계별 기록과 판단 근거
-- [전환기 블로그: Vanilla JS → React Migration 전환기 — 비로소 AI를 "도구"로써 사용하다](https://velog.io/@soyeong/Vanilla-JS-React-Migration-%EC%A0%84%ED%99%98%EA%B8%B0)
+- [설계 문서](docs/react-migration-design.md) : 기존 구조 분석, 컴포넌트/상태 설계, 단계별 마이그레이션 계획
+- [작업 로그](docs/migration-log.md) : 마이그레이션 단계별 기록과 판단 근거
+- [전환기 블로그](https://velog.io/@soyeong/Vanilla-JS-React-Migration-%EC%A0%84%ED%99%98%EA%B8%B0) Vanilla JS → React Migration 전환기 — 비로소 AI를 "도구"로써 사용하다
 
 ## 성능 개선
 
