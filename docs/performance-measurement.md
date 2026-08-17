@@ -293,11 +293,23 @@ masonry 레이아웃을 유지하면서 가상화하려면 masonry를 지원하�
 
 ### 적용 후 (TanStack Virtual)
 
-| 개수 | DOM 노드 수 | Profiler 렌더 시간 | 스크롤 FPS / Long Task | 스크린샷 |
-|---|---|---|---|---|
-| 1000 | | | | |
-| 5000 | | | | |
-| 10000 | | | | |
+mock 데이터는 3개 중 1개꼴로 이미지 있는 카드(가변 높이)로 섞음.
+
+**초기 렌더 (마운트) + DOM 노드 수 — 가상화 핵심 개선 지표**
+
+| 개수 | DOM 노드 수 | 초기 렌더 Profiler 시간 | (baseline 대비) |
+|---|---|---|---|
+| 1000 | 12 | 14.4ms (PostList 자체 3.2ms) | baseline 276.4ms → 약 19배 개선 |
+| 5000 | 12 | 15ms (PostList 자체 4.6ms) | baseline 783.5ms → 약 52배 개선 |
+| 10000 | 12 | 18.1ms (PostList 자체 2.4ms) | baseline 1484.5ms(화면 프리징) → 약 82배 개선, 프리징 해소 |
+
+**스크롤 중 Main thread 점유 (트레이드오프 참고용, 자동 스크롤 3000px/3000ms)**
+
+| 개수 | Main thread 총 점유 | Profiler 커밋 수 |
+|---|---|---|
+| 1000 | 733.7ms (5.41s 녹화 중, Scripting 525ms/System 170ms/Painting 36ms/Rendering 34ms) | 28개 (커밋당 렌더 최대 26.1ms 수준) |
+| 5000 | 618.7ms (5.53s 녹화 중, Scripting 429ms/System 118ms/Painting 49ms/Rendering 47ms) | 20개 |
+| 10000 | 571.4ms (5.43s 녹화 중, Scripting 429ms/System 109ms/Rendering 32ms/Painting 30ms) | 21개 |
 
 ## 구현 전 총평 (baseline 결과 정리)
 
