@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { markAsRead } from "../../api/notificationApi";
 import { formatRelativeTime } from "../../utils/formatRelativeTime.js";
@@ -7,7 +8,7 @@ const NOTIFICATION_ICONS = {
     COMMENT: '/svg/comment.svg',
 };
 
-export default function NotificationItem({ notification, onChanged }) {
+function NotificationItem({ notification, onChanged }) {
     const navigate = useNavigate();
 
     async function handleClick() {
@@ -34,3 +35,5 @@ export default function NotificationItem({ notification, onChanged }) {
         </div>
     );
 }
+
+export default memo(NotificationItem);
