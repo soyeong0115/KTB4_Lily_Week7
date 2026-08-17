@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import NotificationItem from "./NotificationItem";
 
 const ITEM_HEIGHT = 73; // NotificationItem 한 개의 실제 측정 높이
@@ -7,6 +7,7 @@ const OVERSCAN = 3;
 
 export default function NotificationList({ notifications, onChanged }) {
     const [scrollTop, setScrollTop] = useState(0);
+    const tickingRef = useRef(false); // 한 프레임에 최대 한 번만 처리하기 위한 플래그
 
     if (notifications.length === 0) {
         return (
