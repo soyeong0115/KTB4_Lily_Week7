@@ -923,6 +923,17 @@ textarea {
   column-gap: 24px;
 }
 
+/* 가상화된 게시글 목록 컨테이너: 기존 column 흐름에서 빠져나와 전체 폭을 차지하고,
+   내부 3열 masonry 배치는 TanStack Virtual이 계산한 lane/start 값으로 직접 처리한다. */
+.post-virtual-container {
+  column-span: all;
+}
+
+/* 세로 간격은 TanStack Virtual의 gap 옵션이 처리하므로 카드 자체 margin은 제거 */
+.post-virtual-item .post-card {
+  margin-bottom: 0;
+}
+
 .post-list-empty {
   column-span: all;
   min-height: calc(100vh - 92px - 120px);

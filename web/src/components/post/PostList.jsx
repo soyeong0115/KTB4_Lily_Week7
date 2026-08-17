@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { List } from "react-window";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { getPosts } from "../../api/postApi";
 import { MOCK_COUNT, generateMockPosts } from "../../utils/mockData.js";
-import PostRow from "./PostRow.jsx";
+import PostCard from "./PostCard.jsx";
 
 const CONTAINER_HEIGHT = 600;
-const ROW_HEIGHT_WITH_IMAGE = 378;
-const ROW_HEIGHT_WITHOUT_IMAGE = 214;
+const LANES = 3;   // 열 개수 (기존 masonry의 column-count: 3)
+const GAP = 24;    // 카드 사이 간격 (기존 column-gap / margin-bottom)
+const ESTIMATED_HEIGHT_WITH_IMAGE = 378;
+const ESTIMATED_HEIGHT_WITHOUT_IMAGE = 214;
 
 export default function PostList({ onPostsFetched }) {
     const pageRef = useRef(0);
@@ -15,6 +17,9 @@ export default function PostList({ onPostsFetched }) {
     const isLoadingRef = useRef(false);
     const [ posts, setPosts ] = useState([]);
     const [ hasLoadedOnce, setHasLoadedOnce ] = useState(false);
+
+    const scrollRef = useRef(null);
+    const [ columnWidth, setColumnWidth ] = useState(0);
 
     const POST_PAGE_SIZE = 10;
 
@@ -54,11 +59,31 @@ export default function PostList({ onPostsFetched }) {
         fetchPosts();
     }, []);
 
-    function handleRowsRendered({ stopIndex }) {
-        if (stopIndex >= posts.length - 1 && hasNextRef.current) {
-            fetchPosts();
+    // 컨테이너 폭을 측정해 열 하나의 너비를 계산 (반응형 대응 위해 ResizeObserver 사용)
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        function updateWidth() {
+            const totalWidth = el.clientWidth;
+            setColumnWidth((totalWidth - GAP * (LANES - 1)) / LANES);
         }
-    }
+
+        updateWidth();
+        const observer = new ResizeObserver(updateWidth);
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [hasLoadedOnce]);
+
+    const virtualizer = useVirtualizer({
+        count: posts.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: (index) =>
+            posts[index]?.postImage ? ESTIMATED_HEIGHT_WITH_IMAGE : ESTIMATED_HEIGHT_WITHOUT_IMAGE,
+        lanes: LANES,
+        gap: GAP,
+        overscan: 3,
+    });
 
     if (hasLoadedOnce && posts.length === 0) {
         return (
@@ -71,13 +96,30 @@ export default function PostList({ onPostsFetched }) {
     }
 
     return (
-        <List
-            rowComponent={PostRow}
-            rowCount={posts.length}
-            rowHeight={(index, { posts }) => posts[index].postImage ? ROW_HEIGHT_WITH_IMAGE : ROW_HEIGHT_WITHOUT_IMAGE}
-            rowProps={{ posts }}
-            onRowsRendered={handleRowsRendered}
-            style={{ height: CONTAINER_HEIGHT }}
-        />
+        <div
+            ref={scrollRef}
+            className="post-virtual-container"
+            style={{ height: CONTAINER_HEIGHT, overflowY: 'auto' }}
+        >
+            <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+                {virtualizer.getVirtualItems().map((item) => (
+                    <div
+                        key={item.key}
+                        data-index={item.index}
+                        ref={virtualizer.measureElement}
+                        className="post-virtual-item"
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: item.lane * (columnWidth + GAP),
+                            width: columnWidth,
+                            transform: `translateY(${item.start}px)`,
+                        }}
+                    >
+                        <PostCard post={posts[item.index]} />
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
