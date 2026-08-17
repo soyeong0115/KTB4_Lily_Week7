@@ -85,6 +85,15 @@ export default function PostList({ onPostsFetched }) {
         overscan: 3,
     });
 
+    const virtualItems = virtualizer.getVirtualItems();
+
+    useEffect(() => {
+        const lastItem = virtualItems[virtualItems.length - 1];
+        if (lastItem && lastItem.index >= posts.length - 1) {
+            fetchPosts();
+        }
+    }, [virtualItems, posts.length, fetchPosts]);
+
     if (hasLoadedOnce && posts.length === 0) {
         return (
             <div className="post-list-empty">
@@ -102,7 +111,7 @@ export default function PostList({ onPostsFetched }) {
             style={{ height: CONTAINER_HEIGHT, overflowY: 'auto' }}
         >
             <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
-                {virtualizer.getVirtualItems().map((item) => (
+                {virtualItems.map((item) => (
                     <div
                         key={item.key}
                         data-index={item.index}
