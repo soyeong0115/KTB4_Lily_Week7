@@ -19,12 +19,22 @@ export default function NotificationList({ notifications, onChanged }) {
     }
 
     function handleOnScroll(nextScrollTop) {
-        const nextRawIndex = Math.floor(nextScrollTop / ITEM_HEIGHT);
-        const currentRawIndex = Math.floor(scrollTop / ITEM_HEIGHT);
-
-        if (nextRawIndex !== currentRawIndex) {
-            setScrollTop(nextScrollTop);
+        if (tickingRef.current) {
+            return;
         }
+
+        tickingRef.current = true;
+
+        requestAnimationFrame(() => {
+            const nextRawIndex = Math.floor(nextScrollTop / ITEM_HEIGHT);
+            const currentRawIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+
+            if (nextRawIndex !== currentRawIndex) {
+                setScrollTop(nextScrollTop);
+            }
+
+            tickingRef.current = false;
+        });
     }
 
     const rawStartIndex = Math.floor(scrollTop / ITEM_HEIGHT); // clamp 전 원본
