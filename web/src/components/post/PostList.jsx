@@ -54,6 +54,12 @@ export default function PostList({ onPostsFetched }) {
         fetchPosts();
     }, []);
 
+    function handleRowsRendered({ stopIndex }) {
+        if (stopIndex >= posts.length - 1 && hasNextRef.current) {
+            fetchPosts();
+        }
+    }
+
     if (hasLoadedOnce && posts.length === 0) {
         return (
             <div className="post-list-empty">
@@ -70,6 +76,7 @@ export default function PostList({ onPostsFetched }) {
             rowCount={posts.length}
             rowHeight={(index, { posts }) => posts[index].postImage ? ROW_HEIGHT_WITH_IMAGE : ROW_HEIGHT_WITHOUT_IMAGE}
             rowProps={{ posts }}
+            onRowsRendered={handleRowsRendered}
             style={{ height: CONTAINER_HEIGHT }}
         />
     );
