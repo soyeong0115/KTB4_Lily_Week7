@@ -94,9 +94,9 @@ function autoScroll(selector, distance = 3000, duration = 3000) {
 
 | 개수 | Main thread 총 점유 | Profiler 커밋 수 |
 |---|---|---|
-| 1000 | 396.1ms (4.98s 녹화 중, Scripting 240ms/System 149ms/Rendering 20ms/Painting 13ms) | |
-| 5000 | | |
-| 10000 | | |
+| 1000 | 396.1ms → memo 적용 후 299.8ms (4.91s 녹화 중, Scripting 137ms/System 153ms/Rendering 19ms/Painting 13ms) | 41개 (커밋당 렌더 4.9ms 수준) |
+| 5000 | 311.6ms (5.49s 녹화 중, System 159ms/Scripting 145ms/Rendering 19ms/Painting 13ms) — memo 적용 상태 | 42개 (커밋당 렌더 1.6~2.3ms 수준) |
+| 10000 | 330.7ms (5.21s 녹화 중, System 178ms/Scripting 142ms/Rendering 20ms/Painting 15ms) — memo 적용 상태 | 41개 (커밋당 렌더 2ms 수준) |
 
 같은 3000px 스크롤 기준으로 적용 전(123.3ms)과 비교하면 오히려 늘었다. Scripting이 13ms→240ms로 크게 증가한 게 원인이다. DOM/초기 렌더 관점에서는 가상화가 확실히 이득이지만, 스크롤 중 총 메인 스레드 비용만 보면 추가 최적화 없이는 오히려 손해라는 걸 수치로 확인했다. (정확한 원인 분석과 추가 최적화 시도는 아래 "구현 과정 기록" 참고)
 
