@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { List } from "react-window";
 import { getPosts } from "../../api/postApi";
-import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import { MOCK_COUNT, generateMockPosts } from "../../utils/mockData.js";
-import PostCard from "./PostCard.jsx";
+import PostRow from "./PostRow.jsx";
+
+const CONTAINER_HEIGHT = 600;
+const ROW_HEIGHT_WITH_IMAGE = 378;
+const ROW_HEIGHT_WITHOUT_IMAGE = 214;
 
 export default function PostList({ onPostsFetched }) {
     const pageRef = useRef(0);
@@ -50,8 +54,6 @@ export default function PostList({ onPostsFetched }) {
         fetchPosts();
     }, []);
 
-    const targetRef = useInfiniteScroll({ onIntersect: fetchPosts, isLoadingRef, hasNextPageRef: hasNextRef });
-
     if (hasLoadedOnce && posts.length === 0) {
         return (
             <div className="post-list-empty">
@@ -63,11 +65,12 @@ export default function PostList({ onPostsFetched }) {
     }
 
     return (
-        <>
-            {posts.map((post) => (
-                <PostCard post={post} key={post.postId} />
-            ))}
-            <div ref={targetRef}></div>
-        </>
+        <List
+            rowComponent={PostRow}
+            rowCount={posts.length}
+            rowHeight={(index, { posts }) => posts[index].postImage ? ROW_HEIGHT_WITH_IMAGE : ROW_HEIGHT_WITHOUT_IMAGE}
+            rowProps={{ posts }}
+            style={{ height: CONTAINER_HEIGHT }}
+        />
     );
 }
