@@ -70,6 +70,36 @@ Scripting이 13ms로 거의 0에 가까운 것과, 커밋이 0개인 것 둘 다
 | 5000 | | | | |
 | 10000 | 12 (overscan 적용 전 측정한 9에서 갱신) | | | |
 
+### 측정 방법 보완 — 자동 스크롤 기반 재측정 (적용 후)
+
+적용 전과 동일한 조건(3000px, 3000ms)으로, `.notification-list` 컨테이너를 대상으로 자동 스크롤해서 재측정한다.
+
+```js
+function autoScroll(selector, distance = 3000, duration = 3000) {
+    const el = document.querySelector(selector);
+    const startTop = el.scrollTop;
+    const startTime = performance.now();
+
+    function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        el.scrollTop = startTop + distance * progress;
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        }
+    }
+    requestAnimationFrame(step);
+}
+```
+
+| 개수 | Main thread 총 점유 | Profiler 커밋 수 |
+|---|---|---|
+| 1000 | 396.1ms (4.98s 녹화 중, Scripting 240ms/System 149ms/Rendering 20ms/Painting 13ms) | |
+| 5000 | | |
+| 10000 | | |
+
+같은 3000px 스크롤 기준으로 적용 전(123.3ms)과 비교하면 오히려 늘었다. Scripting이 13ms→240ms로 크게 증가한 게 원인이다. DOM/초기 렌더 관점에서는 가상화가 확실히 이득이지만, 스크롤 중 총 메인 스레드 비용만 보면 추가 최적화 없이는 오히려 손해라는 걸 수치로 확인했다. (정확한 원인 분석과 추가 최적화 시도는 아래 "구현 과정 기록" 참고)
+
 ### 구현 과정 기록 — overscan 버그 디버깅
 
 기본 windowing(고정 높이 컨테이너 + spacer + slice)까지 구현한 뒤 빠르게 스크롤해보니, 새 아이템이 그려지기 전에 흰 화면이 스치는 문제가 있었다. 화면에 딱 보이는 개수(9개, `Math.ceil(600/73)`)만 렌더링하고 있어서, 스크롤이 리액트의 재렌더링 속도보다 빠르면 아직 안 그려진 영역이 그대로 노출되는 것이었다. 이를 해결하기 위해 위아래로 여유분을 더 그리는 overscan을 도입했다.
@@ -143,6 +173,39 @@ function handleOnScroll(nextScrollTop) {
 2. **`React.memo`** — 리렌더가 발생해도 props가 바뀌지 않은 `NotificationItem`은 다시 그리지 않도록 방지하는 것
 
 react-window 같은 라이브러리가 빠르다고 느껴지는 이유는 이런 세부 최적화들을 이미 내장하고 있기 때문이라는 걸 이번 시도로 확인했다. 직접 구현에서는 이런 기법들을 하나하나 별도로 적용해야 하고, 그 격차 자체가 "왜 라이브러리를 쓰는가"에 대한 실증적인 답이 될 수 있을 것 같다는 생각이 든다.
+
+### 구현 과정 기록 — rAF 쓰로틀링 시도와 재분석
+
+위에서 제안한 두 방향 중 `requestAnimationFrame` 쓰로틀링을 먼저 시도했다. 손 스크롤 대신 자동 스크롤(3000px/3000ms)로 정확히 같은 조건에서 다시 측정할 수 있게 된 상태였으므로, 이번엔 신뢰할 수 있는 비교가 가능했다.
+
+```jsx
+const tickingRef = useRef(false);
+
+function handleOnScroll(nextScrollTop) {
+    if (tickingRef.current) {
+        return;
+    }
+
+    tickingRef.current = true;
+
+    requestAnimationFrame(() => {
+        const nextRawIndex = Math.floor(nextScrollTop / ITEM_HEIGHT);
+        const currentRawIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+
+        if (nextRawIndex !== currentRawIndex) {
+            setScrollTop(nextScrollTop);
+        }
+
+        tickingRef.current = false;
+    });
+}
+```
+
+같은 조건(3000px, 3000ms)으로 측정한 결과, 적용 전(123.3ms) 대비 적용 후는 396.1ms였고, rAF 쓰로틀링을 추가한 뒤에도 396.5ms로 **거의 변화가 없었다.**
+
+**재분석**: 애초에 이 최적화들(index 체크, rAF 쓰로틀링)은 전부 "중복으로 발생하는 불필요한 리렌더를 걸러내는" 방식이었다. 그런데 3000px ÷ 아이템 높이(73px) ≈ 41번은 보여줄 구간(index) 자체가 실제로 바뀌므로, 이 41번의 리렌더는 애초에 걸러낼 수 없는 **필수 리렌더**다. 41번 × 렌더 1회 비용(Profiler 기준 ~6~8ms) ≈ 250~330ms로, 실제 측정된 240ms대와 비슷한 규모다. 즉 지금까지 시도한 두 최적화는 "렌더 횟수를 줄이는" 접근이었는데, 애초에 줄일 만한 중복 렌더가 거의 없었기 때문에 효과가 없었던 것으로 보인다.
+
+측정에서 뚜렷한 효과가 없었으므로, rAF 쓰로틀링 코드는 제거했다. 다음으로는 "렌더 횟수"가 아니라 "렌더 1회당 비용"을 줄이는 방향(`React.memo`)을 시도해본다.
 
 ## 게시글 목록 (react-window 예정)
 
