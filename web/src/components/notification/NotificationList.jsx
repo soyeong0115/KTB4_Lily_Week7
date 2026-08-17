@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import NotificationItem from "./NotificationItem";
 
 const ITEM_HEIGHT = 73; // NotificationItem 한 개의 실제 측정 높이
@@ -7,7 +7,6 @@ const OVERSCAN = 3;
 
 export default function NotificationList({ notifications, onChanged }) {
     const [scrollTop, setScrollTop] = useState(0);
-    const tickingRef = useRef(false); // 한 프레임에 최대 한 번만 처리하기 위한 플래그
 
     if (notifications.length === 0) {
         return (
@@ -19,22 +18,12 @@ export default function NotificationList({ notifications, onChanged }) {
     }
 
     function handleOnScroll(nextScrollTop) {
-        if (tickingRef.current) {
-            return;
+        const nextRawIndex = Math.floor(nextScrollTop / ITEM_HEIGHT);
+        const currentRawIndex = Math.floor(scrollTop / ITEM_HEIGHT);
+
+        if (nextRawIndex !== currentRawIndex) {
+            setScrollTop(nextScrollTop);
         }
-
-        tickingRef.current = true;
-
-        requestAnimationFrame(() => {
-            const nextRawIndex = Math.floor(nextScrollTop / ITEM_HEIGHT);
-            const currentRawIndex = Math.floor(scrollTop / ITEM_HEIGHT);
-
-            if (nextRawIndex !== currentRawIndex) {
-                setScrollTop(nextScrollTop);
-            }
-
-            tickingRef.current = false;
-        });
     }
 
     const rawStartIndex = Math.floor(scrollTop / ITEM_HEIGHT); // clamp 전 원본
