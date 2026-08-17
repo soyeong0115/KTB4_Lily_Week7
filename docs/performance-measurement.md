@@ -207,6 +207,20 @@ function handleOnScroll(nextScrollTop) {
 
 측정에서 뚜렷한 효과가 없었으므로, rAF 쓰로틀링 코드는 제거했다. 다음으로는 "렌더 횟수"가 아니라 "렌더 1회당 비용"을 줄이는 방향(`React.memo`)을 시도해본다.
 
+### 구현 과정 기록 — React.memo 적용
+
+`NotificationItem`을 `memo`로 감쌌다. `notification`과 `onChanged` props가 이전 커밋과 동일한 아이템(스크롤로 새로 진입하지 않은, 계속 화면에 남아있는 아이템)은 리렌더를 건너뛰도록 하는 목적이다. `onChanged`로 전달되는 `refetch`가 `useCallback`으로 감싸져 있어 참조가 안정적이라는 것도 미리 확인했다 — 그렇지 않으면 매 렌더마다 `onChanged`가 새 함수로 바뀌어 memo가 무의미해진다.
+
+```jsx
+function NotificationItem({ notification, onChanged }) {
+    // ...
+}
+
+export default memo(NotificationItem);
+```
+
+같은 조건(3000px, 3000ms)으로 측정한 결과 **396.1ms → 299.8ms로 개선됐다** (Scripting 240ms → 137ms, 약 43% 감소). rAF 쓰로틀링과 달리 이번엔 재분석에서 예상한 대로 효과가 있었다 — overscan을 포함해 한 번에 12~15개 정도가 렌더되는데, 스크롤 한 번에 그중 실제로 "새로 화면에 들어오는" 아이템은 1~2개뿐이고 나머지는 이미 떠 있던 아이템이 위치만 유지되는 것이었다. memo 덕분에 이 나머지 아이템들의 리렌더 비용이 걸러진 것으로 보인다. (적용 전 baseline인 123.3ms에는 아직 못 미치지만, 최적화 시도들 중 유일하게 측정 가능한 개선을 보였다.)
+
 ## 게시글 목록 (react-window 예정)
 
 ### 적용 전 (baseline)
