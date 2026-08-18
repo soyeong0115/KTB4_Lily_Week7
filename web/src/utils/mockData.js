@@ -1,6 +1,6 @@
 // 가상화 스크롤 적용 전/후 성능 비교용 임시 mock 데이터 (측정 끝나면 제거 예정)
 // 0이면 비활성화, 1000 / 5000 / 10000으로 바꿔가며 측정
-export const MOCK_COUNT = 10000;
+export const MOCK_COUNT = 0;
 
 export function generateMockNotifications(count) {
     return Array.from({ length: count }, (_, i) => ({
